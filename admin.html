@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIRAI POINTS | 管理者画面</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body style="justify-content: flex-start; padding-top: 2rem;">
+
+  <div class="dashboard-container">
+    <header class="header">
+      <h2 class="gradient-text" style="margin: 0;">🛠️ 管理者ダッシュボード</h2>
+      <div class="nav-user">
+        <span class="user-name" id="display-name">管理者 (S1)</span>
+        <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">⚙️ 設定</button>
+        <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
+      </div>
+    </header>
+
+    <div class="glass-panel" style="padding: 1.5rem;">
+      <h3 class="section-title">👥 ユーザー管理</h3>
+      <p style="margin-bottom: 1rem; color: var(--text-muted);">ユーザーのポイント編集や削除が行えます。</p>
+      
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+              <th style="padding: 1rem;">名前</th>
+              <th style="padding: 1rem;">メールアドレス</th>
+              <th style="padding: 1rem;">ポイント</th>
+              <th style="padding: 1rem;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="admin-user-list">
+            <!-- Users will be injected here via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem;">
+      <h3 class="section-title">📥 ユーザーからの意見一覧</h3>
+      <ul class="history-list" id="admin-feedback-list">
+        <!-- Feedbacks will be injected here via JS -->
+      </ul>
+    </div>
+
+    <div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem;">
+      <h3 class="section-title">📷 写真付き自己申告の履歴一覧</h3>
+      <div id="admin-report-list" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Reports will be injected here via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- User History Modal -->
+  <div id="history-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div class="glass-panel" style="width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
+      <h3 class="section-title" id="history-modal-title">ユーザー履歴</h3>
+      <ul class="history-list" id="history-modal-list" style="overflow-y: auto; flex: 1; margin-bottom: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
+        <!-- Injected via JS -->
+      </ul>
+      <button class="btn btn-outline btn-sm" onclick="closeHistoryModal()">閉じる</button>
+    </div>
+  </div>
+
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

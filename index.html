@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIRAI POINTS | ログイン</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+  <div class="auth-container glass-panel" id="auth-panel">
+    <h1 class="gradient-text">MIRAI POINTS</h1>
+    <p class="mb-4" id="auth-subtitle">ログインしてポイントを獲得しよう</p>
+
+    <!-- Login Form -->
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email">ユーザー名 または メールアドレス</label>
+        <input type="text" id="login-email" class="form-control" placeholder="ユーザー名 / user@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">パスワード</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary mt-4">ログイン</button>
+      <p class="mt-4">
+        アカウントをお持ちでないですか？ <span class="toggle-auth" onclick="toggleAuthMode()">新規登録</span>
+      </p>
+    </form>
+
+    <!-- Signup Form (Hidden by default) -->
+    <form id="signup-form" style="display: none;">
+      <div class="form-group">
+        <label for="signup-name">お名前</label>
+        <input type="text" id="signup-name" class="form-control" placeholder="山田 太郎" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-email">メールアドレス</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="user@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-password">パスワード</label>
+        <input type="password" id="signup-password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary mt-4">アカウント作成</button>
+      <p class="mt-4">
+        すでにアカウントをお持ちですか？ <span class="toggle-auth" onclick="toggleAuthMode()">ログイン</span>
+      </p>
+    </form>
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

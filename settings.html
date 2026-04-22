@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIRAI POINTS | 設定</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body style="justify-content: flex-start; padding-top: 2rem;">
+
+  <div class="dashboard-container">
+    <header class="header">
+      <h2 class="gradient-text" style="margin: 0;">⚙️ アカウント設定</h2>
+      <div class="nav-user">
+        <button class="btn btn-outline btn-sm" onclick="goBack()">戻る</button>
+        <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
+      </div>
+    </header>
+
+    <div class="glass-panel" style="padding: 2rem; max-width: 600px; margin: 0 auto;">
+      <h3 class="section-title">プロフィール情報の編集</h3>
+      
+      <form id="settings-form">
+        <div class="form-group">
+          <label for="settings-name">ユーザー名</label>
+          <input type="text" id="settings-name" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="settings-email" id="label-settings-email">メールアドレス</label>
+          <input type="email" id="settings-email" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="settings-password">新しいパスワード (変更する場合のみ入力)</label>
+          <input type="password" id="settings-password" class="form-control" placeholder="••••••••">
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-4">変更を保存</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>
