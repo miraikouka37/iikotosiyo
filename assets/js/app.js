@@ -1,6 +1,10 @@
 // app.js
 let currentCalendarDate = new Date();
 
+let currentUserData = null;
+let allUsersData = null;
+let allReportsData = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check if logged in
   const currentUserStr = localStorage.getItem('mirai_currentUser');
@@ -12,22 +16,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentUser = JSON.parse(currentUserStr);
   document.getElementById('display-name').innerText = currentUser.name;
 
-  renderDashboard();
+  const safeEmail = currentUser.email.replace(/\./g, '_');
+
+  // Firebase Realtime DB Listeners
+  db.ref('mirai_users/' + safeEmail).on('value', snapshot => {
+    currentUserData = snapshot.val() || {};
+    // Ensure email is set
+    if (!currentUserData.email) currentUserData.email = currentUser.email; 
+    renderDashboard();
+  });
+
+  db.ref('mirai_users').on('value', snapshot => {
+    allUsersData = snapshot.val() || {};
+    renderRanking();
+  });
+
+  db.ref('mirai_reports').on('value', snapshot => {
+    allReportsData = [];
+    snapshot.forEach(child => {
+      allReportsData.push(child.val());
+    });
+    renderCommunityPhotos();
+  });
 });
 
 function getUserData() {
   const currentUser = JSON.parse(localStorage.getItem('mirai_currentUser'));
-  const users = JSON.parse(localStorage.getItem('mirai_users')) || {};
   return { 
     email: currentUser.email, 
-    data: users[currentUser.email] 
+    data: currentUserData 
   };
 }
 
 function saveUserData(email, data) {
-  const users = JSON.parse(localStorage.getItem('mirai_users')) || {};
-  users[email] = data;
-  localStorage.setItem('mirai_users', JSON.stringify(users));
+  const safeEmail = email.replace(/\./g, '_');
+  db.ref('mirai_users/' + safeEmail).set(data);
 }
 
 function checkYearlyReset(data) {
@@ -126,16 +149,12 @@ function renderDashboard() {
 }
 
 function renderCommunityPhotos() {
-  const reportsStr = localStorage.getItem('mirai_reports');
   const container = document.getElementById('community-photos-container');
   if (!container) return;
 
-  if (!reportsStr) {
-    container.innerHTML = '<div style="text-align: center; color: var(--text-muted); width: 100%;">写真がありません</div>';
-    return;
-  }
+  if (!allReportsData) return;
 
-  const reports = JSON.parse(reportsStr).filter(r => r.status === 'approved');
+  const reports = allReportsData.filter(r => r.status === 'approved');
   if (reports.length === 0) {
     container.innerHTML = '<div style="text-align: center; color: var(--text-muted); width: 100%;">写真がありません</div>';
     return;
@@ -167,17 +186,16 @@ function renderCommunityPhotos() {
 }
 
 function renderRanking() {
-  const usersStr = localStorage.getItem('mirai_users');
-  if (!usersStr) return;
-  const users = JSON.parse(usersStr);
+  if (!allUsersData) return;
+  const users = allUsersData;
   const rankingContainer = document.getElementById('ranking-container');
   if (!rankingContainer) return;
 
   rankingContainer.innerHTML = '';
 
-  const userList = Object.keys(users).map(email => ({
-    name: users[email].name,
-    points: users[email].points || 0
+  const userList = Object.keys(users).map(key => ({
+    name: users[key].name,
+    points: users[key].points || 0
   }));
 
   userList.sort((a, b) => b.points - a.points);
@@ -237,7 +255,6 @@ function earnPoints(action, amount) {
   data.history.push(entry);
 
   saveUserData(email, data);
-  renderDashboard();
 }
 
 function logout() {
@@ -363,19 +380,18 @@ function sendFeedback() {
   }
 
   const { email, data } = getUserData();
-  const feedbacks = JSON.parse(localStorage.getItem('mirai_feedbacks')) || [];
   
-  feedbacks.push({
+  const newFeedback = {
     name: data.name,
     email: email,
     message: message,
     timestamp: new Date().toISOString()
-  });
+  };
 
-  localStorage.setItem('mirai_feedbacks', JSON.stringify(feedbacks));
-  
-  messageInput.value = '';
-  alert('貴重なご意見ありがとうございます！管理者に送信しました。');
+  db.ref('mirai_feedbacks').push(newFeedback).then(() => {
+    messageInput.value = '';
+    alert('貴重なご意見ありがとうございます！管理者に送信しました。');
+  });
 }
 
 function submitReport() {
@@ -398,24 +414,25 @@ function submitReport() {
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64Image = e.target.result;
-    const { email, data } = getUserData();
-    const reports = JSON.parse(localStorage.getItem('mirai_reports')) || [];
+  const { email, data } = getUserData();
 
-    reports.push({
+  // Upload file to Firebase Storage
+  const storageRef = storage.ref('reports/' + Date.now() + "_" + file.name);
+  storageRef.put(file).then(snapshot => {
+    return snapshot.ref.getDownloadURL();
+  }).then(url => {
+    const newReport = {
       email: email,
       name: data.name,
       title: title,
       points: points,
-      image: base64Image,
+      image: url,
       timestamp: new Date().toISOString(),
       status: 'approved'
-    });
+    };
 
-    localStorage.setItem('mirai_reports', JSON.stringify(reports));
-
+    return db.ref('mirai_reports').push(newReport);
+  }).then(() => {
     document.getElementById('report-title').value = '';
     if (fileInputImage) fileInputImage.value = '';
     if (fileInputCamera) fileInputCamera.value = '';
@@ -424,6 +441,8 @@ function submitReport() {
 
     earnPoints(`[写真報告] ${title}`, points);
     alert(`「${title}」の報告が完了し、${points}pt獲得しました！`);
-  };
-  reader.readAsDataURL(file);
+  }).catch(error => {
+    console.error(error);
+    alert('写真のアップロードに失敗しました。');
+  });
 }

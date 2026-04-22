@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const currentUser = JSON.parse(currentUserStr);
   const isAdmin = currentUser.role === 'admin';
-  const users = JSON.parse(localStorage.getItem('mirai_users')) || {};
   let userData;
 
   if (isAdmin) {
@@ -18,19 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Change input type to text since ID doesn't need to be email
     const emailInput = document.getElementById('settings-email');
     if (emailInput) emailInput.type = "text";
+    
+    document.getElementById('settings-name').value = userData.name;
+    document.getElementById('settings-email').value = userData.id;
   } else {
-    userData = users[currentUser.email];
+    const safeEmail = currentUser.email.replace(/\./g, '_');
+    db.ref('mirai_users/' + safeEmail).once('value').then(snapshot => {
+      userData = snapshot.val();
+      if (!userData) {
+        localStorage.removeItem('mirai_currentUser');
+        window.location.href = 'index.html';
+        return;
+      }
+      document.getElementById('settings-name').value = userData.name;
+      document.getElementById('settings-email').value = currentUser.email;
+    });
   }
-
-  if (!userData) {
-    localStorage.removeItem('mirai_currentUser');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  // Populate form with current data
-  document.getElementById('settings-name').value = userData.name;
-  document.getElementById('settings-email').value = isAdmin ? userData.id : currentUser.email;
 
   const form = document.getElementById('settings-form');
   form.addEventListener('submit', (e) => {
@@ -51,8 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('ユーザー名に不適切な表現が含まれているため、使用できません。');
       return;
     }
-
-    const allUsers = JSON.parse(localStorage.getItem('mirai_users')) || {};
 
     const isAdmin = currentUser.role === 'admin';
 
@@ -78,43 +78,43 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Check if new email is taken by someone else
-    if (newEmail !== previousEmail && allUsers[newEmail]) {
-      alert('そのメールアドレスは既に他のユーザーに使用されています。');
-      return;
-    }
+    const safePrev = previousEmail.replace(/\./g, '_');
+    const safeNew = newEmail.replace(/\./g, '_');
 
-    const updatedData = allUsers[previousEmail];
-    
-    // Update name
-    updatedData.name = newName;
+    db.ref('mirai_users').once('value').then(snapshot => {
+      const allUsers = snapshot.val() || {};
 
-    // Update password if provided
-    if (newPassword.trim() !== '') {
-      updatedData.password = newPassword;
-    }
+      if (newEmail !== previousEmail && allUsers[safeNew]) {
+        alert('そのメールアドレスは既に他のユーザーに使用されています。');
+        return;
+      }
 
-    // Handle email change logic (primary key change)
-    if (newEmail !== previousEmail) {
-      allUsers[newEmail] = updatedData;
-      delete allUsers[previousEmail];
-      // Update session info
-      currentUser.email = newEmail;
-    } else {
-      allUsers[previousEmail] = updatedData;
-    }
+      const updatedData = allUsers[safePrev] || {};
+      updatedData.name = newName;
+      if (newPassword.trim() !== '') {
+        updatedData.password = newPassword;
+      }
+      // Ensure email property inside is updated
+      updatedData.email = newEmail; 
 
-    // Update session name just in case
-    currentUser.name = newName;
-
-    // Save to localStorage
-    localStorage.setItem('mirai_users', JSON.stringify(allUsers));
-    localStorage.setItem('mirai_currentUser', JSON.stringify(currentUser));
-
-    alert('設定が保存されました！');
-    
-    // Refresh to update placeholders
-    window.location.reload();
+      if (newEmail !== previousEmail) {
+        db.ref('mirai_users/' + safeNew).set(updatedData).then(() => {
+          db.ref('mirai_users/' + safePrev).remove();
+          currentUser.email = newEmail;
+          currentUser.name = newName;
+          localStorage.setItem('mirai_currentUser', JSON.stringify(currentUser));
+          alert('設定が保存されました！');
+          window.location.reload();
+        });
+      } else {
+        db.ref('mirai_users/' + safePrev).set(updatedData).then(() => {
+          currentUser.name = newName;
+          localStorage.setItem('mirai_currentUser', JSON.stringify(currentUser));
+          alert('設定が保存されました！');
+          window.location.reload();
+        });
+      }
+    });
   });
 });
 

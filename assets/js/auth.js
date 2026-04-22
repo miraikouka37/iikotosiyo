@@ -28,24 +28,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      const users = JSON.parse(localStorage.getItem('mirai_users')) || {};
-      
-      let targetEmail = null;
-      if (users[identifier]) {
-        targetEmail = identifier;
-      } else {
-        const found = Object.keys(users).find(key => users[key].name === identifier);
-        if (found) {
-          targetEmail = found;
+      db.ref('mirai_users').once('value').then(snapshot => {
+        const users = snapshot.val() || {};
+        let targetUser = null;
+        
+        for (const key in users) {
+          const user = users[key];
+          const userEmail = user.email || key.replace(/_/g, '.'); 
+          if (userEmail === identifier || user.name === identifier) {
+            targetUser = user;
+            targetUser.email = userEmail;
+            break;
+          }
         }
-      }
-      
-      if (targetEmail && users[targetEmail].password === password) {
-        localStorage.setItem('mirai_currentUser', JSON.stringify({ email: targetEmail, name: users[targetEmail].name }));
-        window.location.href = 'dashboard.html';
-      } else {
-        alert('ユーザー名/メールアドレス または パスワードが間違っています。');
-      }
+        
+        if (targetUser && targetUser.password === password) {
+          localStorage.setItem('mirai_currentUser', JSON.stringify({ email: targetUser.email, name: targetUser.name }));
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('ユーザー名/メールアドレス または パスワードが間違っています。');
+        }
+      }).catch(error => {
+        console.error(error);
+        alert('ログインエラーが発生しました。通信環境を確認してください。');
+      });
     });
   }
 
@@ -67,19 +73,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem('mirai_users')) || {};
-
-      if (users[email]) {
-        alert('このメールアドレスは既に登録されています。');
-        return;
-      }
-
-      users[email] = { name, password, points: 0, history: [] };
-      localStorage.setItem('mirai_users', JSON.stringify(users));
+      const safeEmail = email.replace(/\./g, '_');
       
-      // Auto login
-      localStorage.setItem('mirai_currentUser', JSON.stringify({ email, name }));
-      window.location.href = 'dashboard.html';
+      db.ref('mirai_users/' + safeEmail).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          alert('このメールアドレスは既に登録されています。');
+          return;
+        }
+        
+        const newUser = {
+          email: email,
+          name: name,
+          password: password,
+          points: 0,
+          history: []
+        };
+        
+        db.ref('mirai_users/' + safeEmail).set(newUser).then(() => {
+          // Auto login
+          localStorage.setItem('mirai_currentUser', JSON.stringify({ email, name }));
+          window.location.href = 'dashboard.html';
+        }).catch(err => {
+          console.error(err);
+          alert('アカウントの作成に失敗しました。');
+        });
+      });
     });
   }
 });
