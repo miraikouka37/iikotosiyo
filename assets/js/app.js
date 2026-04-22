@@ -409,8 +409,8 @@ function submitReport() {
   }
 
   const file = selectedFile;
-  if(file.size > 2 * 1024 * 1024) { 
-    alert('画像サイズは2MB以下にしてください。');
+  if(file.size > 6 * 1024 * 1024) { 
+    alert('画像サイズは6MB以下にしてください。');
     return;
   }
 
