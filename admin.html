@@ -6,62 +6,87 @@
   <title>MIRAI POINTS | 管理者画面</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body style="justify-content: flex-start; padding-top: 2rem;">
+<body style="padding-top: 0;">
 
   <div class="dashboard-container">
     <header class="header">
-      <h2 class="gradient-text" style="margin: 0;">🛠️ 管理者ダッシュボード</h2>
+      <h2 style="margin: 0;">管理者ダッシュボード</h2>
       <div class="nav-user">
-        <span class="user-name" id="display-name">管理者 (S1)</span>
-        <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">⚙️ 設定</button>
+        <span class="user-name" id="display-name">管理者</span>
+        <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
         <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
       </div>
     </header>
 
-    <div class="glass-panel" style="padding: 1.5rem;">
-      <h3 class="section-title">👥 ユーザー管理</h3>
-      <p style="margin-bottom: 1rem; color: var(--text-muted);">ユーザーのポイント編集や削除が行えます。</p>
+    <div class="glass-panel">
+      <h3 class="section-title">ユーザー管理 & ランキング</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Filter Tabs -->
+        <div style="display: flex; border-bottom: 1px solid var(--panel-border); overflow-x: auto; gap: 0.5rem; white-space: nowrap;">
+          <button class="btn btn-outline" id="tab-total" style="border: none; border-bottom: 2px solid #fff; border-radius: 0; width: auto; font-weight: 700;" onclick="switchRankTab('total')">総合</button>
+          <button class="btn btn-outline" id="tab-surge-24h" style="border: none; border-bottom: 2px solid transparent; border-radius: 0; width: auto; color: var(--text-muted);" onclick="switchRankTab('24h')">急上昇 (24h)</button>
+          <button class="btn btn-outline" id="tab-surge-7d" style="border: none; border-bottom: 2px solid transparent; border-radius: 0; width: auto; color: var(--text-muted);" onclick="switchRankTab('7d')">急上昇 (7d)</button>
+          <button class="btn btn-outline" id="tab-surge-30d" style="border: none; border-bottom: 2px solid transparent; border-radius: 0; width: auto; color: var(--text-muted);" onclick="switchRankTab('30d')">急上昇 (30d)</button>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <p style="color: var(--text-muted); flex: 1; min-width: 200px; font-size: 0.8125rem;">
+            期間を選択してランキングを表示し、個別のユーザー編集や履歴確認を行えます。
+          </p>
+          <div style="width: 300px; max-width: 100%;">
+            <input type="text" id="user-search" class="form-control" placeholder="名前またはメールで検索..." style="font-size: 0.8125rem; padding: 0.5rem 0.75rem;">
+          </div>
+        </div>
+      </div>
       
       <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
           <thead>
-            <tr style="border-bottom: 1px solid var(--glass-border);">
-              <th style="padding: 1rem;">名前</th>
-              <th style="padding: 1rem;">メールアドレス</th>
-              <th style="padding: 1rem;">ポイント</th>
-              <th style="padding: 1rem;">操作</th>
+            <tr style="border-bottom: 2px solid var(--panel-border);">
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; width: 60px;">順位</th>
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">名前</th>
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">メールアドレス</th>
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;" id="points-header">獲得ポイント</th>
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">操作</th>
             </tr>
           </thead>
           <tbody id="admin-user-list">
-            <!-- Users will be injected here via JS -->
+            <!-- Users via JS -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem;">
-      <h3 class="section-title">📥 ユーザーからの意見一覧</h3>
-      <ul class="history-list" id="admin-feedback-list">
-        <!-- Feedbacks will be injected here via JS -->
-      </ul>
-    </div>
-
-    <div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem;">
-      <h3 class="section-title">📷 写真付き自己申告の履歴一覧</h3>
-      <div id="admin-report-list" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Reports will be injected here via JS -->
+    <div class="grid mt-4">
+      <div class="col-main">
+        <div class="glass-panel">
+          <h3 class="section-title">ユーザーの意見</h3>
+          <ul class="history-list" id="admin-feedback-list">
+            <!-- Feedbacks via JS -->
+          </ul>
+        </div>
+      </div>
+      
+      <div class="col-side">
+        <div class="glass-panel">
+          <h3 class="section-title">写真報告履歴</h3>
+          <div id="admin-report-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Reports via JS -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- User History Modal -->
-  <div id="history-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
-    <div class="glass-panel" style="width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
+  <div id="history-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px);">
+    <div class="glass-panel" style="width: 100%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; border-color: #333;">
       <h3 class="section-title" id="history-modal-title">ユーザー履歴</h3>
-      <ul class="history-list" id="history-modal-list" style="overflow-y: auto; flex: 1; margin-bottom: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
-        <!-- Injected via JS -->
+      <ul class="history-list" id="history-modal-list" style="overflow-y: auto; flex: 1; margin-bottom: 1.5rem; border-top: 1px solid var(--panel-border); padding-top: 1rem;">
+        <!-- JS -->
       </ul>
-      <button class="btn btn-outline btn-sm" onclick="closeHistoryModal()">閉じる</button>
+      <button class="btn btn-outline" onclick="closeHistoryModal()">閉じる</button>
     </div>
   </div>
 

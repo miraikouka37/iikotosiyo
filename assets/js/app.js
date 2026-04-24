@@ -99,15 +99,13 @@ function renderDashboard() {
   const pointsMessage = document.getElementById('points-message');
   if (pointsMessage) {
     if (userPoints >= 20000) {
-      pointsMessage.innerText = "🍹 ジュース獲得チャンス！？";
-      pointsMessage.style.color = "var(--accent-primary)";
-      pointsMessage.style.fontWeight = "bold";
-      pointsMessage.style.fontSize = "1.2rem";
+      pointsMessage.innerText = "ジュース獲得チャンス！？";
+      pointsMessage.style.color = "#fff";
+      pointsMessage.style.fontWeight = "700";
     } else {
       pointsMessage.innerText = "✨ KEEP IT UP!";
-      pointsMessage.style.color = "inherit";
-      pointsMessage.style.fontWeight = "normal";
-      pointsMessage.style.fontSize = "inherit";
+      pointsMessage.style.color = "var(--text-muted)";
+      pointsMessage.style.fontWeight = "400";
     }
   }
 
@@ -166,19 +164,18 @@ function renderCommunityPhotos() {
 
   reversedReports.forEach(report => {
     const card = document.createElement('div');
-    card.style.minWidth = '200px';
-    card.style.maxWidth = '250px';
-    card.style.background = 'rgba(0,0,0,0.2)';
-    card.style.border = '1px solid var(--glass-border)';
-    card.style.borderRadius = '12px';
+    card.style.minWidth = '220px';
+    card.style.background = '#0a0a0a';
+    card.style.border = '1px solid var(--panel-border)';
+    card.style.borderRadius = '8px';
     card.style.padding = '0.75rem';
     card.style.display = 'flex';
     card.style.flexDirection = 'column';
     card.style.flexShrink = '0';
 
     card.innerHTML = `
-      <img src="${report.image}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem;" alt="写真">
-      <div style="font-size: 0.875rem; font-weight: bold; margin-bottom: 0.25rem;">${report.title}</div>
+      <img src="${report.image}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px; margin-bottom: 0.75rem;" alt="写真">
+      <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem; color: #fff;">${report.title}</div>
       <div style="font-size: 0.75rem; color: var(--text-muted);">by ${report.name}</div>
     `;
     container.appendChild(card);
@@ -204,9 +201,9 @@ function renderRanking() {
     const li = document.createElement('li');
     li.className = 'list-item';
     let rankIcon = `${index + 1}位`;
-    if (index === 0) rankIcon = '🥇 1位';
-    if (index === 1) rankIcon = '🥈 2位';
-    if (index === 2) rankIcon = '🥉 3位';
+    if (index === 0) rankIcon = '1位';
+    if (index === 1) rankIcon = '2位';
+    if (index === 2) rankIcon = '3位';
 
     li.innerHTML = `
       <div class="item-info">
@@ -292,9 +289,10 @@ function renderCalendar() {
   daysOfWeek.forEach((d, i) => {
     const el = document.createElement('div');
     el.innerText = d;
-    el.style.color = i === 0 ? 'var(--danger)' : i === 6 ? 'var(--accent-primary)' : 'var(--text-muted)';
-    el.style.fontWeight = 'bold';
-    el.style.paddingBottom = '0.5rem';
+    el.style.color = i === 0 ? 'var(--danger)' : 'var(--text-muted)';
+    el.style.fontWeight = '600';
+    el.style.fontSize = '0.75rem';
+    el.style.paddingBottom = '0.75rem';
     container.appendChild(el);
   });
 
@@ -330,19 +328,22 @@ function renderCalendar() {
     el.innerText = i;
     
     if (dateStr === todayStr) {
-      el.style.background = 'rgba(255, 255, 255, 0.1)';
-      el.style.fontWeight = 'bold';
+      el.style.background = '#1a1a1a';
+      el.style.fontWeight = '700';
+      el.style.color = '#fff';
     }
 
     if (checkedInDates.includes(dateStr)) {
       const stamp = document.createElement('div');
-      stamp.innerText = '🌸';
+      stamp.innerText = 'CHECK';
       stamp.style.position = 'absolute';
       stamp.style.top = '50%';
       stamp.style.left = '50%';
       stamp.style.transform = 'translate(-50%, -50%)';
-      stamp.style.fontSize = '1.3rem';
-      stamp.style.opacity = '0.8';
+      stamp.style.fontSize = '0.65rem';
+      stamp.style.fontWeight = '800';
+      stamp.style.letterSpacing = '-0.02em';
+      stamp.style.opacity = '0.9';
       stamp.style.zIndex = '0';
       
       el.appendChild(stamp);

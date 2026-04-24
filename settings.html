@@ -6,19 +6,19 @@
   <title>MIRAI POINTS | 設定</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body style="justify-content: flex-start; padding-top: 2rem;">
+<body style="padding-top: 0;">
 
   <div class="dashboard-container">
     <header class="header">
-      <h2 class="gradient-text" style="margin: 0;">⚙️ アカウント設定</h2>
+      <h2 style="margin: 0;">アカウント設定</h2>
       <div class="nav-user">
         <button class="btn btn-outline btn-sm" onclick="goBack()">戻る</button>
         <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
       </div>
     </header>
 
-    <div class="glass-panel" style="padding: 2rem; max-width: 600px; margin: 0 auto;">
-      <h3 class="section-title">プロフィール情報の編集</h3>
+    <div class="glass-panel" style="max-width: 600px; margin: 2rem auto;">
+      <h3 class="section-title">プロフィール編集</h3>
       
       <form id="settings-form">
         <div class="form-group">
@@ -32,7 +32,7 @@
         </div>
         
         <div class="form-group">
-          <label for="settings-password">新しいパスワード (変更する場合のみ入力)</label>
+          <label for="settings-password">新しいパスワード (変更のみ入力)</label>
           <input type="password" id="settings-password" class="form-control" placeholder="••••••••">
         </div>
         

@@ -28,6 +28,8 @@ function checkYearlyReset(data) {
   return false;
 }
 
+let currentRankView = 'total'; // 'total' or 'surge'
+let userSearchTerm = '';
 let allUsersData = null;
 let allFeedbacksData = [];
 let allReportsData = [];
@@ -67,7 +69,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderReports();
   });
+
+  const searchInput = document.getElementById('user-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      userSearchTerm = e.target.value.toLowerCase();
+      renderAdminUsers();
+    });
+  }
 });
+
+function switchRankTab(type) {
+  currentRankView = type;
+  const tabs = {
+    'total': document.getElementById('tab-total'),
+    '24h': document.getElementById('tab-surge-24h'),
+    '7d': document.getElementById('tab-surge-7d'),
+    '30d': document.getElementById('tab-surge-30d')
+  };
+
+  Object.keys(tabs).forEach(key => {
+    const tab = tabs[key];
+    if (!tab) return;
+    if (key === type) {
+      tab.style.borderBottomColor = '#fff';
+      tab.style.fontWeight = '700';
+      tab.style.color = '#fff';
+    } else {
+      tab.style.borderBottomColor = 'transparent';
+      tab.style.fontWeight = '400';
+      tab.style.color = 'var(--text-muted)';
+    }
+  });
+
+  const header = document.getElementById('points-header');
+  if (header) {
+    if (type === 'total') header.innerText = '保有ポイント';
+    else if (type === '24h') header.innerText = '増加分 (24h)';
+    else if (type === '7d') header.innerText = '増加分 (7d)';
+    else if (type === '30d') header.innerText = '増加分 (30d)';
+  }
+
+  renderAdminUsers();
+}
 
 function renderAdminUsers() {
   const tbody = document.getElementById('admin-user-list');
@@ -79,31 +123,66 @@ function renderAdminUsers() {
   const keys = Object.keys(users);
 
   if (keys.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">ユーザーが登録されていません</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem;">ユーザーが登録されていません</td></tr>';
     return;
   }
 
-  keys.forEach(key => {
-    if (checkYearlyReset(users[key])) {
-       db.ref('mirai_users/' + key).set(users[key]);
+  // Pre-calculate values based on current view
+  const userList = keys.map(key => {
+    const user = users[key];
+    let displayValue = 0;
+
+    if (currentRankView === 'total') {
+      displayValue = user.points || 0;
+    } else {
+      const now = new Date();
+      const cutoff = new Date();
+      if (currentRankView === '24h') cutoff.setHours(now.getHours() - 24);
+      else if (currentRankView === '7d') cutoff.setDate(now.getDate() - 7);
+      else if (currentRankView === '30d') cutoff.setDate(now.getDate() - 30);
+
+      const history = user.history || [];
+      displayValue = history
+        .filter(h => new Date(h.timestamp) > cutoff)
+        .reduce((sum, h) => sum + h.amount, 0);
     }
+    return { key, displayValue, name: user.name, email: user.email || key.replace(/_/g, '.') };
   });
 
-  keys.forEach(key => {
-    const user = users[key];
-    const email = user.email || key.replace(/_/g, '.');
+  // Filter by search term
+  const filteredList = userList.filter(u => 
+    u.name.toLowerCase().includes(userSearchTerm) || 
+    u.email.toLowerCase().includes(userSearchTerm)
+  );
+
+  if (filteredList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem;">一致するユーザーが見つかりません</td></tr>';
+    return;
+  }
+
+  // Sort by displayValue (ranking order)
+  const sortedList = filteredList.sort((a, b) => b.displayValue - a.displayValue);
+
+  // Still calculate global rank for filtered items if needed? 
+  // Let's just use the index in the sorted list of ALL users for the true rank
+  const globalSortedKeys = [...userList].sort((a, b) => b.displayValue - a.displayValue).map(u => u.key);
+
+  sortedList.forEach((u) => {
+    const overallRank = globalSortedKeys.indexOf(u.key) + 1;
+    const user = users[u.key];
 
     const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+    tr.style.borderBottom = '1px solid var(--panel-border)';
 
     tr.innerHTML = `
-      <td style="padding: 1rem; font-weight: bold;">${user.name}</td>
-      <td style="padding: 1rem; color: var(--text-muted);">${email}</td>
-      <td style="padding: 1rem; font-weight: bold; color: var(--accent-primary);">${user.points || 0} pt</td>
+      <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem; font-weight: 600;">${overallRank}</td>
+      <td style="padding: 1rem; font-weight: 600;">${u.name}</td>
+      <td style="padding: 1rem; color: var(--text-muted);">${u.email}</td>
+      <td style="padding: 1rem; font-weight: 700; color: #fff;">${u.displayValue} pt</td>
       <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-outline btn-sm" onclick="viewHistory('${key}')">履歴を見る</button>
-        <button class="btn btn-outline btn-sm" onclick="editPoints('${key}')">ポイント編集</button>
-        <button class="btn btn-primary btn-sm" style="background:var(--danger); border:none; box-shadow:none;" onclick="deleteUser('${key}')">削除</button>
+        <button class="btn btn-outline btn-sm" onclick="viewHistory('${u.key}')">履歴</button>
+        <button class="btn btn-outline btn-sm" onclick="editPoints('${u.key}')">編集</button>
+        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); background: transparent;" onclick="deleteUser('${u.key}')">削除</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -172,12 +251,12 @@ function renderFeedbacks() {
     });
 
     li.innerHTML = `
-      <div style="display: flex; justify-content: space-between; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
-        <span style="font-weight: bold; color: var(--accent-primary);">${fb.name} <span style="font-size: 0.8rem; color: var(--text-muted);">(${fb.email})</span></span>
-        <span style="font-size: 0.875rem; color: var(--text-muted);">${dateStr}</span>
+      <div style="display: flex; justify-content: space-between; width: 100%; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+        <span style="font-weight: 600; color: #fff;">${fb.name} <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">(${fb.email})</span></span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</span>
       </div>
-      <div style="font-size: 1rem; line-height: 1.5; white-space: pre-wrap; width: 100%;">${fb.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
-      <div style="width: 100%; text-align: right; margin-top: 0.5rem;">
+      <div style="font-size: 0.9375rem; line-height: 1.5; white-space: pre-wrap; width: 100%; color: var(--text-main);">${fb.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+      <div style="width: 100%; text-align: right; margin-top: 0.75rem;">
          <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick="deleteFeedback('${fb.id}')">削除</button>
       </div>
     `;
@@ -210,24 +289,24 @@ function renderReports() {
     const dateStr = new Date(report.timestamp).toLocaleString('ja-JP');
 
     const card = document.createElement('div');
-    card.style.background = 'rgba(0,0,0,0.2)';
-    card.style.border = '1px solid var(--glass-border)';
-    card.style.borderRadius = '12px';
-    card.style.padding = '1.5rem';
+    card.style.background = '#0d0d0d';
+    card.style.border = '1px solid var(--panel-border)';
+    card.style.borderRadius = '8px';
+    card.style.padding = '1rem';
     card.style.display = 'flex';
-    card.style.gap = '1.5rem';
-    card.style.flexWrap = 'wrap';
+    card.style.flexDirection = 'column';
+    card.style.gap = '1rem';
 
     card.innerHTML = `
-      <div style="flex: 1; min-width: 250px;">
-        <h4 style="margin-bottom: 0.5rem; color: var(--accent-primary);">${report.title}</h4>
-        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">報告者: <span style="color: #fff; font-weight:bold;">${report.name}</span> (${report.email})</p>
-        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">報告日時: ${dateStr}</p>
-        <p style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">獲得ポイント: <span style="color: var(--success);">+${report.points} pt</span></p>
-        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick="deleteReport('${report.id}')">写真記録を削除</button>
-      </div>
-      <div>
-        <img src="${report.image}" style="max-height: 200px; max-width: 300px; object-fit: contain; border-radius: 8px; border: 1px solid var(--glass-border);" alt="添付写真">
+      <div style="width: 100%;">
+        <img src="${report.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; border: 1px solid var(--panel-border); margin-bottom: 1rem;" alt="添付写真">
+        <h4 style="margin-bottom: 0.25rem; font-size: 1rem;">${report.title}</h4>
+        <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.25rem;">報告者: <span style="color: #fff; font-weight:600;">${report.name}</span></p>
+        <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">${dateStr}</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 1rem; font-weight: 700; color: var(--success);">+${report.points} pt</span>
+          <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); padding: 0.25rem 0.5rem;" onclick="deleteReport('${report.id}')">削除</button>
+        </div>
       </div>
     `;
     container.appendChild(card);
