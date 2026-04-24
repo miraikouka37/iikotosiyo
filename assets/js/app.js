@@ -33,7 +33,7 @@
 
     // Attach Event Listeners (Security hardening)
     document.body.addEventListener('click', (e) => {
-      const target = e.closest('.btn-earn, .btn-logout, .btn-prev-month, .btn-next-month, .btn-submit-report, .btn-send-feedback');
+      const target = e.target.closest('.btn-earn, .btn-logout, .btn-prev-month, .btn-next-month, .btn-submit-report, .btn-send-feedback');
       if (!target) return;
       
       if (target.classList.contains('btn-earn')) {
@@ -98,6 +98,20 @@
     const displayName = document.getElementById('display-name');
     const totalPoints = document.getElementById('total-points');
     const historyContainer = document.getElementById('history-container');
+    const alertContainer = document.getElementById('alert-container');
+
+    if (alertContainer) {
+      if (data.warning) {
+        alertContainer.innerHTML = `
+          <div class="glass-panel" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.4); margin-bottom: 1.5rem; padding: 1rem; color: #ef4444;">
+            <p style="font-weight: 800; font-size: 1rem; margin-bottom: 0.25rem;">警告！</p>
+            <p style="font-size: 0.875rem;">${data.warning}</p>
+          </div>
+        `;
+      } else {
+        alertContainer.innerHTML = '';
+      }
+    }
 
     if (displayName) displayName.innerText = data.name;
     if (totalPoints) animatePoints(data.points || 0);

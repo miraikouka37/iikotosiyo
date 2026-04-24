@@ -182,6 +182,7 @@ function renderAdminUsers() {
       <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <button class="btn btn-outline btn-sm" onclick="viewHistory('${u.key}')">履歴</button>
         <button class="btn btn-outline btn-sm" onclick="editPoints('${u.key}')">編集</button>
+        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); background: transparent;" onclick="sendWarning('${u.key}')">${user.warning ? '警告中' : '警告'}</button>
         <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); background: transparent;" onclick="deleteUser('${u.key}')">削除</button>
       </td>
     `;
@@ -223,6 +224,28 @@ function deleteUser(key) {
 
   if (confirm(`本当に ${user.name} を削除しますか？\nこの操作は取り消せません。`)) {
     db.ref('mirai_users/' + key).remove();
+  }
+}
+
+function sendWarning(key) {
+  const user = allUsersData[key];
+  if (!user) return;
+
+  const currentWarning = user.warning || '';
+  const message = prompt(`${user.name} への警告メッセージを入力してください（空欄にして保存すると警告を解除します）:`, currentWarning);
+  
+  if (message !== null) {
+    if (message.trim() === '') {
+      // Clear warning
+      db.ref(`mirai_users/${key}/warning`).remove().then(() => {
+        alert('警告を解除しました。');
+      });
+    } else {
+      // Set or update warning
+      db.ref(`mirai_users/${key}/warning`).set(message).then(() => {
+        alert('警告内容を保存しました。');
+      });
+    }
   }
 }
 
