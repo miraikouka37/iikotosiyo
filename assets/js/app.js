@@ -321,36 +321,34 @@ function renderCalendar() {
   for (let i = 1; i <= daysInMonth; i++) {
     const el = document.createElement('div');
     el.style.padding = '0.5rem 0';
-    el.style.borderRadius = '8px';
     el.style.position = 'relative';
+    el.style.cursor = 'default';
 
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     el.innerText = i;
     
     if (dateStr === todayStr) {
-      el.style.background = '#1a1a1a';
-      el.style.fontWeight = '700';
       el.style.color = '#fff';
+      el.style.fontWeight = '800';
+      el.style.textDecoration = 'underline';
     }
 
     if (checkedInDates.includes(dateStr)) {
       const stamp = document.createElement('div');
-      stamp.innerText = 'CHECK';
+      stamp.innerText = '✓';
       stamp.style.position = 'absolute';
       stamp.style.top = '50%';
       stamp.style.left = '50%';
       stamp.style.transform = 'translate(-50%, -50%)';
-      stamp.style.fontSize = '0.65rem';
-      stamp.style.fontWeight = '800';
-      stamp.style.letterSpacing = '-0.02em';
-      stamp.style.opacity = '0.9';
+      stamp.style.fontSize = '1.3rem';
+      stamp.style.fontWeight = '700';
+      stamp.style.color = 'var(--success)';
+      stamp.style.opacity = '0.6';
       stamp.style.zIndex = '0';
       
       el.appendChild(stamp);
-      el.style.color = '#fff';
+      el.style.color = 'var(--text-muted)';
       el.style.zIndex = '1';
-      // override background for stamped items
-      el.style.background = 'transparent'; 
     }
 
     container.appendChild(el);
