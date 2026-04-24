@@ -9,13 +9,14 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // Check if logged in
-    const storedUser = localStorage.getItem('mirai_currentUser');
-    if (!storedUser) {
+    const storedUserStr = localStorage.getItem('mirai_currentUser');
+    if (!storedUserStr) {
       window.location.href = 'index.html';
       return;
     }
 
-    userEmail = storedUser;
+    const storedUser = JSON.parse(storedUserStr);
+    userEmail = storedUser.email;
 
     // Real-time synchronization
     db.ref('mirai_users').on('value', snapshot => {
