@@ -189,10 +189,12 @@
     if (!rankingContainer || !allUsersData) return;
 
     rankingContainer.innerHTML = '';
-    const userList = Object.keys(allUsersData).map(key => ({
-      name: allUsersData[key].name,
-      points: allUsersData[key].points || 0
-    }));
+    const userList = Object.keys(allUsersData)
+      .filter(key => !key.startsWith('{'))
+      .map(key => ({
+        name: allUsersData[key].name,
+        points: allUsersData[key].points || 0
+      }));
 
     userList.sort((a, b) => b.points - a.points);
 

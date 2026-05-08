@@ -126,7 +126,7 @@
     tbody.innerHTML = '';
 
     const users = allUsersData;
-    const keys = Object.keys(users);
+    const keys = Object.keys(users).filter(key => !key.startsWith('{'));
 
     const userList = keys.map(key => {
       const user = users[key];
