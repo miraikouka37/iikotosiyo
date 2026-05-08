@@ -340,39 +340,70 @@
       return;
     }
 
-    const file = selectedFile;
-    if(file.size > 6 * 1024 * 1024) { 
-      alert('画像サイズは6MB以下にしてください。');
-      return;
-    }
-
     const { email, data } = getUserData();
-    const storageRef = storage.ref('reports/' + Date.now() + "_" + file.name);
-    storageRef.put(file).then(snapshot => {
-      return snapshot.ref.getDownloadURL();
-    }).then(url => {
-      const newReport = {
-        email: email,
-        name: data.name,
-        title: title,
-        points: points,
-        image: url,
-        timestamp: new Date().toISOString(),
-        status: 'approved'
+
+    // Firebase Storage の権限エラーを回避するため、画像を縮小してBase64形式でRealtime DBに直接保存する
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 800; // 最大800pxに縮小
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.floor(height * (maxDim / width));
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.floor(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 画質70%のJPEG形式にしてデータサイズを軽量化
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+        const newReport = {
+          email: email,
+          name: data.name,
+          title: title,
+          points: points,
+          image: dataUrl,
+          timestamp: new Date().toISOString(),
+          status: 'approved'
+        };
+
+        db.ref('mirai_reports').push(newReport).then(() => {
+          titleInput.value = '';
+          if (fileInputImage) fileInputImage.value = '';
+          if (fileInputCamera) fileInputCamera.value = '';
+          const nameLabel = document.getElementById('selected-file-name');
+          if (nameLabel) nameLabel.innerText = '写真が選択されていません';
+          earnPoints(`[写真報告] ${title}`, points);
+          alert(`「${title}」の報告が完了し、${points}pt獲得しました！`);
+        }).catch(err => {
+          console.error(err);
+          alert('報告の送信に失敗しました。');
+        });
       };
-      return db.ref('mirai_reports').push(newReport);
-    }).then(() => {
-      titleInput.value = '';
-      if (fileInputImage) fileInputImage.value = '';
-      if (fileInputCamera) fileInputCamera.value = '';
-      const nameLabel = document.getElementById('selected-file-name');
-      if (nameLabel) nameLabel.innerText = '写真が選択されていません';
-      earnPoints(`[写真報告] ${title}`, points);
-      alert(`「${title}」の報告が完了し、${points}pt獲得しました！`);
-    }).catch(error => {
-      console.error(error);
-      alert('写真のアップロードに失敗しました。');
-    });
+      img.onerror = function() {
+        alert('画像の読み込みに失敗しました。');
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() {
+      alert('ファイルの読み込みに失敗しました。');
+    };
+    reader.readAsDataURL(selectedFile);
   }
 
   function renderCommunityPhotos() {

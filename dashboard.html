@@ -23,29 +23,16 @@
     <div id="alert-container"></div>
 
     <div class="grid">
-      <!-- Balance Card -->
-      <div class="col-main">
+      <!-- Left Column -->
+      <div class="col-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Balance Card -->
         <div class="glass-panel points-card">
           <p class="points-label">Current Balance</p>
           <div class="points-display" id="total-points">0</div>
           <p class="points-label mt-4" id="points-message">KEEP IT UP!</p>
         </div>
-      </div>
 
-      <!-- Ranking Card -->
-      <div class="col-side">
-        <div class="glass-panel" style="height: 100%; display: flex; flex-direction: column;">
-          <h3 class="section-title">ランキング</h3>
-          <ul class="action-list" id="ranking-container" style="overflow-y: auto; flex: 1;">
-            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
-              データがありません
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Action Card -->
-      <div class="col-main">
+        <!-- Action Card -->
         <div class="glass-panel">
           <h3 class="section-title">ポイント獲得</h3>
           <ul class="action-list">
@@ -99,22 +86,8 @@
             <button class="btn btn-primary btn-submit-report">画像を送信して70ptを獲得</button>
           </div>
         </div>
-      </div>
 
-      <!-- History Card -->
-      <div class="col-side">
-        <div class="glass-panel" style="height: 100%;">
-          <h3 class="section-title">最近の履歴</h3>
-          <ul class="history-list" id="history-container">
-            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
-              履歴がありません
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Calendar & Community -->
-      <div class="col-main">
+        <!-- Calendar -->
         <div class="glass-panel">
           <h3 class="section-title">チェックイン</h3>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -128,8 +101,30 @@
         </div>
       </div>
 
-      <div class="col-side">
-        <div class="glass-panel" style="height: 100%;">
+      <!-- Right Column -->
+      <div class="col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Ranking Card -->
+        <div class="glass-panel" style="display: flex; flex-direction: column;">
+          <h3 class="section-title">ランキング</h3>
+          <ul class="action-list" id="ranking-container" style="overflow-y: auto; max-height: 250px; margin-bottom: 1.5rem;">
+            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
+              データがありません
+            </li>
+          </ul>
+        </div>
+
+        <!-- History Card -->
+        <div class="glass-panel" style="flex: 1;">
+          <h3 class="section-title">最近の履歴</h3>
+          <ul class="history-list" id="history-container">
+            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
+              履歴がありません
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="glass-panel">
           <h3 class="section-title">意見箱</h3>
           <p style="margin-bottom: 1rem; font-size: 0.8125rem;">管理者に要望を送信できます。</p>
           <div class="form-group">
