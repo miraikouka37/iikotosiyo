@@ -177,11 +177,13 @@
         <td style="padding: 1rem; font-weight: 600;">${safeName}</td>
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">${safeEmail}</td>
         <td style="padding: 1rem; font-weight: 700;">${u.displayValue} pt</td>
-        <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="btn btn-outline btn-sm" data-action="history" data-key="${safeKey}">履歴</button>
-          <button class="btn btn-outline btn-sm" data-action="edit" data-key="${safeKey}">編集</button>
-          <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${user.warning ? '警告中' : '警告'}</button>
-          <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" data-action="delete" data-key="${safeKey}">削除</button>
+        <td style="padding: 1rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-width: 200px;">
+            <button class="btn btn-outline btn-sm" data-action="history" data-key="${safeKey}">履歴</button>
+            <button class="btn btn-outline btn-sm" data-action="edit" data-key="${safeKey}">編集</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${user.warning ? '警告中' : '警告'}</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" data-action="delete" data-key="${safeKey}">削除</button>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);
