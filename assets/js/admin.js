@@ -287,10 +287,10 @@
       li.innerHTML = `
         <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 1rem;">
           <div>
-            <h4 style="font-size: 1.1rem;">${rp.title}</h4>
-            <p>${rp.name} (${rp.email})</p>
+            <h4 style="font-size: 1.1rem;">${escapeHTML(rp.title)}</h4>
+            <p>${escapeHTML(rp.name)} (${escapeHTML(rp.email)})</p>
           </div>
-          <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="db.ref('mirai_reports/${rp.id}').remove()">削除</button>
+          <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deleteReport('${escapeHTML(rp.id)}', '${escapeHTML(rp.email)}', ${rp.points}, '${escapeHTML(rp.title)}')">削除</button>
         </div>
         <img src="${rp.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem;">
       `;
@@ -321,6 +321,37 @@
 
   window.closeHistoryModal = function() {
     document.getElementById('history-modal').style.display = 'none';
+  };
+
+  window.deleteReport = function(id, email, points, title) {
+    if (confirm(`「${title}」の報告を削除し、獲得した ${points}pt をユーザーから没収しますか？`)) {
+      db.ref('mirai_reports/' + id).remove().then(() => {
+        const userKey = email.replace(/\./g, '_');
+        const user = allUsersData[userKey];
+        if (user) {
+          user.points = (user.points || 0) - points;
+          user.history = user.history || [];
+          user.history.push({
+            action: `[取消] ${title}`,
+            amount: -points,
+            timestamp: new Date().toISOString()
+          });
+          if (user.history.length > 150) {
+            user.history = user.history.slice(user.history.length - 150);
+          }
+          db.ref('mirai_users/' + userKey).set(user);
+        }
+        alert('写真の削除とポイントの没収が完了しました。');
+      }).catch(err => {
+        console.error(err);
+        alert('削除に失敗しました。');
+      });
+    }
+  };
+
+  window.logout = function() {
+    localStorage.removeItem('mirai_currentUser');
+    window.location.href = 'index.html';
   };
 
   // Needed for inline onclick in Feedback/Reports if we don't delegate them yet

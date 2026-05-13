@@ -256,7 +256,7 @@
     saveUserData(email, data);
   }
 
-  function logout() {
+  window.logout = function() {
     localStorage.removeItem('mirai_currentUser');
     window.location.href = 'index.html';
   }
