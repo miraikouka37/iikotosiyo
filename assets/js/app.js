@@ -222,9 +222,11 @@
 
   function earnPoints(action, amount) {
     const { email, data } = getUserData();
+    const todayStr = new Date().toDateString();
+    data.lastEarned = data.lastEarned || {};
+
     if (action === 'デイリーチェックイン') {
       const todayObj = new Date();
-      const todayStr = todayObj.toDateString();
       const tzOffset = new Date().getTimezoneOffset() * 60000;
       const todayIso = new Date(Date.now() - tzOffset).toISOString().split('T')[0];
 
@@ -237,6 +239,16 @@
       if (!data.checkInDates.includes(todayIso)) {
         data.checkInDates.push(todayIso);
       }
+    } else {
+      // 写真報告の場合は別のキーで管理（タイトルが毎回変わる可能性があるため）
+      const limitKey = action.startsWith('[写真報告]') ? 'photo_report' : action;
+      
+      if (data.lastEarned[limitKey] === todayStr) {
+        const msg = limitKey === 'photo_report' ? '写真報告' : action;
+        alert(`「${msg}」のポイント獲得は1日1回までです。また明日お願いします！`);
+        return;
+      }
+      data.lastEarned[limitKey] = todayStr;
     }
 
     const entry = {
@@ -355,6 +367,11 @@
     }
 
     const { email, data } = getUserData();
+    const todayStr = new Date().toDateString();
+    if (data.lastEarned && data.lastEarned['photo_report'] === todayStr) {
+      alert('写真報告は1日1回のみ送信可能です。また明日お願いします！');
+      return;
+    }
 
     // Firebase Storage の権限エラーを回避するため、画像を縮小してBase64形式でRealtime DBに直接保存する
     const reader = new FileReader();
