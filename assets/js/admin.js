@@ -27,7 +27,7 @@
       renderAdminUsers();
     });
 
-    db.ref('mirai_feedbacks').on('value', snapshot => {
+    db.ref('mirai_feedbacks').limitToLast(50).on('value', snapshot => {
       allFeedbacksData = [];
       snapshot.forEach(child => {
         allFeedbacksData.push({ id: child.key, ...child.val() });
@@ -35,7 +35,7 @@
       renderFeedbacks();
     });
 
-    db.ref('mirai_reports').on('value', snapshot => {
+    db.ref('mirai_reports').limitToLast(50).on('value', snapshot => {
       allReportsData = [];
       snapshot.forEach(child => {
         allReportsData.push({ id: child.key, ...child.val() });
@@ -170,6 +170,15 @@
       const safeName = escapeHTML(u.name);
       const safeEmail = escapeHTML(u.email);
 
+      let isWarningActive = false;
+      if (user.warning) {
+        if (typeof user.warning === 'string') {
+          isWarningActive = true;
+        } else if (user.warning.message && (Date.now() - user.warning.timestamp < 24 * 60 * 60 * 1000)) {
+          isWarningActive = true;
+        }
+      }
+
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--panel-border)';
       tr.innerHTML = `
@@ -181,7 +190,7 @@
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-width: 200px;">
             <button class="btn btn-outline btn-sm" data-action="history" data-key="${safeKey}">履歴</button>
             <button class="btn btn-outline btn-sm" data-action="edit" data-key="${safeKey}">編集</button>
-            <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${user.warning ? '警告中' : '警告'}</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${isWarningActive ? '警告中' : '警告'}</button>
             <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" data-action="delete" data-key="${safeKey}">削除</button>
           </div>
         </td>
@@ -217,13 +226,25 @@
   function sendWarning(key) {
     const user = allUsersData[key];
     if (!user) return;
-    const currentWarning = user.warning || '';
+    
+    let currentWarning = '';
+    if (user.warning) {
+      if (typeof user.warning === 'string') {
+        currentWarning = user.warning;
+      } else if (user.warning.message && (Date.now() - user.warning.timestamp < 24 * 60 * 60 * 1000)) {
+        currentWarning = user.warning.message;
+      }
+    }
+
     const message = prompt(`${user.name} への警告メッセージ（空欄で解除）:`, currentWarning);
     if (message !== null) {
       if (message.trim() === '') {
         db.ref(`mirai_users/${key}/warning`).remove().then(() => alert('警告解除'));
       } else {
-        db.ref(`mirai_users/${key}/warning`).set(message).then(() => alert('警告保存'));
+        db.ref(`mirai_users/${key}/warning`).set({
+          message: message.trim(),
+          timestamp: Date.now()
+        }).then(() => alert('警告保存'));
       }
     }
   }

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const db = firebase.database();
   const storage = firebase.storage();
 
@@ -21,10 +21,18 @@
     // Real-time synchronization
     db.ref('mirai_users').on('value', snapshot => {
       allUsersData = snapshot.val() || {};
+      
+      const userKey = userEmail.replace(/\./g, '_');
+      if (!allUsersData[userKey]) {
+        alert('アカウントが存在しないか、管理者によって削除されました。');
+        logout();
+        return;
+      }
+      
       renderDashboard();
     });
 
-    db.ref('mirai_reports').on('value', snapshot => {
+    db.ref('mirai_reports').limitToLast(30).on('value', snapshot => {
       allReportsData = [];
       snapshot.forEach(child => {
         allReportsData.push({ id: child.key, ...child.val() });
@@ -36,29 +44,29 @@
     document.body.addEventListener('click', (e) => {
       const target = e.target.closest('.btn-earn, .btn-logout, .btn-prev-month, .btn-next-month, .btn-submit-report, .btn-send-feedback');
       if (!target) return;
-      
+
       if (target.classList.contains('btn-earn')) {
         const action = target.getAttribute('data-action');
         const amount = parseInt(target.getAttribute('data-amount'));
         earnPoints(action, amount);
       }
-      
+
       if (target.classList.contains('btn-logout')) {
         logout();
       }
-      
+
       if (target.classList.contains('btn-prev-month')) {
         changeMonth(-1);
       }
-      
+
       if (target.classList.contains('btn-next-month')) {
         changeMonth(1);
       }
-      
+
       if (target.classList.contains('btn-submit-report')) {
         submitReport();
       }
-      
+
       if (target.classList.contains('btn-send-feedback')) {
         sendFeedback();
       }
@@ -70,14 +78,14 @@
   // Helper to find the closest element matching a selector (for event delegation)
   // Re-implementing a simple version since e.path is non-standard
   if (!Element.prototype.closest) {
-      Element.prototype.closest = function(s) {
-          var el = this;
-          do {
-              if (el.matches(s)) return el;
-              el = el.parentElement || el.parentNode;
-          } while (el !== null && el.nodeType === 1);
-          return null;
-      };
+    Element.prototype.closest = function (s) {
+      var el = this;
+      do {
+        if (el.matches(s)) return el;
+        el = el.parentElement || el.parentNode;
+      } while (el !== null && el.nodeType === 1);
+      return null;
+    };
   }
 
   function getUserData() {
@@ -104,9 +112,9 @@
     if (alertContainer) {
       if (data.warning) {
         alertContainer.innerHTML = `
-          <div class="glass-panel" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.4); margin-bottom: 1.5rem; padding: 1rem; color: #ef4444;">
-            <p style="font-weight: 800; font-size: 1rem; margin-bottom: 0.25rem;">警告！</p>
-            <p style="font-size: 0.875rem;">${data.warning}</p>
+          <div class="glass-panel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: #dc2626; border: 3px solid #991b1b; padding: 2rem; color: #ffffff; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 25px rgba(220, 38, 38, 0.9); text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">
+            <p style="font-weight: 900; font-size: 2rem; margin-bottom: 1rem; color: #fde047; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);">警告！</p>
+            <p style="font-size: 1.25rem; font-weight: bold; line-height: 1.5;">${data.warning}</p>
           </div>
         `;
       } else {
@@ -142,7 +150,7 @@
         const li = document.createElement('li');
         li.className = 'list-item';
         const dateStr = new Date(item.timestamp).toLocaleString('ja-JP', {
-          month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
         li.innerHTML = `
           <div class="item-info">
@@ -227,7 +235,7 @@
       data.lastCheckIn = todayStr;
       data.checkInDates = data.checkInDates || [];
       if (!data.checkInDates.includes(todayIso)) {
-          data.checkInDates.push(todayIso);
+        data.checkInDates.push(todayIso);
       }
     }
 
@@ -239,6 +247,12 @@
     data.points = (data.points || 0) + amount;
     data.history = data.history || [];
     data.history.push(entry);
+    
+    // 履歴の無限増殖を防ぐため、最新の150件のみを保持
+    if (data.history.length > 150) {
+      data.history = data.history.slice(data.history.length - 150);
+    }
+    
     saveUserData(email, data);
   }
 
@@ -282,7 +296,7 @@
       el.style.cursor = 'default';
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       el.innerText = i;
-      
+
       if (dateStr === todayStr) {
         el.style.color = '#fff';
         el.style.fontWeight = '800';
@@ -332,8 +346,8 @@
     const points = 70;
     const fileInputImage = document.getElementById('report-image');
     const fileInputCamera = document.getElementById('report-camera');
-    const selectedFile = (fileInputImage && fileInputImage.files.length > 0) ? fileInputImage.files[0] : 
-                         (fileInputCamera && fileInputCamera.files.length > 0) ? fileInputCamera.files[0] : null;
+    const selectedFile = (fileInputImage && fileInputImage.files.length > 0) ? fileInputImage.files[0] :
+      (fileInputCamera && fileInputCamera.files.length > 0) ? fileInputCamera.files[0] : null;
 
     if (!title || !selectedFile) {
       alert('活動内容と写真の両方を正しく入力してください。');
@@ -344,9 +358,9 @@
 
     // Firebase Storage の権限エラーを回避するため、画像を縮小してBase64形式でRealtime DBに直接保存する
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
@@ -395,12 +409,12 @@
           alert('報告の送信に失敗しました。');
         });
       };
-      img.onerror = function() {
+      img.onerror = function () {
         alert('画像の読み込みに失敗しました。');
       };
       img.src = e.target.result;
     };
-    reader.onerror = function() {
+    reader.onerror = function () {
       alert('ファイルの読み込みに失敗しました。');
     };
     reader.readAsDataURL(selectedFile);
