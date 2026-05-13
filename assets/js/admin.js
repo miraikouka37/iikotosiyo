@@ -79,7 +79,7 @@
     });
   });
 
-  function switchRankTab(type) {
+  window.switchRankTab = function(type) {
     currentRankView = type;
     const tabs = {
       'total': document.getElementById('tab-total'),
@@ -302,19 +302,22 @@
     const user = allUsersData[key];
     if (!user) return;
     const modal = document.getElementById('history-modal');
-    const list = document.getElementById('modal-history-list');
-    document.getElementById('modal-user-name').innerText = `${user.name} の履歴`;
-    list.innerHTML = '';
-    const history = user.history || [];
-    if (history.length === 0) {
-      list.innerHTML = '<li class="list-item">履歴なし</li>';
-    } else {
-      [...history].reverse().forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'list-item';
-        li.innerHTML = `<div><h4>${item.action}</h4></div><div>${item.amount} pt</div>`;
-        list.appendChild(li);
-      });
+    const list = document.getElementById('history-modal-list');
+    const title = document.getElementById('history-modal-title');
+    if (title) title.innerText = `${user.name} の履歴`;
+    if (list) {
+      list.innerHTML = '';
+      const history = user.history || [];
+      if (history.length === 0) {
+        list.innerHTML = '<li class="list-item">履歴なし</li>';
+      } else {
+        [...history].reverse().forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.innerHTML = `<div><h4>${item.action}</h4></div><div>${item.amount} pt</div>`;
+          list.appendChild(li);
+        });
+      }
     }
     modal.style.display = 'flex';
   }
