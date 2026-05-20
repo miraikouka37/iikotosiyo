@@ -87,6 +87,7 @@
           </div>
         </div>
 
+
         <!-- Calendar -->
         <div class="glass-panel">
           <h3 class="section-title">チェックイン</h3>
@@ -144,6 +145,46 @@
         </div>
       </div>
 
+      <!-- Recommendations Gallery -->
+      <div class="col-main" style="grid-column: span 12;">
+        <div class="glass-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <h3 class="section-title" style="margin: 0;">みんなの「いい人」紹介</h3>
+            <button class="btn btn-primary btn-sm btn-recommend-trigger" style="width: auto;">いい人を推薦する</button>
+          </div>
+          <div id="recommendations-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+            <div style="text-align: center; color: var(--text-muted); width: 100%;">読み込み中...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Recommendation Modal -->
+  <div id="recommend-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px);">
+    <div class="glass-panel" style="width: 100%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; border-color: #333;">
+      <h3 class="section-title">いい人推薦</h3>
+      <p style="margin-bottom: 1.5rem; font-size: 0.875rem;">身の回りの「いい人」を推薦してください。管理者が承認すると、推薦された人に50pt、あなたに10ptが贈られます！</p>
+      
+      <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label for="recommend-user-select">推薦する人</label>
+          <select id="recommend-user-select" class="form-control" required>
+            <option value="" disabled selected>ユーザーを選択してください</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="recommend-reason">具体的な理由・感謝の言葉</label>
+          <textarea id="recommend-reason" class="form-control" rows="4" placeholder="どのような良い行いをしたか、具体的に記入してください..." style="resize: none;" required></textarea>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-outline" onclick="closeRecommendModal()" style="flex: 1;">キャンセル</button>
+        <button class="btn btn-primary btn-submit-recommend" style="flex: 1;">推薦を送信する</button>
+      </div>
     </div>
   </div>
 
