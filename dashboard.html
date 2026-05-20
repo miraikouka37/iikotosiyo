@@ -188,6 +188,79 @@
     </div>
   </div>
 
+  <!-- Onboarding Modal -->
+  <div id="onboarding-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1001; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
+    <div class="glass-panel" style="width: 100%; max-width: 550px; border-color: #333; padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; position: relative;">
+      
+      <!-- Close/Skip Button at Top Right -->
+      <button onclick="closeOnboarding()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.875rem;">スキップ ✕</button>
+
+      <!-- Slides Container -->
+      <div id="onboarding-slides" style="min-height: 250px; display: flex; flex-direction: column; justify-content: center;">
+        
+        <!-- Slide 1: Welcome -->
+        <div class="onboarding-slide" id="slide-1">
+          <h2 style="font-size: 1.8rem; background: linear-gradient(45deg, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">MIRAI POINTSへようこそ！</h2>
+          <p style="font-size: 1rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1.5rem;">
+            このアプリは、日々の活動やコミュニティ内での素晴らしい行動に対してポイントを獲得し、みんなで良い輪を広げていくプラットフォームです。
+          </p>
+          <div style="font-size: 3.5rem; text-align: center; margin-top: 1rem;">✨</div>
+        </div>
+
+        <!-- Slide 2: How to earn -->
+        <div class="onboarding-slide" id="slide-2" style="display: none;">
+          <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">1. ポイントを貯めよう</h2>
+          <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+            ポイントは様々な方法で獲得できます：
+          </p>
+          <ul style="list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+            <li>📅 <strong>デイリーチェックイン</strong>：毎日ログインして +10 pt</li>
+            <li>🏫 <strong>登校・部活参加</strong>：学校到着や活動時に申請してポイント獲得</li>
+            <li>📷 <strong>写真報告</strong>：ボランティアやゴミ拾い写真を送って +70 pt</li>
+          </ul>
+        </div>
+
+        <!-- Slide 3: Recommendations -->
+        <div class="onboarding-slide" id="slide-3" style="display: none;">
+          <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">2. 「いい人」を推薦しよう</h2>
+          <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+            身の回りで親切なことや良い行いをした友達（いい人）を見つけたら、推薦しましょう！
+          </p>
+          <ul style="list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+            <li>🤝 「いい人を推薦する」ボタンからユーザーを選んで理由を送信</li>
+            <li>🛡️ 管理者が承認すると、<strong>推薦された人に +50 pt</strong></li>
+            <li>🎁 推薦した<strong>あなたにも感謝の +10 pt</strong>が贈られます！</li>
+          </ul>
+        </div>
+
+        <!-- Slide 4: Start -->
+        <div class="onboarding-slide" id="slide-4" style="display: none;">
+          <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">準備はできましたか？</h2>
+          <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1.5rem;">
+            貯まったポイントは、ランキングで自分の順位を確認したり、様々なイベントや特典に利用できます。さっそく始めてみましょう！
+          </p>
+          <div style="font-size: 3.5rem; text-align: center; margin-top: 1rem;">🚀</div>
+        </div>
+
+      </div>
+
+      <!-- Dot Indicators -->
+      <div style="display: flex; justify-content: center; gap: 0.5rem; margin: 1rem 0;">
+        <span class="onboarding-dot" id="dot-1" style="width: 8px; height: 8px; border-radius: 50%; background: #fff; transition: var(--transition);"></span>
+        <span class="onboarding-dot" id="dot-2" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: var(--transition);"></span>
+        <span class="onboarding-dot" id="dot-3" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: var(--transition);"></span>
+        <span class="onboarding-dot" id="dot-4" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: var(--transition);"></span>
+      </div>
+
+      <!-- Controls -->
+      <div style="display: flex; justify-content: space-between; gap: 1rem;">
+        <button id="onboarding-prev" class="btn btn-outline" onclick="prevSlide()" style="flex: 1; display: none;">前へ</button>
+        <button id="onboarding-next" class="btn btn-primary" onclick="nextSlide()" style="flex: 1;">次へ</button>
+      </div>
+
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
