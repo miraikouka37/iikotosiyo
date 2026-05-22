@@ -6,6 +6,8 @@
   let allUsersData = null;
   let allFeedbacksData = [];
   let allReportsData = [];
+  let allRecommendationsData = [];
+  let allLostItemsData = [];
 
   document.addEventListener('DOMContentLoaded', () => {
     // Check if logged in and is admin
@@ -41,6 +43,22 @@
         allReportsData.push({ id: child.key, ...child.val() });
       });
       renderReports();
+    });
+
+    db.ref('mirai_recommendations').on('value', snapshot => {
+      allRecommendationsData = [];
+      snapshot.forEach(child => {
+        allRecommendationsData.push({ id: child.key, ...child.val() });
+      });
+      renderRecommendations();
+    });
+
+    db.ref('mirai_lost_items').on('value', snapshot => {
+      allLostItemsData = [];
+      snapshot.forEach(child => {
+        allLostItemsData.push({ id: child.key, ...child.val() });
+      });
+      renderLostItems();
     });
 
     // Event Delegation for Table Actions
@@ -271,6 +289,36 @@
     });
   }
 
+  function renderLostItems() {
+    const list = document.getElementById('admin-lost-items-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (allLostItemsData.length === 0) {
+      list.innerHTML = '<li class="list-item" style="justify-content: center;">忘れ物のお知らせはありません</li>';
+      return;
+    }
+    [...allLostItemsData].reverse().forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'list-item';
+      const dateStr = new Date(item.timestamp).toLocaleString('ja-JP', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      const safeName = escapeHTML(item.itemName);
+      const safeLocation = escapeHTML(item.location);
+      const safeReporter = escapeHTML(item.reporterName);
+      const safeEmail = escapeHTML(item.reporterEmail);
+      
+      li.innerHTML = `
+        <div class="item-info">
+          <h4>${safeName} (場所: ${safeLocation})</h4>
+          <p>投稿者: ${safeReporter} (${safeEmail}) | 投稿日時: ${dateStr}</p>
+        </div>
+        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); width: auto;" onclick="deleteLostItem('${escapeHTML(item.id)}')">削除</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
   function renderReports() {
     const list = document.getElementById('admin-report-list');
     if (!list) return;
@@ -345,6 +393,180 @@
           db.ref('mirai_users/' + userKey).set(user);
         }
         alert('写真の削除とポイントの没収が完了しました。');
+      }).catch(err => {
+        console.error(err);
+        alert('削除に失敗しました。');
+      });
+    }
+  };
+
+  function renderRecommendations() {
+    const list = document.getElementById('admin-recommendation-list');
+    if (list) {
+      list.innerHTML = '';
+      const pendingRecs = allRecommendationsData.filter(r => r.status === 'pending');
+      
+      if (pendingRecs.length === 0) {
+        list.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">保留中の推薦はありません</li>';
+      } else {
+        pendingRecs.forEach(rec => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.style.flexDirection = 'column';
+          li.style.alignItems = 'flex-start';
+          
+          const dateStr = new Date(rec.timestamp).toLocaleString('ja-JP', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          
+          const safeId = escapeHTML(rec.id);
+          const safeSenderName = escapeHTML(rec.senderName);
+          const safeSenderEmail = escapeHTML(rec.senderEmail);
+          const safeReceiverName = escapeHTML(rec.receiverName);
+          const safeReceiverEmail = escapeHTML(rec.receiverEmail);
+          const safeReason = escapeHTML(rec.reason);
+          
+          li.innerHTML = `
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                  <span style="color: var(--success); font-weight: 700;">${safeReceiverName}</span> (${safeReceiverEmail})
+                </h4>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">推薦者: ${safeSenderName} (${safeSenderEmail}) | ${dateStr}</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary btn-sm" style="background: var(--success); color: #fff; width: auto;" onclick="approveRecommendation('${safeId}')">承認</button>
+                <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); width: auto;" onclick="rejectRecommendation('${safeId}')">却下</button>
+              </div>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-main); margin-top: 0.25rem; white-space: pre-wrap; word-break: break-all; width: 100%;">${safeReason}</p>
+          `;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    const approvedList = document.getElementById('admin-approved-recommendation-list');
+    if (approvedList) {
+      approvedList.innerHTML = '';
+      const approvedRecs = allRecommendationsData.filter(r => r.status === 'approved');
+      if (approvedRecs.length === 0) {
+        approvedList.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">承認済みの推薦はありません</li>';
+      } else {
+        const sortedApproved = [...approvedRecs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        sortedApproved.forEach(rec => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.style.flexDirection = 'column';
+          li.style.alignItems = 'flex-start';
+          
+          const dateStr = new Date(rec.timestamp).toLocaleString('ja-JP', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          
+          const safeId = escapeHTML(rec.id);
+          const safeSenderName = escapeHTML(rec.senderName);
+          const safeSenderEmail = escapeHTML(rec.senderEmail);
+          const safeReceiverName = escapeHTML(rec.receiverName);
+          const safeReceiverEmail = escapeHTML(rec.receiverEmail);
+          const safeReason = escapeHTML(rec.reason);
+          
+          li.innerHTML = `
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+              <div>
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                  <span style="color: var(--success); font-weight: 700;">${safeReceiverName}</span> (${safeReceiverEmail})
+                </h4>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">推薦者: ${safeSenderName} (${safeSenderEmail}) | ${dateStr}</p>
+              </div>
+              <div>
+                <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); width: auto;" onclick="deleteApprovedRecommendation('${safeId}')">削除</button>
+              </div>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-main); margin-top: 0.25rem; white-space: pre-wrap; word-break: break-all; width: 100%;">${safeReason}</p>
+          `;
+          approvedList.appendChild(li);
+        });
+      }
+    }
+  }
+
+  window.approveRecommendation = function(id) {
+    const rec = allRecommendationsData.find(r => r.id === id);
+    if (!rec) return;
+    
+    if (confirm(`「${rec.receiverName}」さんへの推薦を承認し、ポイントを付与しますか？\n（推薦された人に50pt、推薦した人に10pt）`)) {
+      db.ref('mirai_recommendations/' + id + '/status').set('approved').then(() => {
+        const receiverKey = rec.receiverEmail.replace(/\./g, '_');
+        db.ref('mirai_users/' + receiverKey).once('value').then(snap => {
+          const user = snap.val();
+          if (user) {
+            user.points = (user.points || 0) + 50;
+            user.history = user.history || [];
+            user.history.push({
+              action: `[推薦承認] ${rec.senderName}さんから: ${rec.reason}`,
+              amount: 50,
+              timestamp: new Date().toISOString()
+            });
+            if (user.history.length > 150) {
+              user.history = user.history.slice(user.history.length - 150);
+            }
+            db.ref('mirai_users/' + receiverKey).set(user);
+          }
+        });
+        
+        const senderKey = rec.senderEmail.replace(/\./g, '_');
+        db.ref('mirai_users/' + senderKey).once('value').then(snap => {
+          const user = snap.val();
+          if (user) {
+            user.points = (user.points || 0) + 10;
+            user.history = user.history || [];
+            user.history.push({
+              action: `[推薦送信] ${rec.receiverName}さんの推薦承認`,
+              amount: 10,
+              timestamp: new Date().toISOString()
+            });
+            if (user.history.length > 150) {
+              user.history = user.history.slice(user.history.length - 150);
+            }
+            db.ref('mirai_users/' + senderKey).set(user);
+          }
+        });
+        
+        alert('推薦を承認しました！');
+      }).catch(err => {
+        console.error(err);
+        alert('承認に失敗しました。');
+      });
+    }
+  };
+
+  window.rejectRecommendation = function(id) {
+    if (confirm('この推薦を却下（削除）しますか？')) {
+      db.ref('mirai_recommendations/' + id).remove().then(() => {
+        alert('推薦を却下しました。');
+      }).catch(err => {
+        console.error(err);
+        alert('削除に失敗しました。');
+      });
+    }
+  };
+
+  window.deleteApprovedRecommendation = function(id) {
+    if (confirm('この推薦（承認済み）を完全に削除しますか？\n※付与されたポイントは没収されません。')) {
+      db.ref('mirai_recommendations/' + id).remove().then(() => {
+        alert('推薦を削除しました。');
+      }).catch(err => {
+        console.error(err);
+        alert('削除に失敗しました。');
+      });
+    }
+  };
+
+  window.deleteLostItem = function(id) {
+    if (confirm('この忘れ物のお知らせを削除しますか？')) {
+      db.ref('mirai_lost_items/' + id).remove().then(() => {
+        alert('削除しました。');
       }).catch(err => {
         console.error(err);
         alert('削除に失敗しました。');

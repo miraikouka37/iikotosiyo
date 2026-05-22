@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MIRAI POINTS | ダッシュボード</title>
+  <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="stylesheet" href="assets/css/styles.css?v=1.1">
 </head>
 
@@ -12,7 +12,7 @@
 
   <div class="dashboard-container">
     <header class="header">
-      <h2 style="margin: 0;">MIRAI POINTS</h2>
+      <h2 style="margin: 0;">FUTURE POINTS</h2>
       <div class="nav-user">
         <span class="user-name" id="display-name">ユーザー</span>
         <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
@@ -133,6 +133,24 @@
           </div>
           <button class="btn btn-outline btn-sm btn-send-feedback" style="width: 100%;">送信する</button>
         </div>
+
+        <!-- Lost & Found Card -->
+        <div class="glass-panel">
+          <h3 class="section-title">忘れ物掲示板</h3>
+          <p style="margin-bottom: 1rem; font-size: 0.8125rem;">見つけた忘れ物をお知らせできます。</p>
+          <div class="form-group">
+            <input type="text" id="lost-item-name" class="form-control" placeholder="忘れ物名 (例: 赤い水筒)" style="margin-bottom: 0.5rem;" required>
+            <input type="text" id="lost-item-location" class="form-control" placeholder="見つけた場所 (例: 3F理科室前)" required>
+          </div>
+          <button class="btn btn-outline btn-sm btn-send-lost-item" style="width: 100%; margin-bottom: 1.5rem;">お知らせを投稿</button>
+          
+          <h4 style="font-size: 0.875rem; margin-bottom: 0.75rem; border-top: 1px solid var(--panel-border); padding-top: 1rem;">現在のお知らせ</h4>
+          <ul class="history-list" id="lost-items-container" style="max-height: 250px; overflow-y: auto;">
+            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
+              現在、忘れ物はありません
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Photos Gallery -->
@@ -200,7 +218,7 @@
         
         <!-- Slide 1: Welcome -->
         <div class="onboarding-slide" id="slide-1">
-          <h2 style="font-size: 1.8rem; background: linear-gradient(45deg, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">MIRAI POINTSへようこそ！</h2>
+          <h2 style="font-size: 1.8rem; background: linear-gradient(45deg, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">FUTURE POINTSへようこそ！</h2>
           <p style="font-size: 1rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1.5rem;">
             このアプリは、日々の活動やコミュニティ内での素晴らしい行動に対してポイントを獲得し、みんなで良い輪を広げていくプラットフォームです。
           </p>

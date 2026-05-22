@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref('mirai_users/' + safeEmail).set(newUser).then(() => {
           // Auto login
           localStorage.setItem('mirai_currentUser', JSON.stringify({ email, name }));
+          localStorage.setItem('mirai_isNewUser', 'true');
           window.location.href = 'dashboard.html';
         }).catch(err => {
           console.error(err);

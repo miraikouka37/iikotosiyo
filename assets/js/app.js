@@ -5,6 +5,8 @@
   let userEmail = '';
   let allUsersData = null;
   let allReportsData = null;
+  let allRecommendationsData = null;
+  let allLostItemsData = [];
   let currentCalendarDate = new Date();
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -40,9 +42,25 @@
       renderCommunityPhotos();
     });
 
+    db.ref('mirai_recommendations').on('value', snapshot => {
+      allRecommendationsData = [];
+      snapshot.forEach(child => {
+        allRecommendationsData.push({ id: child.key, ...child.val() });
+      });
+      renderRecommendations();
+    });
+
+    db.ref('mirai_lost_items').on('value', snapshot => {
+      allLostItemsData = [];
+      snapshot.forEach(child => {
+        allLostItemsData.push({ id: child.key, ...child.val() });
+      });
+      renderLostItems();
+    });
+
     // Attach Event Listeners (Security hardening)
     document.body.addEventListener('click', (e) => {
-      const target = e.target.closest('.btn-earn, .btn-logout, .btn-prev-month, .btn-next-month, .btn-submit-report, .btn-send-feedback');
+      const target = e.target.closest('.btn-earn, .btn-logout, .btn-prev-month, .btn-next-month, .btn-submit-report, .btn-send-feedback, .btn-submit-recommend, .btn-recommend-trigger, .btn-send-lost-item, .btn-resolve-lost');
       if (!target) return;
 
       if (target.classList.contains('btn-earn')) {
@@ -69,6 +87,23 @@
 
       if (target.classList.contains('btn-send-feedback')) {
         sendFeedback();
+      }
+
+      if (target.classList.contains('btn-submit-recommend')) {
+        submitRecommendation();
+      }
+
+      if (target.classList.contains('btn-recommend-trigger')) {
+        openRecommendModal();
+      }
+
+      if (target.classList.contains('btn-send-lost-item')) {
+        submitLostItem();
+      }
+
+      if (target.classList.contains('btn-resolve-lost')) {
+        const id = target.getAttribute('data-id');
+        resolveLostItem(id);
       }
     });
 
@@ -166,6 +201,13 @@
     renderRanking();
     renderCommunityPhotos();
     renderCalendar();
+    populateUserSelect();
+    renderRecommendations();
+    renderLostItems();
+
+    if (localStorage.getItem('mirai_isNewUser') === 'true') {
+      openOnboarding();
+    }
   }
 
   function animatePoints(target) {
@@ -465,5 +507,327 @@
       container.appendChild(card);
     });
   }
+
+  function populateUserSelect() {
+    const select = document.getElementById('recommend-user-select');
+    if (!select || !allUsersData) return;
+    
+    const currentSelection = select.value;
+    select.innerHTML = '<option value="" disabled selected>ユーザーを選択してください</option>';
+    
+    const userKey = userEmail.replace(/\./g, '_');
+    
+    Object.keys(allUsersData).forEach(key => {
+      if (key.startsWith('{')) return;
+      if (key === userKey) return;
+      
+      const user = allUsersData[key];
+      if (user.role === 'admin' || key === 'S1') return;
+      
+      const email = user.email || key.replace(/_/g, '.');
+      const option = document.createElement('option');
+      option.value = email;
+      option.textContent = `${user.name} (${email})`;
+      select.appendChild(option);
+    });
+    
+    if (currentSelection) {
+      select.value = currentSelection;
+    }
+  }
+
+  function submitRecommendation() {
+    const select = document.getElementById('recommend-user-select');
+    const reasonInput = document.getElementById('recommend-reason');
+    if (!select || !reasonInput) return;
+    
+    const receiverEmail = select.value;
+    const reason = reasonInput.value.trim();
+    
+    if (!receiverEmail || !reason) {
+      alert('推薦する人と理由の両方を入力してください。');
+      return;
+    }
+    
+    const { email, data } = getUserData();
+    const todayStr = new Date().toDateString();
+    
+    if (data.lastRecommendDate === todayStr) {
+      alert('推薦は1日1回のみ送信可能です。また明日お願いします！');
+      return;
+    }
+    
+    const receiverKey = receiverEmail.replace(/\./g, '_');
+    const receiverData = allUsersData[receiverKey];
+    if (!receiverData) {
+      alert('推薦対象のユーザーが見つかりません。');
+      return;
+    }
+    
+    const newRecommendation = {
+      senderEmail: email,
+      senderName: data.name,
+      receiverEmail: receiverEmail,
+      receiverName: receiverData.name,
+      reason: reason,
+      timestamp: new Date().toISOString(),
+      status: 'pending'
+    };
+    
+    db.ref('mirai_recommendations').push(newRecommendation).then(() => {
+      data.lastRecommendDate = todayStr;
+      saveUserData(email, data);
+      
+      select.value = '';
+      reasonInput.value = '';
+      
+      alert(`「${receiverData.name}」さんの推薦を送信しました。管理者の承認をお待ちください！`);
+      closeRecommendModal();
+    }).catch(err => {
+      console.error(err);
+      alert('推薦の送信に失敗しました。');
+    });
+  }
+
+  function renderRecommendations() {
+    const container = document.getElementById('recommendations-container');
+    if (!container || !allRecommendationsData) return;
+    
+    const approvedRecs = allRecommendationsData.filter(r => r.status === 'approved');
+    if (approvedRecs.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: var(--text-muted); width: 100%;">紹介された「いい人」はまだいません</div>';
+      return;
+    }
+    
+    container.innerHTML = '';
+    const sortedRecs = [...approvedRecs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    sortedRecs.forEach(rec => {
+      const card = document.createElement('div');
+      card.style.minWidth = '280px';
+      card.style.background = '#0d0d0d';
+      card.style.border = '1px solid var(--panel-border)';
+      card.style.borderRadius = '8px';
+      card.style.padding = '1rem';
+      card.style.flexShrink = '0';
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.justifyContent = 'space-between';
+      
+      const dateStr = new Date(rec.timestamp).toLocaleDateString('ja-JP', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      
+      const safeReceiverName = escapeHTML(rec.receiverName);
+      const safeSenderName = escapeHTML(rec.senderName);
+      const safeReason = escapeHTML(rec.reason);
+      
+      card.innerHTML = `
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-weight: 700; color: #fff; font-size: 0.9375rem;">${safeReceiverName} さん</span>
+            <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">★ 推薦されました</span>
+          </div>
+          <p style="font-size: 0.8125rem; color: var(--text-main); line-height: 1.4; margin-bottom: 0.5rem; word-break: break-all; white-space: pre-wrap;">${safeReason}</p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a1a; padding-top: 0.5rem; margin-top: 0.5rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">推薦者: ${safeSenderName} さん</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">${dateStr}</span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderLostItems() {
+    const container = document.getElementById('lost-items-container');
+    if (!container || !allLostItemsData) return;
+    
+    if (allLostItemsData.length === 0) {
+      container.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">現在、忘れ物はありません</li>';
+      return;
+    }
+    
+    container.innerHTML = '';
+    const sortedItems = [...allLostItemsData].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    sortedItems.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'list-item';
+      li.style.flexDirection = 'column';
+      li.style.alignItems = 'flex-start';
+      li.style.gap = '0.5rem';
+      
+      const dateStr = new Date(item.timestamp).toLocaleString('ja-JP', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      
+      const safeName = escapeHTML(item.itemName);
+      const safeLocation = escapeHTML(item.location);
+      const safeReporter = escapeHTML(item.reporterName);
+      
+      li.innerHTML = `
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+          <div>
+            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 700; color: #fff;">${safeName}</h4>
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">場所: ${safeLocation}</p>
+          </div>
+          <button class="btn btn-outline btn-sm btn-resolve-lost" data-id="${item.id}" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.7rem; border-color: var(--success); color: var(--success); margin: 0;">解決済</button>
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; justify-content: space-between; width: 100%;">
+          <span>投稿者: ${safeReporter}</span>
+          <span>${dateStr}</span>
+        </div>
+      `;
+      container.appendChild(li);
+    });
+  }
+
+  function submitLostItem() {
+    const nameInput = document.getElementById('lost-item-name');
+    const locationInput = document.getElementById('lost-item-location');
+    if (!nameInput || !locationInput) return;
+    
+    const itemName = nameInput.value.trim();
+    const location = locationInput.value.trim();
+    
+    if (!itemName || !location) {
+      alert('忘れ物名と見つけた場所の両方を入力してください。');
+      return;
+    }
+    
+    const forbiddenWords = [
+      'セックス', 'エロ', 'ちんちん', 'まんこ', 'オナニー', 'ペニス', 'sex', 'porn', 'ヴァギナ', '淫乱', 
+      '死ね', '殺す', 'カス', 'ゴミ', 
+      'nigger', 'nigga', 'pussy', 'キチガイ', 'ガイジ', 'チョン', '土人'
+    ];
+    if (forbiddenWords.some(word => itemName.toLowerCase().includes(word) || location.toLowerCase().includes(word))) {
+      alert('入力内容に不適切な表現が含まれているため、投稿できません。');
+      return;
+    }
+    
+    const { email, data } = getUserData();
+    const newLostItem = {
+      itemName: itemName,
+      location: location,
+      reporterName: data.name,
+      reporterEmail: email,
+      timestamp: new Date().toISOString()
+    };
+    
+    db.ref('mirai_lost_items').push(newLostItem).then(() => {
+      nameInput.value = '';
+      locationInput.value = '';
+      alert('忘れ物のお知らせを投稿しました！');
+    }).catch(err => {
+      console.error(err);
+      alert('投稿に失敗しました。');
+    });
+  }
+
+  function resolveLostItem(id) {
+    if (confirm('落とし主が見つかりましたか？（このお知らせを削除します）')) {
+      db.ref('mirai_lost_items/' + id).remove().then(() => {
+        alert('解決済みにしました！');
+      }).catch(err => {
+        console.error(err);
+        alert('削除に失敗しました。');
+      });
+    }
+  }
+
+  function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#39;');
+  }
+
+  function openRecommendModal() {
+    const modal = document.getElementById('recommend-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeRecommendModal() {
+    const modal = document.getElementById('recommend-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      const select = document.getElementById('recommend-user-select');
+      const reasonInput = document.getElementById('recommend-reason');
+      if (select) select.value = '';
+      if (reasonInput) reasonInput.value = '';
+    }
+  }
+
+  window.openRecommendModal = openRecommendModal;
+  window.closeRecommendModal = closeRecommendModal;
+
+  let currentOnboardingSlide = 1;
+  const totalOnboardingSlides = 4;
+
+  function openOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      currentOnboardingSlide = 1;
+      showOnboardingSlide(1);
+    }
+  }
+
+  function closeOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      localStorage.removeItem('mirai_isNewUser');
+    }
+  }
+
+  function showOnboardingSlide(slideNum) {
+    for (let i = 1; i <= totalOnboardingSlides; i++) {
+      const slide = document.getElementById('slide-' + i);
+      const dot = document.getElementById('dot-' + i);
+      if (slide) {
+        slide.style.display = (i === slideNum) ? 'block' : 'none';
+      }
+      if (dot) {
+        dot.style.background = (i === slideNum) ? '#fff' : 'var(--text-muted)';
+      }
+    }
+    
+    const prevBtn = document.getElementById('onboarding-prev');
+    const nextBtn = document.getElementById('onboarding-next');
+    
+    if (prevBtn) {
+      prevBtn.style.display = (slideNum === 1) ? 'none' : 'block';
+    }
+    if (nextBtn) {
+      if (slideNum === totalOnboardingSlides) {
+        nextBtn.textContent = 'ダッシュボードへ';
+      } else {
+        nextBtn.textContent = '次へ';
+      }
+    }
+  }
+
+  window.nextSlide = function() {
+    if (currentOnboardingSlide < totalOnboardingSlides) {
+      currentOnboardingSlide++;
+      showOnboardingSlide(currentOnboardingSlide);
+    } else {
+      closeOnboarding();
+    }
+  };
+
+  window.prevSlide = function() {
+    if (currentOnboardingSlide > 1) {
+      currentOnboardingSlide--;
+      showOnboardingSlide(currentOnboardingSlide);
+    }
+  };
+
+  window.closeOnboarding = closeOnboarding;
+  window.openOnboarding = openOnboarding;
 
 })();
