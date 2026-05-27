@@ -294,6 +294,10 @@
       }
     } else if (action === 'ごみを拾った') {
       // ごみ拾いは1日7回まで
+      // 古い制限データが残っている場合はクリア
+      if (data.lastEarned && data.lastEarned['ごみを拾った']) {
+        delete data.lastEarned['ごみを拾った'];
+      }
       data.earnedCount = data.earnedCount || {};
       const countData = data.earnedCount[action] || { date: '', count: 0 };
       if (countData.date !== todayStr) {
