@@ -282,3 +282,26 @@ p {
   .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .nav-user { width: 100%; justify-content: space-between; }
 }
+
+.help-onboarding-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.help-onboarding-btn:hover {
+  border-color: var(--text-main);
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
