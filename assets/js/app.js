@@ -292,6 +292,20 @@
       if (!data.checkInDates.includes(todayIso)) {
         data.checkInDates.push(todayIso);
       }
+    } else if (action === 'ごみを拾った') {
+      // ごみ拾いは1日7回まで
+      data.earnedCount = data.earnedCount || {};
+      const countData = data.earnedCount[action] || { date: '', count: 0 };
+      if (countData.date !== todayStr) {
+        countData.date = todayStr;
+        countData.count = 0;
+      }
+      if (countData.count >= 7) {
+        alert('「ごみを拾った」のポイント獲得は1日7回までです。また明日お願いします！');
+        return;
+      }
+      countData.count++;
+      data.earnedCount[action] = countData;
     } else {
       // 写真報告の場合は別のキーで管理（タイトルが毎回変わる可能性があるため）
       const limitKey = action.startsWith('[写真報告]') ? 'photo_report' : action;
