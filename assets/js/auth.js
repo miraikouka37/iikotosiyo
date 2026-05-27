@@ -50,7 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }).catch(error => {
         console.error(error);
-        alert('ログインエラーが発生しました。通信環境を確認してください。');
+        if (error.message && error.message.includes('permission_denied')) {
+          alert('データベースへのアクセス権限がありません。管理者にご連絡ください（Firebaseのセキュリティルールの期限が切れている可能性があります）。');
+        } else {
+          alert('ログインエラーが発生しました。通信環境を確認してください。');
+        }
       });
     });
   }
@@ -98,6 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
           console.error(err);
           alert('アカウントの作成に失敗しました。');
         });
+      }).catch(err => {
+        console.error(err);
+        if (err.message && err.message.includes('permission_denied')) {
+          alert('データベースへのアクセス権限がありません。管理者にご連絡ください（Firebaseのセキュリティルールの期限が切れている可能性があります）。');
+        } else {
+          alert('アカウントの作成検証中にエラーが発生しました。');
+        }
       });
     });
   }

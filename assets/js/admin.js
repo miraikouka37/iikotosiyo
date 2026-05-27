@@ -9,6 +9,17 @@
   let allRecommendationsData = [];
   let allLostItemsData = [];
 
+  let hasShownDatabaseError = false;
+  function handleDatabaseError(error) {
+    console.error("Database Error:", error);
+    if (error.message && error.message.includes("permission_denied")) {
+      if (!hasShownDatabaseError) {
+        hasShownDatabaseError = true;
+        alert("データベースへのアクセス権限がありません。管理者にご連絡ください（Firebaseのセキュリティルールの期限が切れている可能性があります）。");
+      }
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // Check if logged in and is admin
     const currentUserStr = localStorage.getItem('mirai_currentUser');
@@ -27,7 +38,7 @@
     db.ref('mirai_users').on('value', snapshot => {
       allUsersData = snapshot.val() || {};
       renderAdminUsers();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_feedbacks').limitToLast(50).on('value', snapshot => {
       allFeedbacksData = [];
@@ -35,7 +46,7 @@
         allFeedbacksData.push({ id: child.key, ...child.val() });
       });
       renderFeedbacks();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_reports').limitToLast(50).on('value', snapshot => {
       allReportsData = [];
@@ -43,7 +54,7 @@
         allReportsData.push({ id: child.key, ...child.val() });
       });
       renderReports();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_recommendations').on('value', snapshot => {
       allRecommendationsData = [];
@@ -51,7 +62,7 @@
         allRecommendationsData.push({ id: child.key, ...child.val() });
       });
       renderRecommendations();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_lost_items').on('value', snapshot => {
       allLostItemsData = [];
@@ -59,7 +70,7 @@
         allLostItemsData.push({ id: child.key, ...child.val() });
       });
       renderLostItems();
-    });
+    }, handleDatabaseError);
 
     // Event Delegation for Table Actions
     const tbody = document.getElementById('admin-user-list');
@@ -228,7 +239,7 @@
         user.points = newPoints;
         user.history = user.history || [];
         user.history.push({ action: '管理者修正', amount: newPoints - currentPoints, timestamp: new Date().toISOString() });
-        db.ref('mirai_users/' + key).set(user).then(() => alert('更新完了'));
+        db.ref('mirai_users/' + key).set(user).then(() => alert('更新完了')).catch(handleDatabaseError);
       }
     }
   }
@@ -237,7 +248,7 @@
     const user = allUsersData[key];
     const name = user ? user.name : 'このユーザー';
     if (confirm(`本当に ${name} を削除しますか？`)) {
-      db.ref('mirai_users/' + key).remove().then(() => alert('削除しました。'));
+      db.ref('mirai_users/' + key).remove().then(() => alert('削除しました。')).catch(handleDatabaseError);
     }
   }
 
@@ -257,12 +268,12 @@
     const message = prompt(`${user.name} への警告メッセージ（空欄で解除）:`, currentWarning);
     if (message !== null) {
       if (message.trim() === '') {
-        db.ref(`mirai_users/${key}/warning`).remove().then(() => alert('警告解除'));
+        db.ref(`mirai_users/${key}/warning`).remove().then(() => alert('警告解除')).catch(handleDatabaseError);
       } else {
         db.ref(`mirai_users/${key}/warning`).set({
           message: message.trim(),
           timestamp: Date.now()
-        }).then(() => alert('警告保存'));
+        }).then(() => alert('警告保存')).catch(handleDatabaseError);
       }
     }
   }
@@ -511,9 +522,9 @@
             if (user.history.length > 150) {
               user.history = user.history.slice(user.history.length - 150);
             }
-            db.ref('mirai_users/' + receiverKey).set(user);
+            db.ref('mirai_users/' + receiverKey).set(user).catch(handleDatabaseError);
           }
-        });
+        }).catch(handleDatabaseError);
         
         const senderKey = rec.senderEmail.replace(/\./g, '_');
         db.ref('mirai_users/' + senderKey).once('value').then(snap => {
@@ -529,14 +540,18 @@
             if (user.history.length > 150) {
               user.history = user.history.slice(user.history.length - 150);
             }
-            db.ref('mirai_users/' + senderKey).set(user);
+            db.ref('mirai_users/' + senderKey).set(user).catch(handleDatabaseError);
           }
-        });
+        }).catch(handleDatabaseError);
         
         alert('推薦を承認しました！');
       }).catch(err => {
         console.error(err);
-        alert('承認に失敗しました。');
+        if (err.message && err.message.includes('permission_denied')) {
+          alert('データベースへのアクセス権限がないため、承認できませんでした。');
+        } else {
+          alert('承認に失敗しました。');
+        }
       });
     }
   };

@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const isAdmin = currentUser.role === 'admin';
   let userData;
 
+  function handleDatabaseError(error) {
+    console.error("Database Error:", error);
+    if (error.message && error.message.includes("permission_denied")) {
+      alert("データベースへのアクセス権限がありません。管理者にご連絡ください（Firebaseのセキュリティルールの期限が切れている可能性があります）。");
+    } else {
+      alert("データベースとの通信でエラーが発生しました。");
+    }
+  }
+
   if (isAdmin) {
     userData = JSON.parse(localStorage.getItem('mirai_admin_credentials')) || { id: 'S1', password: 'ciscoenpass', name: '管理者' };
     const emailLabel = document.getElementById('label-settings-email');
@@ -31,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       document.getElementById('settings-name').value = userData.name;
       document.getElementById('settings-email').value = currentUser.email;
-    });
+    }).catch(handleDatabaseError);
   }
 
   const form = document.getElementById('settings-form');
@@ -99,22 +108,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (newEmail !== previousEmail) {
         db.ref('mirai_users/' + safeNew).set(updatedData).then(() => {
-          db.ref('mirai_users/' + safePrev).remove();
+          db.ref('mirai_users/' + safePrev).remove().catch(handleDatabaseError);
           currentUser.email = newEmail;
           currentUser.name = newName;
           localStorage.setItem('mirai_currentUser', JSON.stringify(currentUser));
           alert('設定が保存されました！');
           window.location.reload();
-        });
+        }).catch(handleDatabaseError);
       } else {
         db.ref('mirai_users/' + safePrev).set(updatedData).then(() => {
           currentUser.name = newName;
           localStorage.setItem('mirai_currentUser', JSON.stringify(currentUser));
           alert('設定が保存されました！');
           window.location.reload();
-        });
+        }).catch(handleDatabaseError);
       }
-    });
+    }).catch(handleDatabaseError);
   });
 });
 

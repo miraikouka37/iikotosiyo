@@ -9,6 +9,17 @@
   let allLostItemsData = [];
   let currentCalendarDate = new Date();
 
+  let hasShownDatabaseError = false;
+  function handleDatabaseError(error) {
+    console.error("Database Error:", error);
+    if (error.message && error.message.includes("permission_denied")) {
+      if (!hasShownDatabaseError) {
+        hasShownDatabaseError = true;
+        alert("データベースへのアクセス権限がありません。管理者にご連絡ください（Firebaseのセキュリティルールの期限が切れている可能性があります）。");
+      }
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // Check if logged in
     const storedUserStr = localStorage.getItem('mirai_currentUser');
@@ -32,7 +43,7 @@
       }
       
       renderDashboard();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_reports').limitToLast(30).on('value', snapshot => {
       allReportsData = [];
@@ -40,7 +51,7 @@
         allReportsData.push({ id: child.key, ...child.val() });
       });
       renderCommunityPhotos();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_recommendations').on('value', snapshot => {
       allRecommendationsData = [];
@@ -48,7 +59,7 @@
         allRecommendationsData.push({ id: child.key, ...child.val() });
       });
       renderRecommendations();
-    });
+    }, handleDatabaseError);
 
     db.ref('mirai_lost_items').on('value', snapshot => {
       allLostItemsData = [];
@@ -56,7 +67,7 @@
         allLostItemsData.push({ id: child.key, ...child.val() });
       });
       renderLostItems();
-    });
+    }, handleDatabaseError);
 
     // Attach Event Listeners (Security hardening)
     document.body.addEventListener('click', (e) => {
@@ -133,7 +144,7 @@
 
   function saveUserData(email, data) {
     const userKey = email.replace(/\./g, '_');
-    db.ref('mirai_users/' + userKey).set(data);
+    db.ref('mirai_users/' + userKey).set(data).catch(handleDatabaseError);
   }
 
   function renderDashboard() {
@@ -391,6 +402,13 @@
     db.ref('mirai_feedbacks').push(newFeedback).then(() => {
       messageInput.value = '';
       alert('貴重なご意見ありがとうございます！管理者に送信しました。');
+    }).catch(err => {
+      console.error(err);
+      if (err.message && err.message.includes('permission_denied')) {
+        alert('データベースへのアクセス権限がないため、意見を送信できませんでした。');
+      } else {
+        alert('意見の送信に失敗しました。');
+      }
     });
   }
 
