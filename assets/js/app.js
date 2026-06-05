@@ -45,10 +45,21 @@
       renderDashboard();
     }, handleDatabaseError);
 
-    db.ref('mirai_reports').limitToLast(30).on('value', snapshot => {
+    db.ref('mirai_reports').limitToLast(50).on('value', snapshot => {
       allReportsData = [];
+      const now = Date.now();
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      
       snapshot.forEach(child => {
-        allReportsData.push({ id: child.key, ...child.val() });
+        const data = child.val();
+        const reportTime = new Date(data.timestamp).getTime();
+        
+        if (now - reportTime > sevenDays) {
+          // 7日経過したものは削除（ポイントは保持される）
+          db.ref('mirai_reports/' + child.key).remove().catch(e => console.error(e));
+        } else {
+          allReportsData.push({ id: child.key, ...data });
+        }
       });
       renderCommunityPhotos();
     }, handleDatabaseError);
@@ -527,7 +538,7 @@
     [...reports].reverse().forEach(report => {
       const card = document.createElement('div');
       card.style.minWidth = '220px';
-      card.style.background = '#0d0d0d';
+      card.style.background = 'var(--panel-bg)';
       card.style.border = '1px solid var(--panel-border)';
       card.style.borderRadius = '8px';
       card.style.padding = '0.75rem';
@@ -641,7 +652,7 @@
     sortedRecs.forEach(rec => {
       const card = document.createElement('div');
       card.style.minWidth = '280px';
-      card.style.background = '#0d0d0d';
+      card.style.background = 'var(--panel-bg)';
       card.style.border = '1px solid var(--panel-border)';
       card.style.borderRadius = '8px';
       card.style.padding = '1rem';
@@ -661,12 +672,12 @@
       card.innerHTML = `
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span style="font-weight: 700; color: #fff; font-size: 0.9375rem;">${safeReceiverName} さん</span>
+            <span style="font-weight: 700; color: var(--text-main); font-size: 0.9375rem;">${safeReceiverName} さん</span>
             <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">★ 推薦されました</span>
           </div>
           <p style="font-size: 0.8125rem; color: var(--text-main); line-height: 1.4; margin-bottom: 0.5rem; word-break: break-all; white-space: pre-wrap;">${safeReason}</p>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a1a; padding-top: 0.5rem; margin-top: 0.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--panel-border); padding-top: 0.5rem; margin-top: 0.5rem;">
           <span style="font-size: 0.75rem; color: var(--text-muted);">推薦者: ${safeSenderName} さん</span>
           <span style="font-size: 0.7rem; color: var(--text-muted);">${dateStr}</span>
         </div>
@@ -705,7 +716,7 @@
       li.innerHTML = `
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
           <div>
-            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 700; color: #fff;">${safeName}</h4>
+            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 700; color: var(--text-main);">${safeName}</h4>
             <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">場所: ${safeLocation}</p>
           </div>
           <button class="btn btn-outline btn-sm btn-resolve-lost" data-id="${item.id}" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.7rem; border-color: var(--success); color: var(--success); margin: 0;">解決済</button>

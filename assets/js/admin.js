@@ -50,8 +50,18 @@
 
     db.ref('mirai_reports').limitToLast(50).on('value', snapshot => {
       allReportsData = [];
+      const now = Date.now();
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      
       snapshot.forEach(child => {
-        allReportsData.push({ id: child.key, ...child.val() });
+        const data = child.val();
+        const reportTime = new Date(data.timestamp).getTime();
+        
+        if (now - reportTime > sevenDays) {
+          db.ref('mirai_reports/' + child.key).remove().catch(e => console.error(e));
+        } else {
+          allReportsData.push({ id: child.key, ...data });
+        }
       });
       renderReports();
     }, handleDatabaseError);
@@ -121,9 +131,9 @@
       const tab = tabs[key];
       if (!tab) return;
       if (key === type) {
-        tab.style.borderBottomColor = '#fff';
+        tab.style.borderBottomColor = 'var(--accent)';
         tab.style.fontWeight = '700';
-        tab.style.color = '#fff';
+        tab.style.color = 'var(--accent)';
       } else {
         tab.style.borderBottomColor = 'transparent';
         tab.style.fontWeight = '400';
