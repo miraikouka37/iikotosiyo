@@ -361,7 +361,7 @@
           </div>
           <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deleteReport('${escapeHTML(rp.id)}', '${escapeHTML(rp.email)}', ${rp.points}, '${escapeHTML(rp.title)}')">削除</button>
         </div>
-        <img src="${rp.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem;">
+        <img src="${rp.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem; cursor: pointer;" onclick="openImageModal('${rp.image}')">
       `;
       list.appendChild(li);
     });
@@ -602,6 +602,20 @@
   window.logout = function() {
     localStorage.removeItem('mirai_currentUser');
     window.location.href = 'index.html';
+  };
+
+  window.openImageModal = function(src) {
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-content');
+    if (modal && img) {
+      img.src = src;
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) modal.style.display = 'none';
   };
 
   // Needed for inline onclick in Feedback/Reports if we don't delegate them yet

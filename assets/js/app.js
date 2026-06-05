@@ -166,12 +166,21 @@
     const historyContainer = document.getElementById('history-container');
     const alertContainer = document.getElementById('alert-container');
 
+    let warningMessage = null;
+    if (data.warning) {
+      if (typeof data.warning === 'string') {
+        warningMessage = data.warning;
+      } else if (data.warning.message && (Date.now() - data.warning.timestamp < 24 * 60 * 60 * 1000)) {
+        warningMessage = data.warning.message;
+      }
+    }
+
     if (alertContainer) {
-      if (data.warning) {
+      if (warningMessage) {
         alertContainer.innerHTML = `
           <div class="glass-panel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: #dc2626; border: 3px solid #991b1b; padding: 2rem; color: #ffffff; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 25px rgba(220, 38, 38, 0.9); text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">
             <p style="font-weight: 900; font-size: 2rem; margin-bottom: 1rem; color: #fde047; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);">警告！</p>
-            <p style="font-size: 1.25rem; font-weight: bold; line-height: 1.5;">${data.warning}</p>
+            <p style="font-size: 1.25rem; font-weight: bold; line-height: 1.5;">${escapeHTML(warningMessage)}</p>
           </div>
         `;
       } else {
@@ -546,7 +555,7 @@
       card.style.padding = '0.75rem';
       card.style.flexShrink = '0';
       card.innerHTML = `
-        <img src="${report.image}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px; margin-bottom: 0.75rem;" alt="活動写真">
+        <img src="${report.image}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px; margin-bottom: 0.75rem; cursor: pointer;" alt="活動写真" onclick="openImageModal('${report.image}')">
         <h5 style="margin-bottom: 0.25rem; font-size: 0.875rem;">${report.title}</h5>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 0.75rem; color: var(--text-muted);">${report.name}</span>
@@ -812,6 +821,20 @@
 
   window.openRecommendModal = openRecommendModal;
   window.closeRecommendModal = closeRecommendModal;
+
+  window.openImageModal = function(src) {
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-content');
+    if (modal && img) {
+      img.src = src;
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) modal.style.display = 'none';
+  };
 
   let currentOnboardingSlide = 1;
   const totalOnboardingSlides = 4;
