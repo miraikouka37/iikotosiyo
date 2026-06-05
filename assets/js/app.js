@@ -321,8 +321,10 @@
       }
       countData.count++;
       data.earnedCount[action] = countData;
+    } else if (action === '委員会・部活動参加' || action === 'サンクスポイント送信') {
+      // これらは回数制限なし
     } else {
-      // 写真報告の場合は別のキーで管理（タイトルが毎回変わる可能性があるため）
+      // 写真報告などの場合は別のキーで管理（タイトルが毎回変わる可能性があるため）
       const limitKey = action.startsWith('[写真報告]') ? 'photo_report' : action;
       
       if (data.lastEarned[limitKey] === todayStr) {
