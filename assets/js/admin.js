@@ -8,7 +8,6 @@
   let allReportsData = [];
   let allRecommendationsData = [];
   let allLostItemsData = [];
-  let allBannedWordsData = [];
 
   let hasShownDatabaseError = false;
   function handleDatabaseError(error) {
@@ -71,14 +70,6 @@
         allLostItemsData.push({ id: child.key, ...child.val() });
       });
       renderLostItems();
-    }, handleDatabaseError);
-
-    db.ref('mirai_banned_words').on('value', snapshot => {
-      allBannedWordsData = [];
-      snapshot.forEach(child => {
-        allBannedWordsData.push({ id: child.key, ...child.val() });
-      });
-      renderBannedWords();
     }, handleDatabaseError);
 
     // Event Delegation for Table Actions
@@ -601,62 +592,6 @@
   window.logout = function() {
     localStorage.removeItem('mirai_currentUser');
     window.location.href = 'index.html';
-  };
-
-  function renderBannedWords() {
-    const list = document.getElementById('banned-words-list');
-    if (!list) return;
-    list.innerHTML = '';
-    if (allBannedWordsData.length === 0) {
-      list.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">不適切用語は登録されていません</li>';
-      return;
-    }
-    
-    [...allBannedWordsData].reverse().forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'list-item';
-      li.style.padding = '0.5rem 1rem';
-      
-      const safeWord = escapeHTML(item.word);
-      
-      li.innerHTML = `
-        <div class="item-info">
-          <span style="font-weight: 500;">${safeWord}</span>
-        </div>
-        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger); width: auto; padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="deleteBannedWord('${escapeHTML(item.id)}')">削除</button>
-      `;
-      list.appendChild(li);
-    });
-  }
-
-  window.addBannedWord = function() {
-    const input = document.getElementById('banned-word-input');
-    const word = input.value.trim();
-    if (!word) return;
-    
-    if (allBannedWordsData.some(w => w.word === word)) {
-      alert('その言葉は既に登録されています。');
-      return;
-    }
-
-    db.ref('mirai_banned_words').push({
-      word: word,
-      timestamp: Date.now()
-    }).then(() => {
-      input.value = '';
-    }).catch(err => {
-      console.error(err);
-      alert('追加に失敗しました。');
-    });
-  };
-
-  window.deleteBannedWord = function(id) {
-    if (confirm('この不適切用語を削除しますか？')) {
-      db.ref('mirai_banned_words/' + id).remove().catch(err => {
-        console.error(err);
-        alert('削除に失敗しました。');
-      });
-    }
   };
 
   // Needed for inline onclick in Feedback/Reports if we don't delegate them yet
