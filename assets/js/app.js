@@ -7,6 +7,7 @@
   let allReportsData = null;
   let allRecommendationsData = null;
   let allLostItemsData = [];
+  let allBannedWordsData = [];
   let currentCalendarDate = new Date();
 
   let hasShownDatabaseError = false;
@@ -67,6 +68,13 @@
         allLostItemsData.push({ id: child.key, ...child.val() });
       });
       renderLostItems();
+    }, handleDatabaseError);
+
+    db.ref('mirai_banned_words').on('value', snapshot => {
+      allBannedWordsData = [];
+      snapshot.forEach(child => {
+        allBannedWordsData.push(child.val().word.toLowerCase());
+      });
     }, handleDatabaseError);
 
     // Attach Event Listeners (Security hardening)
@@ -140,6 +148,20 @@
       email: userEmail,
       data: allUsersData ? (allUsersData[userKey] || { name: 'ユーザー', points: 0, history: [] }) : { name: 'ユーザー', points: 0, history: [] }
     };
+  }
+
+  function containsBannedWord(...texts) {
+    const forbiddenWords = [
+      'セックス', 'エロ', 'ちんちん', 'まんこ', 'オナニー', 'ペニス', 'sex', 'porn', 'ヴァギナ', '淫乱', 
+      '死ね', '殺す', 'カス', 'ゴミ', 
+      'nigger', 'nigga', 'pussy', 'キチガイ', 'ガイジ', 'チョン', '土人'
+    ].concat(allBannedWordsData);
+
+    return texts.some(text => {
+      if (!text) return false;
+      const lower = text.toLowerCase();
+      return forbiddenWords.some(word => lower.includes(word));
+    });
   }
 
   function saveUserData(email, data) {
@@ -410,6 +432,12 @@
     const messageInput = document.getElementById('feedback-message');
     const message = messageInput.value.trim();
     if (!message) return;
+    
+    if (containsBannedWord(message)) {
+      alert('入力内容に不適切な表現が含まれているため、送信できません。');
+      return;
+    }
+    
     const { email, data } = getUserData();
     const newFeedback = {
       name: data.name,
@@ -441,6 +469,11 @@
 
     if (!title || !selectedFile) {
       alert('活動内容と写真の両方を正しく入力してください。');
+      return;
+    }
+
+    if (containsBannedWord(title)) {
+      alert('入力内容に不適切な表現が含まれているため、報告できません。');
       return;
     }
 
@@ -582,6 +615,11 @@
     
     if (!receiverEmail || !reason) {
       alert('推薦する人と理由の両方を入力してください。');
+      return;
+    }
+    
+    if (containsBannedWord(reason)) {
+      alert('入力内容に不適切な表現が含まれているため、送信できません。');
       return;
     }
     
@@ -732,12 +770,7 @@
       return;
     }
     
-    const forbiddenWords = [
-      'セックス', 'エロ', 'ちんちん', 'まんこ', 'オナニー', 'ペニス', 'sex', 'porn', 'ヴァギナ', '淫乱', 
-      '死ね', '殺す', 'カス', 'ゴミ', 
-      'nigger', 'nigga', 'pussy', 'キチガイ', 'ガイジ', 'チョン', '土人'
-    ];
-    if (forbiddenWords.some(word => itemName.toLowerCase().includes(word) || location.toLowerCase().includes(word))) {
+    if (containsBannedWord(itemName, location)) {
       alert('入力内容に不適切な表現が含まれているため、投稿できません。');
       return;
     }
