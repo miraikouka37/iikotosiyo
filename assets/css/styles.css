@@ -298,6 +298,51 @@ p {
   transform: scale(1.1);
 }
 
+/* ================================================================
+   Theme Toggle Button
+   ================================================================ */
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.97);
+}
+
+.theme-toggle-label {
+  pointer-events: none;
+}
+
+/* FOUC防止: html.dark-init の段階でフラッシュを防ぐ */
+html.dark-init body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
 /* Dark Mode — class-based (manual toggle or system preference) */
 body.dark {
   --bg: #0f172a;

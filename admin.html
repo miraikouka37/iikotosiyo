@@ -13,6 +13,9 @@
       <h2 style="margin: 0;">管理者ダッシュボード</h2>
       <div class="nav-user">
         <span class="user-name" id="display-name">管理者</span>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span class="theme-toggle-label">🌙 ダーク</span>
+        </button>
         <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
         <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
       </div>
@@ -127,6 +130,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script src="assets/js/firebase-config.js?v=1.2"></script>
+  <script src="assets/js/theme.js?v=1.0"></script>
   <script src="assets/js/admin.js?v=1.6"></script>
 </body>
 </html>

@@ -19,8 +19,8 @@
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
           <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
-        <button id="theme-toggle-btn" onclick="toggleTheme()" title="テーマ切替" style="background: transparent; border: 1px solid var(--panel-border); border-radius: 6px; cursor: pointer; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; transition: var(--transition); flex-shrink: 0; font-family: inherit;" id="theme-toggle-btn">
-          <span id="theme-toggle-label">ダーク</span>
+        <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()">
+          <span class="theme-toggle-label">🌙 ダーク</span>
         </button>
       </h2>
       <div class="nav-user">
@@ -299,7 +299,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script src="assets/js/firebase-config.js?v=1.2"></script>
-  <script src="assets/js/app.js?v=1.8"></script>
+  <script src="assets/js/theme.js?v=1.0"></script>
+  <script src="assets/js/app.js?v=1.9"></script>
 </body>
 
 </html>

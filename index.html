@@ -8,6 +8,13 @@
 </head>
 <body>
 
+  <!-- Theme Toggle (fixed top-right) -->
+  <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()"
+    style="position: fixed; top: 1rem; right: 1rem; z-index: 100;">
+    <span class="theme-toggle-label">🌙 ダーク</span>
+  </button>
+
+
   <div class="auth-container glass-panel" id="auth-panel">
     <h1>FUTURE POINTS</h1>
     <p id="auth-subtitle">ログインしてポイントを獲得しよう</p>
@@ -53,6 +60,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script src="assets/js/firebase-config.js?v=1.1"></script>
+  <script src="assets/js/theme.js?v=1.0"></script>
   <script src="assets/js/auth.js?v=1.1"></script>
 </body>
 </html>

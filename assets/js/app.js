@@ -42,8 +42,15 @@
         return;
       }
       
+      // Firebase上のテーマ設定を同期
+      if (typeof window._syncTheme === 'function') {
+        window._syncTheme(allUsersData[userKey]);
+      }
+
+      
       renderDashboard();
     }, handleDatabaseError);
+
 
     db.ref('mirai_reports').limitToLast(50).on('value', snapshot => {
       allReportsData = [];
@@ -899,43 +906,32 @@
     }
   };
 
+
   window.closeOnboarding = closeOnboarding;
   window.openOnboarding = openOnboarding;
 
-  // ---- Theme Toggle ----
-  function applyTheme(mode) {
-    const body = document.body;
-    const label = document.getElementById('theme-toggle-label');
+  // ---- Theme: Firebase同期 ----
+  // Firebaseから読み込んだユーザーデータにtheme設定がある場合に適用する
+  window._syncTheme = function(userData) {
+    if (!userData || !userData.theme) return;
+    const fbTheme = userData.theme;
+    if (fbTheme !== 'dark' && fbTheme !== 'light') return;
 
-    if (mode === 'dark') {
-      body.classList.add('dark');
-      body.classList.remove('light');
-      if (label) label.textContent = 'ライト';
-    } else {
-      body.classList.add('light');
-      body.classList.remove('dark');
-      if (label) label.textContent = 'ダーク';
+    const lsCurrent = localStorage.getItem('mirai_theme');
+    if (lsCurrent !== fbTheme) {
+      localStorage.setItem('mirai_theme', fbTheme);
+      const body = document.body;
+      if (fbTheme === 'dark') {
+        body.classList.add('dark');
+        body.classList.remove('light');
+      } else {
+        body.classList.add('light');
+        body.classList.remove('dark');
+      }
+      document.querySelectorAll('.theme-toggle-label').forEach(el => {
+        el.textContent = fbTheme === 'dark' ? '☀️ ライト' : '🌙 ダーク';
+      });
     }
-  }
-
-  window.toggleTheme = function() {
-    const current = localStorage.getItem('mirai_theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('mirai_theme', next);
-    applyTheme(next);
   };
-
-  // Initialize theme on load
-  (function() {
-    const saved = localStorage.getItem('mirai_theme');
-    if (saved) {
-      applyTheme(saved);
-    } else {
-      // Follow system preference by default, show correct label
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const label = document.getElementById('theme-toggle-label');
-      if (prefersDark && label) label.textContent = 'ライト';
-    }
-  })();
 
 })();
