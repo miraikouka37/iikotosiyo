@@ -298,9 +298,43 @@ p {
   transform: scale(1.1);
 }
 
-/* Dark Mode Support */
+/* Dark Mode — class-based (manual toggle or system preference) */
+body.dark {
+  --bg: #0f172a;
+  --panel-bg: #1e293b;
+  --panel-border: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #3b82f6;
+  --accent-inverse: #ffffff;
+}
+
+body.dark .form-control {
+  background: #0f172a;
+  color: var(--text-main);
+}
+
+body.dark .form-control:focus {
+  background: #1e293b;
+}
+
+body.dark .btn-outline {
+  background: transparent;
+  color: var(--text-main);
+}
+
+body.dark .btn-outline:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+body.dark .list-item:hover {
+  background: #334155;
+}
+
+/* Keep system preference as fallback if no class set */
 @media (prefers-color-scheme: dark) {
-  :root {
+  body:not(.light):not(.dark) {
     --bg: #0f172a;
     --panel-bg: #1e293b;
     --panel-border: #334155;
@@ -309,27 +343,27 @@ p {
     --accent: #3b82f6;
     --accent-inverse: #ffffff;
   }
-  
-  .form-control {
+
+  body:not(.light):not(.dark) .form-control {
     background: #0f172a;
     color: var(--text-main);
   }
-  
-  .form-control:focus {
+
+  body:not(.light):not(.dark) .form-control:focus {
     background: #1e293b;
   }
-  
-  .btn-outline {
+
+  body:not(.light):not(.dark) .btn-outline {
     background: transparent;
     color: var(--text-main);
   }
-  
-  .btn-outline:hover {
+
+  body:not(.light):not(.dark) .btn-outline:hover {
     background: #334155;
     border-color: #475569;
   }
-  
-  .list-item:hover {
+
+  body:not(.light):not(.dark) .list-item:hover {
     background: #334155;
   }
 }

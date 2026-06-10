@@ -902,4 +902,40 @@
   window.closeOnboarding = closeOnboarding;
   window.openOnboarding = openOnboarding;
 
+  // ---- Theme Toggle ----
+  function applyTheme(mode) {
+    const body = document.body;
+    const label = document.getElementById('theme-toggle-label');
+
+    if (mode === 'dark') {
+      body.classList.add('dark');
+      body.classList.remove('light');
+      if (label) label.textContent = 'ライト';
+    } else {
+      body.classList.add('light');
+      body.classList.remove('dark');
+      if (label) label.textContent = 'ダーク';
+    }
+  }
+
+  window.toggleTheme = function() {
+    const current = localStorage.getItem('mirai_theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('mirai_theme', next);
+    applyTheme(next);
+  };
+
+  // Initialize theme on load
+  (function() {
+    const saved = localStorage.getItem('mirai_theme');
+    if (saved) {
+      applyTheme(saved);
+    } else {
+      // Follow system preference by default, show correct label
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const label = document.getElementById('theme-toggle-label');
+      if (prefersDark && label) label.textContent = 'ライト';
+    }
+  })();
+
 })();
