@@ -77,6 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      if (name === password) {
+        alert('ユーザーネームとパスワードを同じにすることはできません。セキュリティのため別のパスワードを設定してください。');
+        return;
+      }
+
+      if (email === password) {
+        alert('メールアドレスとパスワードを同じにすることはできません。セキュリティのため別のパスワードを設定してください。');
+        return;
+      }
+
       const safeEmail = email.replace(/\./g, '_');
       
       db.ref('mirai_users').once('value').then(snapshot => {
