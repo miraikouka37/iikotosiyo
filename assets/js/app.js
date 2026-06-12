@@ -195,7 +195,10 @@
       }
     }
 
-    if (displayName) displayName.innerText = data.name;
+    if (displayName) {
+      const rank = data.rank || 'E';
+      displayName.innerHTML = `<span class="rank-badge rank-${rank}">${rank}</span>` + escapeHTML(data.name);
+    }
     if (totalPoints) animatePoints(data.points || 0);
 
     const pointsMessage = document.getElementById('points-message');
@@ -281,7 +284,8 @@
       .filter(key => !key.startsWith('{'))
       .map(key => ({
         name: allUsersData[key].name,
-        points: allUsersData[key].points || 0
+        points: allUsersData[key].points || 0,
+        rank: allUsersData[key].rank || 'E'
       }));
 
     userList.sort((a, b) => b.points - a.points);
@@ -292,7 +296,7 @@
       let rankIcon = `${index + 1}位`;
       li.innerHTML = `
         <div class="item-info">
-          <h4>${rankIcon} - ${user.name}</h4>
+          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}">${user.rank}</span>${escapeHTML(user.name)}</h4>
         </div>
         <div class="item-points">${user.points} pt</div>
       `;

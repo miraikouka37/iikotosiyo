@@ -220,9 +220,10 @@
 
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--panel-border)';
+      const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}">${user.rank || 'E'}</span>`;
       tr.innerHTML = `
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem;">${overallRank}</td>
-        <td style="padding: 1rem; font-weight: 600;">${safeName}</td>
+        <td style="padding: 1rem; font-weight: 600;">${rankBadge}${safeName}</td>
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">${safeEmail}</td>
         <td style="padding: 1rem; font-weight: 700;">${u.displayValue} pt</td>
         <td style="padding: 1rem;">
@@ -620,5 +621,106 @@
 
   // Needed for inline onclick in Feedback/Reports if we don't delegate them yet
   window.db = db;
+
+  window.executeWeeklyRanking = function() {
+    if (!confirm('過去7日間のポイント獲得数に基づいて週間ランク集計を実行しますか？\n（週に1回のみ実行推奨です）')) return;
+
+    const users = allUsersData;
+    if (!users) {
+      alert('ユーザーデータが読み込めていません。');
+      return;
+    }
+
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(now.getDate() - 7);
+
+    // Filter out active users and calculate 7d points
+    const activeUsers = Object.keys(users)
+      .filter(k => !k.startsWith('{') && users[k].role !== 'admin' && k !== 'S1')
+      .map(key => {
+        const history = users[key].history || [];
+        const weeklyPoints = history
+          .filter(h => new Date(h.timestamp) > cutoff)
+          .reduce((sum, h) => sum + h.amount, 0);
+        return { key, weeklyPoints, user: users[key] };
+      });
+
+    if (activeUsers.length === 0) {
+      alert('対象ユーザーがいません。');
+      return;
+    }
+
+    // Sort by weekly points descending
+    activeUsers.sort((a, b) => b.weeklyPoints - a.weeklyPoints);
+
+    // Calculate thresholds
+    const totalUsersCount = activeUsers.length;
+    const top4Count = Math.max(1, Math.floor(totalUsersCount * 0.04));
+    const top20Count = Math.max(1, Math.floor(totalUsersCount * 0.20));
+    const top60Count = Math.max(1, Math.floor(totalUsersCount * 0.60));
+
+    let updates = {};
+
+    activeUsers.forEach((u, index) => {
+      let rankPointsAwarded = 0;
+      if (index < top4Count) {
+        rankPointsAwarded = 3;
+      } else if (index < top20Count) {
+        rankPointsAwarded = 2;
+      } else if (index < top60Count) {
+        rankPointsAwarded = 1;
+      }
+
+      if (rankPointsAwarded > 0) {
+        let currentRank = u.user.rank || 'E';
+        let currentRP = u.user.rankPoints || 0;
+        
+        currentRP += rankPointsAwarded;
+
+        // Rank up logic
+        const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5, 'S': 999 };
+        const rankOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
+
+        let promoted = false;
+        while (currentRank !== 'S' && currentRP >= rankRequirements[currentRank]) {
+          currentRP -= rankRequirements[currentRank];
+          currentRank = rankOrder[rankOrder.indexOf(currentRank) + 1];
+          promoted = true;
+        }
+
+        const updatedUser = { ...u.user };
+        updatedUser.rank = currentRank;
+        updatedUser.rankPoints = currentRP;
+        
+        if (promoted) {
+          updatedUser.history = updatedUser.history || [];
+          updatedUser.history.push({
+            action: `【昇格】${currentRank}ランク到達！`,
+            amount: 0,
+            timestamp: new Date().toISOString()
+          });
+          if (updatedUser.history.length > 150) {
+            updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+          }
+        }
+        
+        updates['mirai_users/' + u.key] = updatedUser;
+      }
+    });
+
+    if (Object.keys(updates).length > 0) {
+      db.ref().update(updates)
+        .then(() => {
+          alert('週間ランク集計が完了しました！');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('集計処理中にエラーが発生しました。');
+        });
+    } else {
+      alert('ランクポイントを獲得したユーザーはいませんでした。');
+    }
+  };
 
 })();

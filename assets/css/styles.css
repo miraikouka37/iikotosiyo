@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
 :root {
   --bg: #f8fafc;
@@ -412,3 +411,22 @@ body.dark .list-item:hover {
     background: #334155;
   }
 }
+
+/* Rank Badges */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  color: #fff;
+}
+.rank-S { background: linear-gradient(135deg, #fbbf24, #d97706); text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+.rank-A { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.rank-B { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.rank-C { background: linear-gradient(135deg, #10b981, #047857); }
+.rank-D { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.rank-E { background: #94a3b8; }
