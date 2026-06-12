@@ -405,9 +405,14 @@
       const el = document.createElement('div');
       el.style.padding = '0.5rem 0';
       el.style.position = 'relative';
-      el.style.cursor = 'default';
+      el.style.cursor = 'pointer';
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       el.innerText = i;
+      el.addEventListener('click', () => {
+        if (typeof showHistoryForDate === 'function') {
+          showHistoryForDate(dateStr);
+        }
+      });
 
       if (dateStr === todayStr) {
         el.style.color = '#fff';
@@ -434,6 +439,55 @@
       container.appendChild(el);
     }
   }
+
+  function showHistoryForDate(dateStr) {
+    const { data } = getUserData();
+    const history = data.history || [];
+    
+    const [targetY, targetM, targetD] = dateStr.split('-');
+    
+    const dateHistory = history.filter(item => {
+      const d = new Date(item.timestamp);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}` === dateStr;
+    });
+
+    const modal = document.getElementById('history-modal');
+    const title = document.getElementById('history-modal-title');
+    const list = document.getElementById('history-modal-list');
+    
+    if (modal && title && list) {
+      title.innerText = `${targetY}年${parseInt(targetM)}月${parseInt(targetD)}日の履歴`;
+      list.innerHTML = '';
+      
+      if (dateHistory.length === 0) {
+        list.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">この日の履歴はありません</li>';
+      } else {
+        const sortedHistory = [...dateHistory].reverse();
+        sortedHistory.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          const timeStr = new Date(item.timestamp).toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
+          li.innerHTML = `
+            <div class="item-info">
+              <h4>${escapeHTML(item.action)}</h4>
+              <p>${timeStr}</p>
+            </div>
+            <div class="item-points points-positive">+${item.amount} pt</div>
+          `;
+          list.appendChild(li);
+        });
+      }
+      modal.style.display = 'flex';
+    }
+  }
+
+  window.closeHistoryModal = function() {
+    const modal = document.getElementById('history-modal');
+    if (modal) modal.style.display = 'none';
+  };
 
   function sendFeedback() {
     const messageInput = document.getElementById('feedback-message');
