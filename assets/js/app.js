@@ -134,14 +134,6 @@
         const id = target.getAttribute('data-id');
         resolveLostItem(id);
       }
-
-      const rankBadge = target.closest('.rank-badge');
-      if (rankBadge) {
-        const currentRank = rankBadge.getAttribute('data-rank') || 'E';
-        const currentRP = parseInt(rankBadge.getAttribute('data-rp') || '0', 10);
-        const totalRP = parseInt(rankBadge.getAttribute('data-total-rp') || '0', 10);
-        showRankProgressAlert(currentRank, currentRP, totalRP);
-      }
     });
 
     renderDashboard();
@@ -207,7 +199,7 @@
       const rank = data.rank || 'E';
       const rp = data.rankPoints || 0;
       const totalRP = data.totalRankPoints || 0;
-      displayName.innerHTML = `<span class="rank-badge rank-${rank}" data-rank="${rank}" data-rp="${rp}" data-total-rp="${totalRP}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${rank}</span>` + escapeHTML(data.name);
+      displayName.innerHTML = `<span class="rank-badge rank-${rank}" onclick="window.showRankProgressAlert('${rank}',${rp},${totalRP})" style="cursor:pointer;">${rank}</span>` + escapeHTML(data.name);
     }
     if (totalPoints) animatePoints(data.points || 0);
 
@@ -353,7 +345,7 @@
       let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `累計RP: ${user.totalRankPoints}`;
       li.innerHTML = `
         <div class="item-info">
-          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" data-rank="${user.rank}" data-rp="${user.rankPoints}" data-total-rp="${user.totalRankPoints}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank}</span>${escapeHTML(user.name)}</h4>
+          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" onclick="window.showRankProgressAlert('${user.rank}',${user.rankPoints},${user.totalRankPoints})" style="cursor:pointer;">${user.rank}</span>${escapeHTML(user.name)}</h4>
         </div>
         <div class="item-points">${pointsDisplay}</div>
       `;

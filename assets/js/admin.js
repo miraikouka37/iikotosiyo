@@ -86,14 +86,6 @@
     const tbody = document.getElementById('admin-user-list');
     if (tbody) {
       tbody.addEventListener('click', (e) => {
-        const rankBadge = e.target.closest('.rank-badge');
-        if (rankBadge) {
-          const currentRank = rankBadge.getAttribute('data-rank') || 'E';
-          const currentRP = parseInt(rankBadge.getAttribute('data-rp') || '0', 10);
-          showRankProgressAlert(currentRank, currentRP);
-          return;
-        }
-
         const btn = e.target.closest('button');
         if (!btn) return;
 
@@ -103,6 +95,7 @@
 
         if (action === 'history') viewHistory(key);
         if (action === 'edit') editPoints(key);
+        if (action === 'edit-rank') editRank(key);
         if (action === 'warning') sendWarning(key);
         if (action === 'delete') deleteUser(key);
       });
@@ -229,7 +222,8 @@
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--panel-border)';
       const rp = user.rankPoints || 0;
-      const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}" data-rank="${user.rank || 'E'}" data-rp="${rp}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank || 'E'}</span>`;
+      const totalRP = user.totalRankPoints || 0;
+      const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}" onclick="window.showRankProgressAlert('${user.rank || 'E'}',${rp},${totalRP})" style="cursor:pointer;">${user.rank || 'E'}</span>`;
       tr.innerHTML = `
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem;">${overallRank}</td>
         <td style="padding: 1rem; font-weight: 600;">${rankBadge}${safeName}</td>
@@ -239,6 +233,7 @@
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-width: 200px;">
             <button class="btn btn-outline btn-sm" data-action="history" data-key="${safeKey}">履歴</button>
             <button class="btn btn-outline btn-sm" data-action="edit" data-key="${safeKey}">編集</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--accent);" data-action="edit-rank" data-key="${safeKey}">ランク編集</button>
             <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${isWarningActive ? '警告中' : '警告'}</button>
             <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" data-action="delete" data-key="${safeKey}">削除</button>
           </div>
@@ -250,7 +245,7 @@
 
   function editPoints(key) {
     const user = allUsersData[key];
-    if(!user) return;
+    if (!user) return;
     const currentPoints = user.points || 0;
     const newPointsStr = prompt(`${user.name} の合計ポイントを入力:`, currentPoints);
     if (newPointsStr !== null) {
@@ -262,6 +257,69 @@
         db.ref('mirai_users/' + key).set(user).then(() => alert('更新完了')).catch(handleDatabaseError);
       }
     }
+  }
+
+  function editRank(key) {
+    const user = allUsersData[key];
+    if (!user) return;
+
+    const rankOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
+    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5, 'S': '∞' };
+
+    const currentRank = user.rank || 'E';
+    const currentRP = user.rankPoints || 0;
+    const currentTotalRP = user.totalRankPoints || 0;
+
+    const rankChoices = rankOrder.map(r => `${r}（次まで${rankRequirements[r]}RP）`).join('\n');
+    const newRankStr = prompt(
+      `【${user.name}】のランクを変更\n\n現在: ${currentRank}ランク (RP: ${currentRP} / 累計: ${currentTotalRP})\n\n変更後のランクを入力 (E / D / C / B / A / S):\n\n${rankChoices}`,
+      currentRank
+    );
+    if (newRankStr === null) return;
+    const newRank = newRankStr.trim().toUpperCase();
+    if (!rankOrder.includes(newRank)) {
+      alert('無効なランクです。E / D / C / B / A / S のいずれかを入力してください。');
+      return;
+    }
+
+    const newRPStr = prompt(
+      `【${user.name}】の現在のランクポイント（RP）を入力:\n（${newRank}ランク内での現在のRP）`,
+      newRank === currentRank ? currentRP : 0
+    );
+    if (newRPStr === null) return;
+    const newRP = parseInt(newRPStr, 10);
+    if (isNaN(newRP) || newRP < 0) {
+      alert('無効な値です。0以上の整数を入力してください。');
+      return;
+    }
+
+    const newTotalRPStr = prompt(
+      `【${user.name}】の累計ランクポイントを入力:\n（変更しない場合はそのままOKを押してください）`,
+      currentTotalRP
+    );
+    if (newTotalRPStr === null) return;
+    const newTotalRP = parseInt(newTotalRPStr, 10);
+    if (isNaN(newTotalRP) || newTotalRP < 0) {
+      alert('無効な値です。0以上の整数を入力してください。');
+      return;
+    }
+
+    user.rank = newRank;
+    user.rankPoints = newRP;
+    user.totalRankPoints = newTotalRP;
+    user.history = user.history || [];
+    user.history.push({
+      action: `【管理者】ランク修正: ${currentRank}→${newRank} (RP: ${currentRP}→${newRP})`,
+      amount: 0,
+      timestamp: new Date().toISOString()
+    });
+    if (user.history.length > 150) {
+      user.history = user.history.slice(user.history.length - 150);
+    }
+
+    db.ref('mirai_users/' + key).set(user)
+      .then(() => alert(`${user.name} のランクを ${newRank} (RP: ${newRP}) に更新しました！`))
+      .catch(handleDatabaseError);
   }
 
   function deleteUser(key) {
