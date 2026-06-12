@@ -139,7 +139,8 @@
       if (rankBadge) {
         const currentRank = rankBadge.getAttribute('data-rank') || 'E';
         const currentRP = parseInt(rankBadge.getAttribute('data-rp') || '0', 10);
-        showRankProgressAlert(currentRank, currentRP);
+        const totalRP = parseInt(rankBadge.getAttribute('data-total-rp') || '0', 10);
+        showRankProgressAlert(currentRank, currentRP, totalRP);
       }
     });
 
@@ -205,7 +206,8 @@
     if (displayName) {
       const rank = data.rank || 'E';
       const rp = data.rankPoints || 0;
-      displayName.innerHTML = `<span class="rank-badge rank-${rank}" data-rank="${rank}" data-rp="${rp}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${rank}</span>` + escapeHTML(data.name);
+      const totalRP = data.totalRankPoints || 0;
+      displayName.innerHTML = `<span class="rank-badge rank-${rank}" data-rank="${rank}" data-rp="${rp}" data-total-rp="${totalRP}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${rank}</span>` + escapeHTML(data.name);
     }
     if (totalPoints) animatePoints(data.points || 0);
 
@@ -326,7 +328,8 @@
         name: allUsersData[key].name,
         points: allUsersData[key].points || 0,
         rank: allUsersData[key].rank || 'E',
-        rankPoints: allUsersData[key].rankPoints || 0
+        rankPoints: allUsersData[key].rankPoints || 0,
+        totalRankPoints: allUsersData[key].totalRankPoints || 0
       }));
 
     if (currentRankingTab === 'points') {
@@ -336,10 +339,9 @@
       userList.sort((a, b) => {
         const valA = rankValues[a.rank] || 1;
         const valB = rankValues[b.rank] || 1;
-        if (valA !== valB) {
-          return valB - valA;
-        }
-        return b.rankPoints - a.rankPoints;
+        if (valA !== valB) return valB - valA;
+        // Same rank: sort by totalRankPoints desc
+        return b.totalRankPoints - a.totalRankPoints;
       });
     }
 
@@ -347,10 +349,11 @@
       const li = document.createElement('li');
       li.className = 'list-item';
       let rankIcon = `${index + 1}位`;
-      let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `RP: ${user.rankPoints}`;
+      // Points tab: show points. Rank tab: show total cumulative RP
+      let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `累計RP: ${user.totalRankPoints}`;
       li.innerHTML = `
         <div class="item-info">
-          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" data-rank="${user.rank}" data-rp="${user.rankPoints}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank}</span>${escapeHTML(user.name)}</h4>
+          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" data-rank="${user.rank}" data-rp="${user.rankPoints}" data-total-rp="${user.totalRankPoints}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank}</span>${escapeHTML(user.name)}</h4>
         </div>
         <div class="item-points">${pointsDisplay}</div>
       `;
@@ -955,9 +958,10 @@
     if (modal) modal.style.display = 'none';
   };
 
-  window.showRankProgressAlert = function(currentRank, currentRP) {
+  window.showRankProgressAlert = function(currentRank, currentRP, totalRP) {
+    const totalDisplay = (totalRP !== undefined && totalRP !== null) ? `\n累計ランクポイント: ${totalRP} RP` : '';
     if (currentRank === 'S') {
-      alert(`現在のランク: S\n最高ランク到達済みです！おめでとうございます！\n現在のランクポイント: ${currentRP} RP`);
+      alert(`現在のランク: S（最高ランク）\n最高ランク到達済みです！おめでとうございます！\n現在の超過RP: ${currentRP} RP${totalDisplay}`);
       return;
     }
 
@@ -967,7 +971,7 @@
       const remaining = required - currentRP;
       const nextRanks = { 'E': 'D', 'D': 'C', 'C': 'B', 'B': 'A', 'A': 'S' };
       const nextRank = nextRanks[currentRank];
-      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！`);
+      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！${totalDisplay}`);
     }
   };
 

@@ -628,9 +628,10 @@
     if (modal) modal.style.display = 'none';
   };
 
-  window.showRankProgressAlert = function(currentRank, currentRP) {
+  window.showRankProgressAlert = function(currentRank, currentRP, totalRP) {
+    const totalDisplay = (totalRP !== undefined && totalRP !== null) ? `\n累計ランクポイント: ${totalRP} RP` : '';
     if (currentRank === 'S') {
-      alert(`現在のランク: S\n最高ランク到達済みです！おめでとうございます！\n現在のランクポイント: ${currentRP} RP`);
+      alert(`現在のランク: S（最高ランク）\n最高ランク到達済みです！おめでとうございます！\n現在の超過RP: ${currentRP} RP${totalDisplay}`);
       return;
     }
 
@@ -640,7 +641,7 @@
       const remaining = required - currentRP;
       const nextRanks = { 'E': 'D', 'D': 'C', 'C': 'B', 'B': 'A', 'A': 'S' };
       const nextRank = nextRanks[currentRank];
-      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！`);
+      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！${totalDisplay}`);
     }
   };
 
@@ -648,7 +649,7 @@
   window.db = db;
 
   window.executeWeeklyRanking = function() {
-    if (!confirm('過去7日間のポイント獲得数に基づいて週間ランク集計を実行しますか？\n（週に1回のみ実行推奨です）')) return;
+    if (!confirm('過去7日間のポイント獲得数に基づいて週間ランク集計を実行しますか？\n（週に1回のみ実行推奨です）\n\n・上位4%: +3RP\n・上位20%: +2RP\n・上位60%: +1RP\n・7日間活動なし: -1RP')) return;
 
     const users = allUsersData;
     if (!users) {
@@ -660,34 +661,40 @@
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - 7);
 
-    // Filter out active users and calculate 7d points
-    const activeUsers = Object.keys(users)
+    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5 };
+    const rankOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
+
+    // Build user list with weekly activity info
+    const allUsers = Object.keys(users)
       .filter(k => !k.startsWith('{') && users[k].role !== 'admin' && k !== 'S1')
       .map(key => {
         const history = users[key].history || [];
-        const weeklyPoints = history
-          .filter(h => new Date(h.timestamp) > cutoff)
-          .reduce((sum, h) => sum + h.amount, 0);
-        return { key, weeklyPoints, user: users[key] };
+        const weeklyEarnings = history.filter(h => {
+          const t = new Date(h.timestamp);
+          return t > cutoff && h.amount > 0;
+        });
+        const weeklyPoints = weeklyEarnings.reduce((sum, h) => sum + h.amount, 0);
+        const hasActivity = weeklyEarnings.length > 0;
+        return { key, weeklyPoints, hasActivity, user: users[key] };
       });
 
-    if (activeUsers.length === 0) {
+    if (allUsers.length === 0) {
       alert('対象ユーザーがいません。');
       return;
     }
 
-    // Sort by weekly points descending
-    activeUsers.sort((a, b) => b.weeklyPoints - a.weeklyPoints);
+    // Sort by weekly points descending for ranking
+    allUsers.sort((a, b) => b.weeklyPoints - a.weeklyPoints);
 
     // Calculate thresholds
-    const totalUsersCount = activeUsers.length;
+    const totalUsersCount = allUsers.length;
     const top4Count = Math.max(1, Math.floor(totalUsersCount * 0.04));
     const top20Count = Math.max(1, Math.floor(totalUsersCount * 0.20));
     const top60Count = Math.max(1, Math.floor(totalUsersCount * 0.60));
 
     let updates = {};
 
-    activeUsers.forEach((u, index) => {
+    allUsers.forEach((u, index) => {
       let rankPointsAwarded = 0;
       if (index < top4Count) {
         rankPointsAwarded = 3;
@@ -697,41 +704,92 @@
         rankPointsAwarded = 1;
       }
 
+      // Penalty for 1 week of inactivity
+      if (!u.hasActivity) {
+        rankPointsAwarded -= 1;
+      }
+
+      if (rankPointsAwarded === 0) return; // no change
+
+      let currentRank = u.user.rank || 'E';
+      let currentRP = u.user.rankPoints || 0;
+      let totalRP = u.user.totalRankPoints || 0;
+
+      const updatedUser = { ...u.user };
+      let promoted = false;
+      let demoted = false;
+
+      // Add totalRankPoints (cumulative, always increases for gains; decreases for penalties)
+      totalRP = Math.max(0, totalRP + rankPointsAwarded);
+
       if (rankPointsAwarded > 0) {
-        let currentRank = u.user.rank || 'E';
-        let currentRP = u.user.rankPoints || 0;
-        
-        currentRP += rankPointsAwarded;
-
-        // Rank up logic
-        const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5, 'S': 999 };
-        const rankOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
-
-        let promoted = false;
-        while (currentRank !== 'S' && currentRP >= rankRequirements[currentRank]) {
-          currentRP -= rankRequirements[currentRank];
-          currentRank = rankOrder[rankOrder.indexOf(currentRank) + 1];
-          promoted = true;
-        }
-
-        const updatedUser = { ...u.user };
-        updatedUser.rank = currentRank;
-        updatedUser.rankPoints = currentRP;
-        
-        if (promoted) {
-          updatedUser.history = updatedUser.history || [];
-          updatedUser.history.push({
-            action: `【昇格】${currentRank}ランク到達！`,
-            amount: 0,
-            timestamp: new Date().toISOString()
-          });
-          if (updatedUser.history.length > 150) {
-            updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+        // S-rank: just accumulate, no cap
+        if (currentRank === 'S') {
+          currentRP += rankPointsAwarded;
+          // Rank up while loop not needed for S
+        } else {
+          currentRP += rankPointsAwarded;
+          // Rank up logic
+          while (currentRank !== 'S' && currentRP >= rankRequirements[currentRank]) {
+            currentRP -= rankRequirements[currentRank];
+            currentRank = rankOrder[rankOrder.indexOf(currentRank) + 1];
+            promoted = true;
           }
         }
-        
-        updates['mirai_users/' + u.key] = updatedUser;
+      } else if (rankPointsAwarded < 0) {
+        // Penalty / deduction
+        currentRP += rankPointsAwarded; // e.g. -1
+        // Rank DOWN if RP goes below 0 and rank > E
+        while (currentRP < 0 && currentRank !== 'E') {
+          const prevRank = rankOrder[rankOrder.indexOf(currentRank) - 1];
+          currentRank = prevRank;
+          currentRP = Math.max(0, (rankRequirements[currentRank] || 1) + currentRP);
+          demoted = true;
+        }
+        if (currentRP < 0) currentRP = 0; // floor at E/0
       }
+
+      updatedUser.rank = currentRank;
+      updatedUser.rankPoints = currentRP;
+      updatedUser.totalRankPoints = totalRP;
+
+      if (promoted) {
+        updatedUser.history = updatedUser.history || [];
+        updatedUser.history.push({
+          action: `【昇格】${currentRank}ランク到達！`,
+          amount: 0,
+          timestamp: new Date().toISOString()
+        });
+        if (updatedUser.history.length > 150) {
+          updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+        }
+      }
+
+      if (demoted) {
+        updatedUser.history = updatedUser.history || [];
+        updatedUser.history.push({
+          action: `【降格】活動なしにより${currentRank}ランクに降格`,
+          amount: 0,
+          timestamp: new Date().toISOString()
+        });
+        if (updatedUser.history.length > 150) {
+          updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+        }
+      }
+
+      if (!u.hasActivity && rankPointsAwarded === -1 && !demoted) {
+        updatedUser.history = updatedUser.history || [];
+        updatedUser.history.push({
+          action: `【ペナルティ】1週間活動なしのため -1RP`,
+          amount: 0,
+          timestamp: new Date().toISOString()
+        });
+        if (updatedUser.history.length > 150) {
+          updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+        }
+      }
+
+      updates['mirai_users/' + u.key] = updatedUser;
     });
 
     if (Object.keys(updates).length > 0) {
@@ -744,7 +802,7 @@
           alert('集計処理中にエラーが発生しました。');
         });
     } else {
-      alert('ランクポイントを獲得したユーザーはいませんでした。');
+      alert('今週は変動したユーザーはいませんでした。');
     }
   };
 
