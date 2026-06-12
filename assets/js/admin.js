@@ -123,6 +123,7 @@
     currentRankView = type;
     const tabs = {
       'total': document.getElementById('tab-total'),
+      'rank': document.getElementById('tab-rank'),
       '24h': document.getElementById('tab-surge-24h'),
       '7d': document.getElementById('tab-surge-7d'),
       '30d': document.getElementById('tab-surge-30d')
@@ -144,7 +145,7 @@
 
     const header = document.getElementById('points-header');
     if (header) {
-      if (type === 'total') header.innerText = '保有ポイント';
+      if (type === 'total' || type === 'rank') header.innerText = '保有ポイント';
       else header.innerText = `増加分 (${type})`;
     }
 
@@ -172,7 +173,7 @@
       const user = users[key];
       let displayValue = 0;
 
-      if (currentRankView === 'total') {
+      if (currentRankView === 'total' || currentRankView === 'rank') {
         displayValue = user.points || 0;
       } else {
         const now = new Date();
@@ -199,8 +200,24 @@
       return;
     }
 
-    const sortedList = filteredList.sort((a, b) => b.displayValue - a.displayValue);
-    const globalSortedKeys = [...userList].sort((a, b) => b.displayValue - a.displayValue).map(u => u.key);
+    let sortedList;
+    let globalSortedKeys;
+    if (currentRankView === 'rank') {
+      const rankValues = { 'S': 6, 'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1 };
+      const rankSortFn = (a, b) => {
+        const userA = users[a.key];
+        const userB = users[b.key];
+        const valA = rankValues[userA.rank || 'E'] || 1;
+        const valB = rankValues[userB.rank || 'E'] || 1;
+        if (valA !== valB) return valB - valA;
+        return (userB.totalRankPoints || 0) - (userA.key === userB.key ? 0 : (userA.totalRankPoints || 0));
+      };
+      sortedList = filteredList.sort(rankSortFn);
+      globalSortedKeys = [...userList].sort(rankSortFn).map(u => u.key);
+    } else {
+      sortedList = filteredList.sort((a, b) => b.displayValue - a.displayValue);
+      globalSortedKeys = [...userList].sort((a, b) => b.displayValue - a.displayValue).map(u => u.key);
+    }
 
     sortedList.forEach((u) => {
       const overallRank = globalSortedKeys.indexOf(u.key) + 1;
@@ -264,37 +281,13 @@
     if (!user) return;
 
     const rankOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
-    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5, 'S': '∞' };
+    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5 };
 
     const currentRank = user.rank || 'E';
-    const currentRP = user.rankPoints || 0;
     const currentTotalRP = user.totalRankPoints || 0;
 
-    const rankChoices = rankOrder.map(r => `${r}（次まで${rankRequirements[r]}RP）`).join('\n');
-    const newRankStr = prompt(
-      `【${user.name}】のランクを変更\n\n現在: ${currentRank}ランク (RP: ${currentRP} / 累計: ${currentTotalRP})\n\n変更後のランクを入力 (E / D / C / B / A / S):\n\n${rankChoices}`,
-      currentRank
-    );
-    if (newRankStr === null) return;
-    const newRank = newRankStr.trim().toUpperCase();
-    if (!rankOrder.includes(newRank)) {
-      alert('無効なランクです。E / D / C / B / A / S のいずれかを入力してください。');
-      return;
-    }
-
-    const newRPStr = prompt(
-      `【${user.name}】の現在のランクポイント（RP）を入力:\n（${newRank}ランク内での現在のRP）`,
-      newRank === currentRank ? currentRP : 0
-    );
-    if (newRPStr === null) return;
-    const newRP = parseInt(newRPStr, 10);
-    if (isNaN(newRP) || newRP < 0) {
-      alert('無効な値です。0以上の整数を入力してください。');
-      return;
-    }
-
     const newTotalRPStr = prompt(
-      `【${user.name}】の累計ランクポイントを入力:\n（変更しない場合はそのままOKを押してください）`,
+      `【${user.name}】の新しい累計ランクポイントを入力してください:\n(現在: 累計 ${currentTotalRP} RP / ランク: ${currentRank}ランク)`,
       currentTotalRP
     );
     if (newTotalRPStr === null) return;
@@ -304,12 +297,20 @@
       return;
     }
 
-    user.rank = newRank;
-    user.rankPoints = newRP;
+    // Auto-calculate rank and rank-level RP based on newTotalRP
+    let calculatedRank = 'E';
+    let calculatedRP = newTotalRP;
+    while (calculatedRank !== 'S' && calculatedRP >= rankRequirements[calculatedRank]) {
+      calculatedRP -= rankRequirements[calculatedRank];
+      calculatedRank = rankOrder[rankOrder.indexOf(calculatedRank) + 1];
+    }
+
+    user.rank = calculatedRank;
+    user.rankPoints = calculatedRP;
     user.totalRankPoints = newTotalRP;
     user.history = user.history || [];
     user.history.push({
-      action: `【管理者】ランク修正: ${currentRank}→${newRank} (RP: ${currentRP}→${newRP})`,
+      action: `【管理者】ランク修正: ${currentRank}→${calculatedRank} (累計RP: ${currentTotalRP}→${newTotalRP})`,
       amount: 0,
       timestamp: new Date().toISOString()
     });
@@ -318,7 +319,7 @@
     }
 
     db.ref('mirai_users/' + key).set(user)
-      .then(() => alert(`${user.name} のランクを ${newRank} (RP: ${newRP}) に更新しました！`))
+      .then(() => alert(`${user.name} のランクを ${calculatedRank} (累計RP: ${newTotalRP}) に更新しました！`))
       .catch(handleDatabaseError);
   }
 
@@ -795,8 +796,30 @@
           // Rank up logic
           while (currentRank !== 'S' && currentRP >= rankRequirements[currentRank]) {
             currentRP -= rankRequirements[currentRank];
+            const oldRank = currentRank;
             currentRank = rankOrder[rankOrder.indexOf(currentRank) + 1];
             promoted = true;
+
+            // Rank up rewards
+            let rewardPoints = 0;
+            if (oldRank === 'E' && currentRank === 'D') rewardPoints = 50;
+            else if (oldRank === 'D' && currentRank === 'C') rewardPoints = 50;
+            else if (oldRank === 'C' && currentRank === 'B') rewardPoints = 100;
+            else if (oldRank === 'B' && currentRank === 'A') rewardPoints = 150;
+            else if (oldRank === 'A' && currentRank === 'S') rewardPoints = 300;
+
+            if (rewardPoints > 0) {
+              updatedUser.points = (updatedUser.points || 0) + rewardPoints;
+              updatedUser.history = updatedUser.history || [];
+              updatedUser.history.push({
+                action: `ランクアップ報酬（${oldRank}→${currentRank}）`,
+                amount: rewardPoints,
+                timestamp: new Date().toISOString()
+              });
+              if (updatedUser.history.length > 150) {
+                updatedUser.history = updatedUser.history.slice(updatedUser.history.length - 150);
+              }
+            }
           }
         }
       } else if (rankPointsAwarded < 0) {
