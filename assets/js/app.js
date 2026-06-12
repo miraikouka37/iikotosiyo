@@ -951,9 +951,13 @@
   };
 
   window.showRankProgressAlert = function(currentRank, currentRP, totalRP) {
-    const totalDisplay = (totalRP !== undefined && totalRP !== null) ? `\n累計ランクポイント: ${totalRP} RP` : '';
+    const baseRPs = { 'E': 0, 'D': 1, 'C': 2, 'B': 5, 'A': 8, 'S': 13 };
+    const cumulativeRequirements = { 'E': 1, 'D': 2, 'C': 5, 'B': 8, 'A': 13 };
+    const calculatedTotalRP = (totalRP !== undefined && totalRP !== null) ? totalRP : (baseRPs[currentRank] || 0) + currentRP;
+    const totalDisplay = `\n累計ランクポイント: ${calculatedTotalRP} RP`;
+
     if (currentRank === 'S') {
-      alert(`現在のランク: S（最高ランク）\n最高ランク到達済みです！おめでとうございます！\n現在の超過RP: ${currentRP} RP${totalDisplay}`);
+      alert(`現在のランク: S（最高ランク）\n最高ランク到達済みです！おめでとうございます！\n累計ランクポイント: ${calculatedTotalRP} RP`);
       return;
     }
 
@@ -963,7 +967,8 @@
       const remaining = required - currentRP;
       const nextRanks = { 'E': 'D', 'D': 'C', 'C': 'B', 'B': 'A', 'A': 'S' };
       const nextRank = nextRanks[currentRank];
-      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！${totalDisplay}`);
+      const nextRankTotalRP = cumulativeRequirements[currentRank];
+      alert(`現在のランク: ${currentRank} (${calculatedTotalRP} / ${nextRankTotalRP} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！${totalDisplay}`);
     }
   };
 
