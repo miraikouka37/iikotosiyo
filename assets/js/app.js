@@ -283,13 +283,45 @@
     requestAnimationFrame(update);
   }
 
+  let currentRankingTab = 'points';
+
+  window.switchRankingTab = function(type) {
+    currentRankingTab = type;
+    const tabPoints = document.getElementById('tab-ranking-points');
+    const tabRank = document.getElementById('tab-ranking-rank');
+    if (type === 'points') {
+      if (tabPoints) {
+        tabPoints.style.fontWeight = '700';
+        tabPoints.style.color = 'var(--accent)';
+        tabPoints.style.borderColor = 'var(--accent)';
+      }
+      if (tabRank) {
+        tabRank.style.fontWeight = '400';
+        tabRank.style.color = 'var(--text-muted)';
+        tabRank.style.borderColor = 'transparent';
+      }
+    } else {
+      if (tabRank) {
+        tabRank.style.fontWeight = '700';
+        tabRank.style.color = 'var(--accent)';
+        tabRank.style.borderColor = 'var(--accent)';
+      }
+      if (tabPoints) {
+        tabPoints.style.fontWeight = '400';
+        tabPoints.style.color = 'var(--text-muted)';
+        tabPoints.style.borderColor = 'transparent';
+      }
+    }
+    renderRanking();
+  };
+
   function renderRanking() {
     const rankingContainer = document.getElementById('ranking-container');
     if (!rankingContainer || !allUsersData) return;
 
     rankingContainer.innerHTML = '';
     const userList = Object.keys(allUsersData)
-      .filter(key => !key.startsWith('{'))
+      .filter(key => !key.startsWith('{') && allUsersData[key].role !== 'admin' && key !== 'S1')
       .map(key => ({
         name: allUsersData[key].name,
         points: allUsersData[key].points || 0,
@@ -297,17 +329,30 @@
         rankPoints: allUsersData[key].rankPoints || 0
       }));
 
-    userList.sort((a, b) => b.points - a.points);
+    if (currentRankingTab === 'points') {
+      userList.sort((a, b) => b.points - a.points);
+    } else {
+      const rankValues = { 'S':6, 'A':5, 'B':4, 'C':3, 'D':2, 'E':1 };
+      userList.sort((a, b) => {
+        const valA = rankValues[a.rank] || 1;
+        const valB = rankValues[b.rank] || 1;
+        if (valA !== valB) {
+          return valB - valA;
+        }
+        return b.rankPoints - a.rankPoints;
+      });
+    }
 
     userList.forEach((user, index) => {
       const li = document.createElement('li');
       li.className = 'list-item';
       let rankIcon = `${index + 1}位`;
+      let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `RP: ${user.rankPoints}`;
       li.innerHTML = `
         <div class="item-info">
           <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" data-rank="${user.rank}" data-rp="${user.rankPoints}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank}</span>${escapeHTML(user.name)}</h4>
         </div>
-        <div class="item-points">${user.points} pt</div>
+        <div class="item-points">${pointsDisplay}</div>
       `;
       rankingContainer.appendChild(li);
     });

@@ -117,7 +117,13 @@
       <div class="col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <!-- Ranking Card -->
         <div class="glass-panel" style="display: flex; flex-direction: column;">
-          <h3 class="section-title">ランキング</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 class="section-title" style="margin-bottom: 0;">ランキング</h3>
+            <div style="display: flex; gap: 0.5rem;" id="ranking-tabs">
+              <span id="tab-ranking-points" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.2rem;" onclick="switchRankingTab('points')">ポイント</span>
+              <span id="tab-ranking-rank" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; color: var(--text-muted); padding-bottom: 0.2rem; border-bottom: 2px solid transparent;" onclick="switchRankingTab('rank')">ランク</span>
+            </div>
+          </div>
           <ul class="action-list" id="ranking-container" style="overflow-y: auto; max-height: 250px; margin-bottom: 1.5rem;">
             <li class="list-item" style="justify-content: center; color: var(--text-muted);">
               データがありません
@@ -328,7 +334,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.2"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
-  <script defer src="assets/js/app.js?v=2.1"></script>
+  <script defer src="assets/js/app.js?v=2.2"></script>
 </body>
 
 </html>
