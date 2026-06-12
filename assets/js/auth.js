@@ -82,17 +82,19 @@ document.addEventListener('DOMContentLoaded', () => {
       db.ref('mirai_users').once('value').then(snapshot => {
         const users = snapshot.val() || {};
         
-        // ユーザー名の重複チェック
+        // 重複チェック (名前とメールアドレスがかぶらないようにする)
         for (const key in users) {
-          if (users[key].name === name) {
-            alert('このユーザーネームは既に使われています。別の名前を入力してください。');
+          const userEmail = users[key].email || key.replace(/_/g, '.');
+          const userName = users[key].name;
+          
+          if (userName === name || userEmail === name) {
+            alert('入力されたユーザーネームは既に他の用途（名前またはメールアドレス）で使用されています。別の名前を入力してください。');
             return;
           }
-        }
-
-        if (users[safeEmail]) {
-          alert('このメールアドレスは既に登録されています。');
-          return;
+          if (userName === email || userEmail === email) {
+            alert('入力されたメールアドレスは既に他の用途（名前またはメールアドレス）で使用されています。別のメールアドレスを入力してください。');
+            return;
+          }
         }
         
         const newUser = {
@@ -142,3 +144,17 @@ function toggleAuthMode() {
   }
   isLoginMode = !isLoginMode;
 }
+
+// パスワードの表示・非表示を切り替える関数
+window.togglePasswordVisibility = function(inputId, iconEl) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    iconEl.textContent = '🙈'; // 閉じた目
+    iconEl.title = 'パスワードを隠す';
+  } else {
+    input.type = 'password';
+    iconEl.textContent = '👁️'; // 開いた目
+    iconEl.title = 'パスワードを表示';
+  }
+};
