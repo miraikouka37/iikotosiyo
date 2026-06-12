@@ -134,6 +134,13 @@
         const id = target.getAttribute('data-id');
         resolveLostItem(id);
       }
+
+      const rankBadge = target.closest('.rank-badge');
+      if (rankBadge) {
+        const currentRank = rankBadge.getAttribute('data-rank') || 'E';
+        const currentRP = parseInt(rankBadge.getAttribute('data-rp') || '0', 10);
+        showRankProgressAlert(currentRank, currentRP);
+      }
     });
 
     renderDashboard();
@@ -197,7 +204,8 @@
 
     if (displayName) {
       const rank = data.rank || 'E';
-      displayName.innerHTML = `<span class="rank-badge rank-${rank}">${rank}</span>` + escapeHTML(data.name);
+      const rp = data.rankPoints || 0;
+      displayName.innerHTML = `<span class="rank-badge rank-${rank}" data-rank="${rank}" data-rp="${rp}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${rank}</span>` + escapeHTML(data.name);
     }
     if (totalPoints) animatePoints(data.points || 0);
 
@@ -285,7 +293,8 @@
       .map(key => ({
         name: allUsersData[key].name,
         points: allUsersData[key].points || 0,
-        rank: allUsersData[key].rank || 'E'
+        rank: allUsersData[key].rank || 'E',
+        rankPoints: allUsersData[key].rankPoints || 0
       }));
 
     userList.sort((a, b) => b.points - a.points);
@@ -296,7 +305,7 @@
       let rankIcon = `${index + 1}位`;
       li.innerHTML = `
         <div class="item-info">
-          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}">${user.rank}</span>${escapeHTML(user.name)}</h4>
+          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" data-rank="${user.rank}" data-rp="${user.rankPoints}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank}</span>${escapeHTML(user.name)}</h4>
         </div>
         <div class="item-points">${user.points} pt</div>
       `;
@@ -901,8 +910,24 @@
     if (modal) modal.style.display = 'none';
   };
 
+  window.showRankProgressAlert = function(currentRank, currentRP) {
+    if (currentRank === 'S') {
+      alert(`現在のランク: S\n最高ランク到達済みです！おめでとうございます！\n現在のランクポイント: ${currentRP} RP`);
+      return;
+    }
+
+    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5 };
+    const required = rankRequirements[currentRank];
+    if (required !== undefined) {
+      const remaining = required - currentRP;
+      const nextRanks = { 'E': 'D', 'D': 'C', 'C': 'B', 'B': 'A', 'A': 'S' };
+      const nextRank = nextRanks[currentRank];
+      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！`);
+    }
+  };
+
   let currentOnboardingSlide = 1;
-  const totalOnboardingSlides = 4;
+  const totalOnboardingSlides = 5;
 
   function openOnboarding() {
     const modal = document.getElementById('onboarding-modal');

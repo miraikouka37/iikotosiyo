@@ -86,6 +86,14 @@
     const tbody = document.getElementById('admin-user-list');
     if (tbody) {
       tbody.addEventListener('click', (e) => {
+        const rankBadge = e.target.closest('.rank-badge');
+        if (rankBadge) {
+          const currentRank = rankBadge.getAttribute('data-rank') || 'E';
+          const currentRP = parseInt(rankBadge.getAttribute('data-rp') || '0', 10);
+          showRankProgressAlert(currentRank, currentRP);
+          return;
+        }
+
         const btn = e.target.closest('button');
         if (!btn) return;
 
@@ -220,7 +228,8 @@
 
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--panel-border)';
-      const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}">${user.rank || 'E'}</span>`;
+      const rp = user.rankPoints || 0;
+      const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}" data-rank="${user.rank || 'E'}" data-rp="${rp}" style="cursor: pointer;" title="タップして次のランクまでのポイントを確認">${user.rank || 'E'}</span>`;
       tr.innerHTML = `
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem;">${overallRank}</td>
         <td style="padding: 1rem; font-weight: 600;">${rankBadge}${safeName}</td>
@@ -617,6 +626,22 @@
   window.closeImageModal = function() {
     const modal = document.getElementById('image-modal');
     if (modal) modal.style.display = 'none';
+  };
+
+  window.showRankProgressAlert = function(currentRank, currentRP) {
+    if (currentRank === 'S') {
+      alert(`現在のランク: S\n最高ランク到達済みです！おめでとうございます！\n現在のランクポイント: ${currentRP} RP`);
+      return;
+    }
+
+    const rankRequirements = { 'E': 1, 'D': 1, 'C': 3, 'B': 3, 'A': 5 };
+    const required = rankRequirements[currentRank];
+    if (required !== undefined) {
+      const remaining = required - currentRP;
+      const nextRanks = { 'E': 'D', 'D': 'C', 'C': 'B', 'B': 'A', 'A': 'S' };
+      const nextRank = nextRanks[currentRank];
+      alert(`現在のランク: ${currentRank} (${currentRP} / ${required} RP)\n次の「${nextRank}」ランクまで、あと ${remaining} ランクポイント必要です！`);
+    }
   };
 
   // Needed for inline onclick in Feedback/Reports if we don't delegate them yet
