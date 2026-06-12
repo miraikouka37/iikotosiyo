@@ -79,8 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const safeEmail = email.replace(/\./g, '_');
       
-      db.ref('mirai_users/' + safeEmail).once('value').then(snapshot => {
-        if (snapshot.exists()) {
+      db.ref('mirai_users').once('value').then(snapshot => {
+        const users = snapshot.val() || {};
+        
+        // ユーザー名の重複チェック
+        for (const key in users) {
+          if (users[key].name === name) {
+            alert('このユーザーネームは既に使われています。別の名前を入力してください。');
+            return;
+          }
+        }
+
+        if (users[safeEmail]) {
           alert('このメールアドレスは既に登録されています。');
           return;
         }
