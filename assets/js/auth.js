@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = document.getElementById('signup-name').value;
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
+      const gradeEl = document.getElementById('signup-grade');
+      const grade = gradeEl ? gradeEl.value : '';
 
       // 不適切な表現のバリデーション
       const forbiddenWords = [
@@ -112,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
           name: name,
           password: password,
           points: 0,
-          history: []
+          history: [],
+          grade: grade ? parseInt(grade) : null
         };
         
         db.ref('mirai_users/' + safeEmail).set(newUser).then(() => {

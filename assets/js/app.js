@@ -247,8 +247,14 @@
     populateUserSelect();
     renderRecommendations();
     renderLostItems();
+    renderGradeStats();
 
-    if (localStorage.getItem('mirai_isNewUser') === 'true') {
+    // 初回ログイン時のオンボーディングと学年設定モーダル
+    if (data.grade === undefined || data.grade === null) {
+      // 学年が未設定の場合、オンボーディングより学年モーダルを優先表示
+      const gradeModal = document.getElementById('grade-modal');
+      if (gradeModal) gradeModal.style.display = 'flex';
+    } else if (localStorage.getItem('mirai_isNewUser') === 'true') {
       openOnboarding();
     }
   }
@@ -313,16 +319,25 @@
     const rankingContainer = document.getElementById('ranking-container');
     if (!rankingContainer || !allUsersData) return;
 
+    const gradeFilter = document.getElementById('filter-ranking-grade');
+    const selectedGrade = gradeFilter ? gradeFilter.value : 'all';
+
     rankingContainer.innerHTML = '';
-    const userList = Object.keys(allUsersData)
+    let userList = Object.keys(allUsersData)
       .filter(key => !key.startsWith('{') && allUsersData[key].role !== 'admin' && key !== 'S1')
       .map(key => ({
         name: allUsersData[key].name,
         points: allUsersData[key].points || 0,
         rank: allUsersData[key].rank || 'E',
         rankPoints: allUsersData[key].rankPoints || 0,
-        totalRankPoints: allUsersData[key].totalRankPoints || 0
+        totalRankPoints: allUsersData[key].totalRankPoints || 0,
+        grade: allUsersData[key].grade || null
       }));
+
+    // 学年フィルタリング
+    if (selectedGrade !== 'all') {
+      userList = userList.filter(u => u.grade === parseInt(selectedGrade));
+    }
 
     if (currentRankingTab === 'points') {
       userList.sort((a, b) => b.points - a.points);
@@ -337,19 +352,113 @@
       });
     }
 
+    if (userList.length === 0) {
+      rankingContainer.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">この学年のユーザーがいません</li>';
+      return;
+    }
+
     userList.forEach((user, index) => {
       const li = document.createElement('li');
       li.className = 'list-item';
       let rankIcon = `${index + 1}位`;
       // Points tab: show points. Rank tab: show total cumulative RP
       let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `累計RP: ${user.totalRankPoints}`;
+      const gradeLabel = user.grade ? `<span style="font-size:0.7rem; background: var(--panel-border); border-radius: 4px; padding: 0.1rem 0.35rem; margin-right: 0.3rem; color: var(--text-muted);">${user.grade}年</span>` : '';
       li.innerHTML = `
         <div class="item-info">
-          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" onclick="window.showRankProgressAlert('${user.rank}',${user.rankPoints},${user.totalRankPoints})" style="cursor:pointer;">${user.rank}</span>${escapeHTML(user.name)}</h4>
+          <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" onclick="window.showRankProgressAlert('${user.rank}',${user.rankPoints},${user.totalRankPoints})" style="cursor:pointer;">${user.rank}</span>${gradeLabel}${escapeHTML(user.name)}</h4>
         </div>
         <div class="item-points">${pointsDisplay}</div>
       `;
       rankingContainer.appendChild(li);
+    });
+  }
+
+  // 学年設定モーダルの送信処理
+  window.submitUserGrade = function() {
+    const select = document.getElementById('grade-modal-select');
+    if (!select || !select.value) {
+      alert('学年を選択してください。');
+      return;
+    }
+    const grade = parseInt(select.value);
+    const { email, data } = getUserData();
+    data.grade = grade;
+    saveUserData(email, data);
+    const modal = document.getElementById('grade-modal');
+    if (modal) modal.style.display = 'none';
+    // 学年保存後、新規ユーザーならオンボーディングを表示
+    if (localStorage.getItem('mirai_isNewUser') === 'true') {
+      openOnboarding();
+    }
+    renderGradeStats();
+    renderRanking();
+  };
+
+  // 学年別対抗ステータスの描画
+  function renderGradeStats() {
+    const container = document.getElementById('grade-stats-container');
+    if (!container || !allUsersData) return;
+
+    const gradeColors = {
+      1: { from: '#3b82f6', to: '#1d4ed8', label: '1年生 🔵' },
+      2: { from: '#10b981', to: '#047857', label: '2年生 🟢' },
+      3: { from: '#f59e0b', to: '#b45309', label: '3年生 🟡' }
+    };
+
+    const stats = { 1: { points: 0, rp: 0, count: 0 }, 2: { points: 0, rp: 0, count: 0 }, 3: { points: 0, rp: 0, count: 0 } };
+
+    Object.keys(allUsersData).forEach(key => {
+      if (key.startsWith('{') || allUsersData[key].role === 'admin' || key === 'S1') return;
+      const u = allUsersData[key];
+      const g = u.grade;
+      if (g && stats[g]) {
+        stats[g].points += u.points || 0;
+        stats[g].rp += u.totalRankPoints || 0;
+        stats[g].count++;
+      }
+    });
+
+    const maxPoints = Math.max(...[1,2,3].map(g => stats[g].points), 1);
+    const maxRP = Math.max(...[1,2,3].map(g => stats[g].rp), 1);
+
+    container.innerHTML = '';
+
+    [1, 2, 3].forEach(g => {
+      const s = stats[g];
+      const color = gradeColors[g];
+      const avgPoints = s.count > 0 ? Math.round(s.points / s.count) : 0;
+      const avgRP = s.count > 0 ? Math.round(s.rp / s.count) : 0;
+      const pointsBarWidth = Math.round((s.points / maxPoints) * 100);
+      const rpBarWidth = Math.round((s.rp / maxRP) * 100);
+
+      const section = document.createElement('div');
+      section.style.marginBottom = '1.25rem';
+      section.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-weight: 700; font-size: 0.9rem;">${color.label}</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">${s.count}人</span>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+            <span style="color: var(--text-muted);">合計ポイント</span>
+            <span style="font-weight: 700;">${s.points.toLocaleString()} pt <span style="color:var(--text-muted); font-weight:400;">(平均 ${avgPoints} pt)</span></span>
+          </div>
+          <div style="background: var(--panel-border); border-radius: 99px; height: 8px; overflow: hidden;">
+            <div style="height: 100%; width: ${pointsBarWidth}%; background: linear-gradient(90deg, ${color.from}, ${color.to}); border-radius: 99px; transition: width 0.6s ease;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+            <span style="color: var(--text-muted);">累計ランクポイント</span>
+            <span style="font-weight: 700;">${s.rp} RP <span style="color:var(--text-muted); font-weight:400;">(平均 ${avgRP} RP)</span></span>
+          </div>
+          <div style="background: var(--panel-border); border-radius: 99px; height: 8px; overflow: hidden;">
+            <div style="height: 100%; width: ${rpBarWidth}%; background: linear-gradient(90deg, ${color.from}88, ${color.to}88); border-radius: 99px; transition: width 0.6s ease;"></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(section);
     });
   }
 

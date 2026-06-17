@@ -56,6 +56,15 @@
           <span class="password-toggle" onclick="togglePasswordVisibility('signup-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; user-select: none;" title="パスワードを表示">👁️</span>
         </div>
       </div>
+      <div class="form-group">
+        <label for="signup-grade">学年</label>
+        <select id="signup-grade" class="form-control" required>
+          <option value="" disabled selected>学年を選択してください</option>
+          <option value="1">1年生</option>
+          <option value="2">2年生</option>
+          <option value="3">3年生</option>
+        </select>
+      </div>
       <button type="submit" class="btn btn-primary mt-4">アカウント作成</button>
       <p class="mt-4 text-center">
         すでにアカウントをお持ちですか？ <span class="toggle-auth" onclick="toggleAuthMode()">ログイン</span>

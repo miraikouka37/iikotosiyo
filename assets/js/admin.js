@@ -3,6 +3,7 @@
 
   let currentRankView = 'total';
   let userSearchTerm = '';
+  let adminGradeFilter = 'all';
   let allUsersData = null;
   let allFeedbacksData = [];
   let allReportsData = [];
@@ -96,6 +97,7 @@
         if (action === 'history') viewHistory(key);
         if (action === 'edit') editPoints(key);
         if (action === 'edit-rank') editRank(key);
+        if (action === 'edit-grade') editGrade(key);
         if (action === 'warning') sendWarning(key);
         if (action === 'delete') deleteUser(key);
       });
@@ -106,6 +108,15 @@
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         userSearchTerm = e.target.value.toLowerCase();
+        renderAdminUsers();
+      });
+    }
+
+    // Grade filter listener
+    const gradeFilterEl = document.getElementById('admin-filter-grade');
+    if (gradeFilterEl) {
+      gradeFilterEl.addEventListener('change', (e) => {
+        adminGradeFilter = e.target.value;
         renderAdminUsers();
       });
     }
@@ -187,16 +198,17 @@
           .filter(h => new Date(h.timestamp) > cutoff)
           .reduce((sum, h) => sum + h.amount, 0);
       }
-      return { key, displayValue, name: user.name || '不明', email: user.email || key.replace(/_/g, '.') };
+      return { key, displayValue, name: user.name || '不明', email: user.email || key.replace(/_/g, '.'), grade: user.grade || null };
     });
 
-    const filteredList = userList.filter(u => 
-      u.name.toLowerCase().includes(userSearchTerm) || 
-      u.email.toLowerCase().includes(userSearchTerm)
-    );
+    const filteredList = userList.filter(u => {
+      const matchSearch = u.name.toLowerCase().includes(userSearchTerm) || u.email.toLowerCase().includes(userSearchTerm);
+      const matchGrade = adminGradeFilter === 'all' || u.grade === parseInt(adminGradeFilter);
+      return matchSearch && matchGrade;
+    });
 
     if (filteredList.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">ユーザーが見つかりません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">ユーザーが見つかりません</td></tr>';
       return;
     }
 
@@ -241,16 +253,19 @@
       const rp = user.rankPoints || 0;
       const totalRP = user.totalRankPoints || 0;
       const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}" onclick="window.showRankProgressAlert('${user.rank || 'E'}',${rp},${totalRP})" style="cursor:pointer;">${user.rank || 'E'}</span>`;
+      const gradeText = user.grade ? `${user.grade}年生` : '<span style="color:var(--text-muted);font-size:0.8rem;">未設定</span>';
       tr.innerHTML = `
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem;">${overallRank}</td>
         <td style="padding: 1rem; font-weight: 600;">${rankBadge}${safeName}</td>
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">${safeEmail}</td>
+        <td style="padding: 1rem; font-size: 0.875rem;">${gradeText}</td>
         <td style="padding: 1rem; font-weight: 700;">${u.displayValue} pt</td>
         <td style="padding: 1rem;">
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-width: 200px;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-width: 240px;">
             <button class="btn btn-outline btn-sm" data-action="history" data-key="${safeKey}">履歴</button>
             <button class="btn btn-outline btn-sm" data-action="edit" data-key="${safeKey}">編集</button>
             <button class="btn btn-outline btn-sm" style="color: var(--accent);" data-action="edit-rank" data-key="${safeKey}">ランク編集</button>
+            <button class="btn btn-outline btn-sm" style="color: #7c3aed;" data-action="edit-grade" data-key="${safeKey}">学年編集</button>
             <button class="btn btn-outline btn-sm" style="color: var(--danger);" data-action="warning" data-key="${safeKey}">${isWarningActive ? '警告中' : '警告'}</button>
             <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" data-action="delete" data-key="${safeKey}">削除</button>
           </div>
@@ -320,6 +335,27 @@
 
     db.ref('mirai_users/' + key).set(user)
       .then(() => alert(`${user.name} のランクを ${calculatedRank} (累計RP: ${newTotalRP}) に更新しました！`))
+      .catch(handleDatabaseError);
+  }
+
+  function editGrade(key) {
+    const user = allUsersData[key];
+    if (!user) return;
+    const currentGrade = user.grade || null;
+    const gradeLabel = currentGrade ? `${currentGrade}年生` : '未設定';
+    const input = prompt(
+      `【${user.name}】の学年を入力してください:\n(現在: ${gradeLabel})\n\n1 = 1年生\n2 = 2年生\n3 = 3年生`,
+      currentGrade || ''
+    );
+    if (input === null) return;
+    const newGrade = parseInt(input);
+    if (isNaN(newGrade) || newGrade < 1 || newGrade > 3) {
+      alert('無効な値です。1・2・3 のいずれかを入力してください。');
+      return;
+    }
+    user.grade = newGrade;
+    db.ref('mirai_users/' + key).set(user)
+      .then(() => alert(`${user.name} の学年を ${newGrade}年生 に更新しました！`))
       .catch(handleDatabaseError);
   }
 

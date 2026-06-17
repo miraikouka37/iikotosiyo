@@ -47,8 +47,16 @@
           <p style="color: var(--text-muted); flex: 1; min-width: 200px; font-size: 0.8125rem;">
             期間を選択してランキングを表示し、個別のユーザー編集や履歴確認を行えます。
           </p>
-          <div style="width: 300px; max-width: 100%;">
-            <input type="text" id="user-search" class="form-control" placeholder="名前またはメールで検索..." style="font-size: 0.8125rem; padding: 0.5rem 0.75rem;">
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <select id="admin-filter-grade" class="form-control" style="width: 130px; font-size: 0.8125rem; padding: 0.5rem 0.75rem;">
+              <option value="all">全学年</option>
+              <option value="1">1年生</option>
+              <option value="2">2年生</option>
+              <option value="3">3年生</option>
+            </select>
+            <div style="width: 260px;">
+              <input type="text" id="user-search" class="form-control" placeholder="名前またはメールで検索..." style="font-size: 0.8125rem; padding: 0.5rem 0.75rem;">
+            </div>
           </div>
         </div>
       </div>
@@ -60,6 +68,7 @@
               <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; width: 60px;">順位</th>
               <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">名前</th>
               <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">メールアドレス</th>
+              <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; width: 80px;">学年</th>
               <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;" id="points-header">獲得ポイント</th>
               <th style="padding: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">操作</th>
             </tr>

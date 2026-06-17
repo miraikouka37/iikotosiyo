@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('settings-name').value = userData.name;
     document.getElementById('settings-email').value = userData.id;
+    // 管理者には学年欄を非表示
+    const gradeGroup = document.getElementById('settings-grade-group');
+    if (gradeGroup) gradeGroup.style.display = 'none';
   } else {
     const safeEmail = currentUser.email.replace(/\./g, '_');
     db.ref('mirai_users/' + safeEmail).once('value').then(snapshot => {
@@ -40,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       document.getElementById('settings-name').value = userData.name;
       document.getElementById('settings-email').value = currentUser.email;
+      // 学年をセレクトに反映
+      const gradeSelect = document.getElementById('settings-grade');
+      if (gradeSelect && userData.grade) {
+        gradeSelect.value = userData.grade.toString();
+      }
     }).catch(handleDatabaseError);
   }
 
@@ -102,6 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
       updatedData.name = newName;
       if (newPassword.trim() !== '') {
         updatedData.password = newPassword;
+      }
+      // 学年を保存（空欄の場合はそのまま）
+      const gradeEl = document.getElementById('settings-grade');
+      if (gradeEl && gradeEl.value) {
+        updatedData.grade = parseInt(gradeEl.value);
       }
       // Ensure email property inside is updated
       updatedData.email = newEmail; 
