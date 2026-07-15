@@ -302,7 +302,7 @@ p {
    ================================================================ */
 
 .theme-toggle-btn {
-  display: inline-flex;
+  display: none !important;
   align-items: center;
   gap: 0.35rem;
   background: var(--panel-bg);
