@@ -7,6 +7,7 @@
   <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="stylesheet" href="assets/css/styles.css?v=1.4">
+  <link rel="icon" href="assets/images/favicon.png" type="image/png">
 </head>
 
 <body style="padding-top: 0;">
@@ -330,14 +331,27 @@
   <div id="grade-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
     <div class="glass-panel" style="width: 100%; max-width: 420px; padding: 2.5rem; text-align: center;">
       <div style="font-size: 3rem; margin-bottom: 1rem;">🏫</div>
-      <h2 style="font-size: 1.5rem; margin-bottom: 0.75rem; color: var(--accent);">美来工科高校の何年生ですか？</h2>
-      <p style="margin-bottom: 2rem; font-size: 0.9375rem;">学年を設定すると、学年別ランキングや対抗ステータスを確認できます。</p>
-      <div class="form-group" style="margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.75rem; color: var(--accent);">美来工科高校の何年生・何組ですか？</h2>
+      <p style="margin-bottom: 2rem; font-size: 0.9375rem;">学年と組を設定すると、学年別ランキングや対抗ステータスを確認できます。</p>
+      <div class="form-group" style="margin-bottom: 1rem;">
         <select id="grade-modal-select" class="form-control" style="font-size: 1rem; text-align: center;">
           <option value="" disabled selected>学年を選択してください</option>
           <option value="1">1年生</option>
           <option value="2">2年生</option>
           <option value="3">3年生</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <select id="class-modal-select" class="form-control" style="font-size: 1rem; text-align: center;">
+          <option value="" disabled selected>組を選択してください</option>
+          <option value="1">1組</option>
+          <option value="2">2組</option>
+          <option value="3">3組</option>
+          <option value="4">4組</option>
+          <option value="5">5組</option>
+          <option value="6">6組</option>
+          <option value="7">7組</option>
+          <option value="8">8組</option>
         </select>
       </div>
       <button class="btn btn-primary" onclick="submitUserGrade()" style="font-size: 1rem;">設定して始める</button>

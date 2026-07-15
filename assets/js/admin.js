@@ -198,7 +198,7 @@
           .filter(h => new Date(h.timestamp) > cutoff)
           .reduce((sum, h) => sum + h.amount, 0);
       }
-      return { key, displayValue, name: user.name || '不明', email: user.email || key.replace(/_/g, '.'), grade: user.grade || null };
+      return { key, displayValue, name: user.name || '不明', email: user.email || key.replace(/_/g, '.'), grade: user.grade || null, class: user.class || null };
     });
 
     const filteredList = userList.filter(u => {
@@ -253,7 +253,8 @@
       const rp = user.rankPoints || 0;
       const totalRP = user.totalRankPoints || 0;
       const rankBadge = `<span class="rank-badge rank-${user.rank || 'E'}" onclick="window.showRankProgressAlert('${user.rank || 'E'}',${rp},${totalRP})" style="cursor:pointer;">${user.rank || 'E'}</span>`;
-      const gradeText = user.grade ? `${user.grade}年生` : '<span style="color:var(--text-muted);font-size:0.8rem;">未設定</span>';
+      const classText = user.class ? ` ${user.class}組` : '';
+      const gradeText = user.grade ? `${user.grade}年生${classText}` : '<span style="color:var(--text-muted);font-size:0.8rem;">未設定</span>';
       tr.innerHTML = `
         <td style="padding: 1rem; color: var(--text-muted); font-size: 0.8125rem;">${overallRank}</td>
         <td style="padding: 1rem; font-weight: 600;">${rankBadge}${safeName}</td>
@@ -353,9 +354,24 @@
       alert('無効な値です。1・2・3 のいずれかを入力してください。');
       return;
     }
+
+    const currentClass = user.class || null;
+    const classLabel = currentClass ? `${currentClass}組` : '未設定';
+    const classInput = prompt(
+      `【${user.name}】の組を入力してください:\n(現在: ${classLabel})\n\n1〜8 の数値を入力してください`,
+      currentClass || ''
+    );
+    if (classInput === null) return;
+    const newClass = parseInt(classInput);
+    if (isNaN(newClass) || newClass < 1 || newClass > 8) {
+      alert('無効な値です。1〜8 の数値を入力してください。');
+      return;
+    }
+
     user.grade = newGrade;
+    user.class = newClass;
     db.ref('mirai_users/' + key).set(user)
-      .then(() => alert(`${user.name} の学年を ${newGrade}年生 に更新しました！`))
+      .then(() => alert(`${user.name} の学年を ${newGrade}年生、組を ${newClass}組 に更新しました！`))
       .catch(handleDatabaseError);
   }
 

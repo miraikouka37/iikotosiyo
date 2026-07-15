@@ -249,11 +249,22 @@
     renderLostItems();
     renderGradeStats();
 
-    // 初回ログイン時のオンボーディングと学年設定モーダル
-    if (data.grade === undefined || data.grade === null) {
-      // 学年が未設定の場合、オンボーディングより学年モーダルを優先表示
+    // 初回ログイン時のオンボーディングと学年・組設定モーダル
+    if (data.grade === undefined || data.grade === null || data.class === undefined || data.class === null) {
+      // 学年または組が未設定の場合、オンボーディングよりモーダルを優先表示
       const gradeModal = document.getElementById('grade-modal');
-      if (gradeModal) gradeModal.style.display = 'flex';
+      if (gradeModal) {
+        gradeModal.style.display = 'flex';
+        // 既存値があれば選択状態にする
+        const gradeSelect = document.getElementById('grade-modal-select');
+        if (gradeSelect && data.grade) {
+          gradeSelect.value = data.grade.toString();
+        }
+        const classSelect = document.getElementById('class-modal-select');
+        if (classSelect && data.class) {
+          classSelect.value = data.class.toString();
+        }
+      }
     } else if (localStorage.getItem('mirai_isNewUser') === 'true') {
       openOnboarding();
     }
@@ -363,7 +374,8 @@
       let rankIcon = `${index + 1}位`;
       // Points tab: show points. Rank tab: show total cumulative RP
       let pointsDisplay = currentRankingTab === 'points' ? `${user.points} pt` : `累計RP: ${user.totalRankPoints}`;
-      const gradeLabel = user.grade ? `<span style="font-size:0.7rem; background: var(--panel-border); border-radius: 4px; padding: 0.1rem 0.35rem; margin-right: 0.3rem; color: var(--text-muted);">${user.grade}年</span>` : '';
+      const classLabel = user.class ? `${user.class}組` : '';
+      const gradeLabel = user.grade ? `<span style="font-size:0.7rem; background: var(--panel-border); border-radius: 4px; padding: 0.1rem 0.35rem; margin-right: 0.3rem; color: var(--text-muted);">${user.grade}年${classLabel}</span>` : '';
       li.innerHTML = `
         <div class="item-info">
           <h4>${rankIcon} - <span class="rank-badge rank-${user.rank}" onclick="window.showRankProgressAlert('${user.rank}',${user.rankPoints},${user.totalRankPoints})" style="cursor:pointer;">${user.rank}</span>${gradeLabel}${escapeHTML(user.name)}</h4>
@@ -374,20 +386,27 @@
     });
   }
 
-  // 学年設定モーダルの送信処理
+  // 学年・組設定モーダルの送信処理
   window.submitUserGrade = function() {
-    const select = document.getElementById('grade-modal-select');
-    if (!select || !select.value) {
+    const gradeSelect = document.getElementById('grade-modal-select');
+    const classSelect = document.getElementById('class-modal-select');
+    if (!gradeSelect || !gradeSelect.value) {
       alert('学年を選択してください。');
       return;
     }
-    const grade = parseInt(select.value);
+    if (!classSelect || !classSelect.value) {
+      alert('組を選択してください。');
+      return;
+    }
+    const grade = parseInt(gradeSelect.value);
+    const classVal = parseInt(classSelect.value);
     const { email, data } = getUserData();
     data.grade = grade;
+    data.class = classVal;
     saveUserData(email, data);
     const modal = document.getElementById('grade-modal');
     if (modal) modal.style.display = 'none';
-    // 学年保存後、新規ユーザーならオンボーディングを表示
+    // 保存後、新規ユーザーならオンボーディングを表示
     if (localStorage.getItem('mirai_isNewUser') === 'true') {
       openOnboarding();
     }

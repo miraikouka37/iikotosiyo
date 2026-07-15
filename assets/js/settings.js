@@ -29,9 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('settings-name').value = userData.name;
     document.getElementById('settings-email').value = userData.id;
-    // 管理者には学年欄を非表示
+    // 管理者には学年・組欄を非表示
     const gradeGroup = document.getElementById('settings-grade-group');
     if (gradeGroup) gradeGroup.style.display = 'none';
+    const classGroup = document.getElementById('settings-class-group');
+    if (classGroup) classGroup.style.display = 'none';
   } else {
     const safeEmail = currentUser.email.replace(/\./g, '_');
     db.ref('mirai_users/' + safeEmail).once('value').then(snapshot => {
@@ -47,6 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const gradeSelect = document.getElementById('settings-grade');
       if (gradeSelect && userData.grade) {
         gradeSelect.value = userData.grade.toString();
+      }
+      // 組をセレクトに反映
+      const classSelect = document.getElementById('settings-class');
+      if (classSelect && userData.class) {
+        classSelect.value = userData.class.toString();
       }
     }).catch(handleDatabaseError);
   }
@@ -115,6 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const gradeEl = document.getElementById('settings-grade');
       if (gradeEl && gradeEl.value) {
         updatedData.grade = parseInt(gradeEl.value);
+      }
+      // 組を保存（空欄の場合はそのまま）
+      const classEl = document.getElementById('settings-class');
+      if (classEl && classEl.value) {
+        updatedData.class = parseInt(classEl.value);
       }
       // Ensure email property inside is updated
       updatedData.email = newEmail; 
