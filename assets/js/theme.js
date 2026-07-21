@@ -1,13 +1,20 @@
 /**
- * theme.js — FUTURE POINTS 共通テーマ管理（無効化版）
- * テーマ切り替え機能を無効化し、ライトモードに固定します。
+ * theme.js — FUTURE POINTS 共通テーマ管理
+ * 黒を基調としたダークテーマをデフォルトとして適用します。
  */
 
 (function () {
   'use strict';
 
-  // FOUC防止クラスの削除とライトモードの強制適用
+  // FOUC防止クラスの削除とダークモードの適用
   document.documentElement.classList.remove('dark-init');
+
+  function applyDarkTheme() {
+    const body = document.body;
+    if (!body) return;
+    body.classList.add('dark');
+    body.classList.remove('light');
+  }
 
   function applyLightTheme() {
     const body = document.body;
@@ -16,18 +23,30 @@
     body.classList.remove('dark');
   }
 
-  // グローバル関数は定義しておくが、何もしない
   window.toggleTheme = function () {
-    // テーマ切り替え機能は無効化されています
+    const body = document.body;
+    if (!body) return;
+    if (body.classList.contains('light')) {
+      applyDarkTheme();
+      localStorage.setItem('future_points_theme', 'dark');
+    } else {
+      applyLightTheme();
+      localStorage.setItem('future_points_theme', 'light');
+    }
   };
 
-  // 即時適用
-  applyLightTheme();
-
-  // DOMContentLoaded時にも実行して確実にライトモードを適用
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyLightTheme);
+  const savedTheme = localStorage.getItem('future_points_theme');
+  if (savedTheme === 'light') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyLightTheme);
+    } else {
+      applyLightTheme();
+    }
   } else {
-    applyLightTheme();
+    applyDarkTheme();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyDarkTheme);
+    }
   }
 })();
+

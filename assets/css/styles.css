@@ -1,10 +1,10 @@
 
 :root {
-  --bg: #f8fafc;
-  --panel-bg: #ffffff;
-  --panel-border: #e2e8f0;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
+  --bg: #090a0f;
+  --panel-bg: rgba(18, 22, 34, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
   --accent: #3b82f6;
   --accent-inverse: #ffffff;
   --success: #10b981;
@@ -31,10 +31,12 @@ body {
 /* Base Panel Style */
 .glass-panel {
   background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: var(--transition);
 }
 
@@ -71,7 +73,7 @@ p {
 
 .form-control {
   width: 100%;
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -81,11 +83,16 @@ p {
   transition: var(--transition);
 }
 
+.form-control option {
+  background-color: #121624;
+  color: #f8fafc;
+}
+
 .form-control:focus {
   outline: none;
   border-color: var(--accent);
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 /* Buttons */
@@ -105,26 +112,28 @@ p {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: var(--accent-inverse);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
 }
 
 .btn-outline {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
   border-color: var(--panel-border);
+  backdrop-filter: blur(8px);
 }
 
 .btn-outline:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
 }
 
 /* Auth Pages */
@@ -186,9 +195,10 @@ p {
   align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
   color: #ffffff;
-  border: none;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(99, 102, 241, 0.15);
 }
 
 .points-display {
@@ -222,7 +232,7 @@ p {
 }
 
 .list-item:hover {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .item-info h4 {
@@ -337,79 +347,83 @@ p {
 }
 
 /* FOUC防止: html.dark-init の段階でフラッシュを防ぐ */
+/* FOUC防止 */
 html.dark-init body {
-  background-color: #0f172a;
+  background-color: #090a0f;
   color: #f8fafc;
 }
 
-/* Dark Mode — class-based (manual toggle or system preference) */
+/* Light Mode — override for light preference */
+body.light {
+  --bg: #f8fafc;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --accent: #3b82f6;
+  --accent-inverse: #ffffff;
+}
+
+body.light .glass-panel {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+body.light .form-control {
+  background: #f1f5f9;
+}
+
+body.light .form-control option {
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+body.light .form-control:focus {
+  background: #ffffff;
+}
+
+body.light .btn-outline {
+  background: #ffffff;
+  color: var(--text-main);
+  border-color: var(--panel-border);
+}
+
+body.light .btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+body.light .list-item:hover {
+  background: #f8fafc;
+}
+
+/* Dark Mode (Default) */
 body.dark {
-  --bg: #0f172a;
-  --panel-bg: #1e293b;
-  --panel-border: #334155;
+  --bg: #090a0f;
+  --panel-bg: rgba(18, 22, 34, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.1);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --accent: #3b82f6;
   --accent-inverse: #ffffff;
 }
 
-body.dark .form-control {
-  background: #0f172a;
-  color: var(--text-main);
+/* Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-body.dark .form-control:focus {
-  background: #1e293b;
+::-webkit-scrollbar-track {
+  background: #090a0f;
 }
 
-body.dark .btn-outline {
-  background: transparent;
-  color: var(--text-main);
+::-webkit-scrollbar-thumb {
+  background: #232b3e;
+  border-radius: 4px;
 }
 
-body.dark .btn-outline:hover {
-  background: #334155;
-  border-color: #475569;
-}
-
-body.dark .list-item:hover {
-  background: #334155;
-}
-
-/* Keep system preference as fallback if no class set */
-@media (prefers-color-scheme: dark) {
-  body:not(.light):not(.dark) {
-    --bg: #0f172a;
-    --panel-bg: #1e293b;
-    --panel-border: #334155;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent: #3b82f6;
-    --accent-inverse: #ffffff;
-  }
-
-  body:not(.light):not(.dark) .form-control {
-    background: #0f172a;
-    color: var(--text-main);
-  }
-
-  body:not(.light):not(.dark) .form-control:focus {
-    background: #1e293b;
-  }
-
-  body:not(.light):not(.dark) .btn-outline {
-    background: transparent;
-    color: var(--text-main);
-  }
-
-  body:not(.light):not(.dark) .btn-outline:hover {
-    background: #334155;
-    border-color: #475569;
-  }
-
-  body:not(.light):not(.dark) .list-item:hover {
-    background: #334155;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
 }
 
 /* Rank Badges */
