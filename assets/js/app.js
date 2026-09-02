@@ -332,6 +332,9 @@
 
     const gradeFilter = document.getElementById('filter-ranking-grade');
     const selectedGrade = gradeFilter ? gradeFilter.value : 'all';
+    
+    const classFilter = document.getElementById('filter-ranking-class');
+    const selectedClass = classFilter ? classFilter.value : 'all';
 
     rankingContainer.innerHTML = '';
     let userList = Object.keys(allUsersData)
@@ -342,12 +345,18 @@
         rank: allUsersData[key].rank || 'E',
         rankPoints: allUsersData[key].rankPoints || 0,
         totalRankPoints: allUsersData[key].totalRankPoints || 0,
-        grade: allUsersData[key].grade || null
+        grade: allUsersData[key].grade || null,
+        class: allUsersData[key].class || null
       }));
 
     // 学年フィルタリング
     if (selectedGrade !== 'all') {
-      userList = userList.filter(u => u.grade === parseInt(selectedGrade));
+      userList = userList.filter(u => parseInt(u.grade, 10) === parseInt(selectedGrade, 10));
+    }
+    
+    // 組フィルタリング
+    if (selectedClass !== 'all') {
+      userList = userList.filter(u => parseInt(u.class, 10) === parseInt(selectedClass, 10));
     }
 
     if (currentRankingTab === 'points') {
@@ -364,7 +373,7 @@
     }
 
     if (userList.length === 0) {
-      rankingContainer.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">この学年のユーザーがいません</li>';
+      rankingContainer.innerHTML = '<li class="list-item" style="justify-content: center; color: var(--text-muted);">該当するユーザーがいません</li>';
       return;
     }
 

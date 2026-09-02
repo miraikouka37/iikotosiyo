@@ -125,12 +125,23 @@
               <span id="tab-ranking-rank" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; color: var(--text-muted); padding-bottom: 0.2rem; border-bottom: 2px solid transparent;" onclick="switchRankingTab('rank')">ランク</span>
             </div>
           </div>
-          <div style="margin-bottom: 1rem;">
-            <select id="filter-ranking-grade" class="form-control" style="font-size: 0.8125rem; padding: 0.4rem 0.75rem;" onchange="renderRanking()">
+          <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+            <select id="filter-ranking-grade" class="form-control" style="font-size: 0.8125rem; padding: 0.4rem 0.75rem; flex: 1;" onchange="renderRanking()">
               <option value="all">全学年</option>
               <option value="1">1年生</option>
               <option value="2">2年生</option>
               <option value="3">3年生</option>
+            </select>
+            <select id="filter-ranking-class" class="form-control" style="font-size: 0.8125rem; padding: 0.4rem 0.75rem; flex: 1;" onchange="renderRanking()">
+              <option value="all">全組</option>
+              <option value="1">1組</option>
+              <option value="2">2組</option>
+              <option value="3">3組</option>
+              <option value="4">4組</option>
+              <option value="5">5組</option>
+              <option value="6">6組</option>
+              <option value="7">7組</option>
+              <option value="8">8組</option>
             </select>
           </div>
           <ul class="action-list" id="ranking-container" style="overflow-y: auto; max-height: 250px; margin-bottom: 1.5rem;">

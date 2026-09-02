@@ -4,6 +4,7 @@
   let currentRankView = 'total';
   let userSearchTerm = '';
   let adminGradeFilter = 'all';
+  let adminClassFilter = 'all';
   let allUsersData = null;
   let allFeedbacksData = [];
   let allReportsData = [];
@@ -121,6 +122,15 @@
       });
     }
 
+    // Class filter listener
+    const classFilterEl = document.getElementById('admin-filter-class');
+    if (classFilterEl) {
+      classFilterEl.addEventListener('change', (e) => {
+        adminClassFilter = e.target.value;
+        renderAdminUsers();
+      });
+    }
+
     // Tab switcher
     document.querySelectorAll('.rank-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -203,8 +213,9 @@
 
     const filteredList = userList.filter(u => {
       const matchSearch = u.name.toLowerCase().includes(userSearchTerm) || u.email.toLowerCase().includes(userSearchTerm);
-      const matchGrade = adminGradeFilter === 'all' || u.grade === parseInt(adminGradeFilter);
-      return matchSearch && matchGrade;
+      const matchGrade = adminGradeFilter === 'all' || parseInt(u.grade, 10) === parseInt(adminGradeFilter, 10);
+      const matchClass = adminClassFilter === 'all' || parseInt(u.class, 10) === parseInt(adminClassFilter, 10);
+      return matchSearch && matchGrade && matchClass;
     });
 
     if (filteredList.length === 0) {
@@ -302,15 +313,27 @@
     const currentRank = user.rank || 'E';
     const currentTotalRP = user.totalRankPoints || 0;
 
-    const newTotalRPStr = prompt(
-      `【${user.name}】の新しい累計ランクポイントを入力してください:\n(現在: 累計 ${currentTotalRP} RP / ランク: ${currentRank}ランク)`,
+    const inputStr = prompt(
+      `【${user.name}】の新しい累計ランクポイント(数字)、または新しいランク(S, A, B, C, D, E)を入力してください:\n(現在: 累計 ${currentTotalRP} RP / ランク: ${currentRank}ランク)`,
       currentTotalRP
     );
-    if (newTotalRPStr === null) return;
-    const newTotalRP = parseInt(newTotalRPStr, 10);
-    if (isNaN(newTotalRP) || newTotalRP < 0) {
-      alert('無効な値です。0以上の整数を入力してください。');
-      return;
+    if (inputStr === null) return;
+    
+    let newTotalRP = 0;
+    const inputRank = inputStr.trim().toUpperCase();
+    
+    if (rankOrder.includes(inputRank)) {
+      let reqRP = 0;
+      for (let i = 0; i < rankOrder.indexOf(inputRank); i++) {
+        reqRP += rankRequirements[rankOrder[i]];
+      }
+      newTotalRP = reqRP;
+    } else {
+      newTotalRP = parseInt(inputStr, 10);
+      if (isNaN(newTotalRP) || newTotalRP < 0) {
+        alert('無効な値です。0以上の整数、または S, A, B, C, D, E を入力してください。');
+        return;
+      }
     }
 
     // Auto-calculate rank and rank-level RP based on newTotalRP
