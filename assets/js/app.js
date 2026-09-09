@@ -351,13 +351,14 @@
 
     // 学年フィルタリング
     if (selectedGrade !== 'all') {
-      userList = userList.filter(u => parseInt(u.grade, 10) === parseInt(selectedGrade, 10));
+      userList = userList.filter(u => String(u.grade) === String(selectedGrade));
     }
-    
+
     // 組フィルタリング
     if (selectedClass !== 'all') {
-      userList = userList.filter(u => parseInt(u.class, 10) === parseInt(selectedClass, 10));
+      userList = userList.filter(u => String(u.class) === String(selectedClass));
     }
+
 
     if (currentRankingTab === 'points') {
       userList.sort((a, b) => b.points - a.points);
