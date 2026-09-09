@@ -136,6 +136,15 @@
       }
     });
 
+    const gradeFilter = document.getElementById('filter-ranking-grade');
+    if (gradeFilter) {
+      gradeFilter.addEventListener('change', renderRanking);
+    }
+    const classFilter = document.getElementById('filter-ranking-class');
+    if (classFilter) {
+      classFilter.addEventListener('change', renderRanking);
+    }
+
     renderDashboard();
   });
 
@@ -395,6 +404,8 @@
       rankingContainer.appendChild(li);
     });
   }
+
+  window.renderRanking = renderRanking;
 
   // 学年・組設定モーダルの送信処理
   window.submitUserGrade = function() {
