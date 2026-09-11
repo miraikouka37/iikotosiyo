@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     userData = JSON.parse(localStorage.getItem('mirai_admin_credentials')) || { id: 'S1', password: 'ciscoenpass', name: '管理者' };
     const emailLabel = document.getElementById('label-settings-email');
     if (emailLabel) emailLabel.innerText = "ログインID";
+    const emailTag = document.getElementById('label-settings-email-tag');
+    if (emailTag) emailTag.style.display = 'none';
+    const emailHint = document.getElementById('settings-email-hint');
+    if (emailHint) emailHint.style.display = 'none';
     // Change input type to text since ID doesn't need to be email
     const emailInput = document.getElementById('settings-email');
     if (emailInput) emailInput.type = "text";
