@@ -30,6 +30,7 @@
 
     const storedUser = JSON.parse(storedUserStr);
     userEmail = storedUser.email;
+    initCrypto(); // Initialize E2EE Keys
 
     // Real-time synchronization
     db.ref('mirai_users').on('value', snapshot => {
@@ -1209,6 +1210,315 @@
       document.querySelectorAll('.theme-toggle-label').forEach(el => {
         el.textContent = fbTheme === 'dark' ? '☀️ ライト' : '🌙 ダーク';
       });
+    }
+  };
+
+  // ---- E2EE Crypto Setup ----
+  let myPrivateKeyObj = null;
+
+  async function initCrypto() {
+    const myKey = userEmail.replace(/\./g, '_');
+    
+    // Check local storage for private key
+    const storedPriv = localStorage.getItem('mirai_priv_' + myKey);
+    const storedPub = localStorage.getItem('mirai_pub_' + myKey);
+
+    if (storedPriv && storedPub) {
+      try {
+        myPrivateKeyObj = await window.crypto.subtle.importKey(
+          "jwk",
+          JSON.parse(storedPriv),
+          { name: "ECDH", namedCurve: "P-256" },
+          true,
+          ["deriveKey"]
+        );
+        return; // Keys already exist
+      } catch(e) {
+        console.error("Failed to import existing key:", e);
+      }
+    }
+
+    // Generate new key pair
+    const keyPair = await window.crypto.subtle.generateKey(
+      { name: "ECDH", namedCurve: "P-256" },
+      true,
+      ["deriveKey"]
+    );
+    myPrivateKeyObj = keyPair.privateKey;
+
+    const exportedPriv = await window.crypto.subtle.exportKey("jwk", keyPair.privateKey);
+    const exportedPub = await window.crypto.subtle.exportKey("jwk", keyPair.publicKey);
+
+    localStorage.setItem('mirai_priv_' + myKey, JSON.stringify(exportedPriv));
+    localStorage.setItem('mirai_pub_' + myKey, JSON.stringify(exportedPub));
+
+    // Upload public key to Firebase
+    db.ref('mirai_users/' + myKey + '/publicKey').set(exportedPub).catch(console.error);
+  }
+
+  async function getSharedKey(otherPublicKeyJwk) {
+    if (!myPrivateKeyObj || !otherPublicKeyJwk) return null;
+    try {
+      const otherPubObj = await window.crypto.subtle.importKey(
+        "jwk",
+        otherPublicKeyJwk,
+        { name: "ECDH", namedCurve: "P-256" },
+        true,
+        []
+      );
+      
+      const sharedKey = await window.crypto.subtle.deriveKey(
+        { name: "ECDH", public: otherPubObj },
+        myPrivateKeyObj,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+      return sharedKey;
+    } catch(e) {
+      console.error("Failed to derive shared key", e);
+      return null;
+    }
+  }
+
+  function bufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+  function base64ToBuffer(base64) {
+    const binary = window.atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  async function encryptText(text, sharedKey) {
+    const enc = new TextEncoder();
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const ciphertext = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      sharedKey,
+      enc.encode(text)
+    );
+    return {
+      ct: bufferToBase64(ciphertext),
+      iv: bufferToBase64(iv)
+    };
+  }
+
+  async function decryptText(encryptedObj, sharedKey) {
+    if (!encryptedObj || !encryptedObj.ct || !encryptedObj.iv) return null;
+    try {
+      const ctBuffer = base64ToBuffer(encryptedObj.ct);
+      const ivBuffer = base64ToBuffer(encryptedObj.iv);
+      const decrypted = await window.crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: ivBuffer },
+        sharedKey,
+        ctBuffer
+      );
+      const dec = new TextDecoder();
+      return dec.decode(decrypted);
+    } catch(e) {
+      return null;
+    }
+  }
+
+  // ---- DM (Chat) Feature ----
+  let currentChatUserId = null;
+  let chatListenerRef = null;
+  let allChatUsers = [];
+  let currentSharedKey = null;
+
+  window.openChatModal = function() {
+    const modal = document.getElementById('chat-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      const badge = document.getElementById('chat-unread-badge');
+      if (badge) badge.style.display = 'none';
+      loadChatUsers();
+    }
+  };
+
+  window.closeChatModal = function() {
+    const modal = document.getElementById('chat-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      if (chatListenerRef) {
+        chatListenerRef.off();
+        chatListenerRef = null;
+      }
+      currentChatUserId = null;
+      currentSharedKey = null;
+      document.getElementById('chat-main-area').style.display = 'none';
+      document.getElementById('chat-placeholder').style.display = 'flex';
+    }
+  };
+
+  function loadChatUsers() {
+    if (!allUsersData) return;
+    const userList = document.getElementById('chat-user-list');
+    if (!userList) return;
+    userList.innerHTML = '';
+    const myKey = userEmail.replace(/\./g, '_');
+    
+    allChatUsers = Object.keys(allUsersData)
+      .filter(key => !key.startsWith('{') && key !== myKey && allUsersData[key].role !== 'admin' && key !== 'S1')
+      .map(key => ({
+        id: key,
+        name: allUsersData[key].name || '名無し',
+        email: allUsersData[key].email || key.replace(/_/g, '.'),
+        publicKey: allUsersData[key].publicKey || null
+      }));
+    
+    renderChatUsers(allChatUsers);
+  }
+
+  window.filterChatUsers = function() {
+    const query = document.getElementById('chat-user-search').value.toLowerCase();
+    const filtered = allChatUsers.filter(u => u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
+    renderChatUsers(filtered);
+  };
+
+  function renderChatUsers(users) {
+    const userList = document.getElementById('chat-user-list');
+    if (!userList) return;
+    userList.innerHTML = '';
+    if (users.length === 0) {
+      userList.innerHTML = '<li style="padding: 1rem; text-align: center; color: var(--text-muted);">ユーザーが見つかりません</li>';
+      return;
+    }
+    users.forEach(u => {
+      const li = document.createElement('li');
+      li.className = 'chat-user-item';
+      if (currentChatUserId === u.id) li.classList.add('active');
+      const initial = u.name.charAt(0);
+      li.innerHTML = `
+        <div class="chat-user-avatar">${escapeHTML(initial)}</div>
+        <div>
+          <div style="font-weight: bold; font-size: 0.9375rem;">${escapeHTML(u.name)}</div>
+        </div>
+      `;
+      li.onclick = () => selectChatUser(u);
+      userList.appendChild(li);
+    });
+  }
+
+  function getChatId(myKey, otherKey) {
+    return [myKey, otherKey].sort().join('_vs_');
+  }
+
+  async function selectChatUser(user) {
+    if (!user.publicKey) {
+      alert('相手ユーザーがまだ暗号化対応バージョンにログインしていないため、メッセージを送れません。');
+      return;
+    }
+
+    currentChatUserId = user.id;
+    currentSharedKey = await getSharedKey(user.publicKey);
+
+    if (!currentSharedKey) {
+      alert('暗号化キーの生成に失敗しました。');
+      return;
+    }
+
+    document.getElementById('chat-placeholder').style.display = 'none';
+    document.getElementById('chat-main-area').style.display = 'flex';
+    document.getElementById('chat-header-name').textContent = user.name;
+    document.getElementById('chat-header-avatar').textContent = user.name.charAt(0);
+    
+    filterChatUsers(); // Maintain search filter if active
+
+    if (chatListenerRef) {
+      chatListenerRef.off();
+    }
+    
+    const myKey = userEmail.replace(/\./g, '_');
+    const chatId = getChatId(myKey, user.id);
+    
+    chatListenerRef = db.ref('mirai_messages/' + chatId).orderByChild('timestamp').limitToLast(100);
+    chatListenerRef.on('value', snapshot => {
+      renderChatMessages(snapshot.val() || {});
+    }, handleDatabaseError);
+  }
+
+  async function renderChatMessages(messagesObj) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    container.innerHTML = '';
+    const myKey = userEmail.replace(/\./g, '_');
+    
+    const messages = Object.keys(messagesObj).map(key => messagesObj[key]);
+    messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    for (const msg of messages) {
+      const isMine = msg.sender === myKey;
+      const timeStr = new Date(msg.timestamp).toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
+      
+      let displayText = '[復号エラー: 暗号化されていないか、端末が異なります]';
+      if (msg.encrypted) {
+        const decrypted = await decryptText(msg.encrypted, currentSharedKey);
+        if (decrypted !== null) displayText = decrypted;
+      } else if (msg.text) {
+        // Fallback to plain text if exists
+        displayText = msg.text;
+      }
+
+      const div = document.createElement('div');
+      div.className = 'chat-bubble ' + (isMine ? 'chat-bubble-mine' : 'chat-bubble-theirs');
+      div.innerHTML = `
+        ${escapeHTML(displayText)}
+        <span class="chat-time">${timeStr}</span>
+      `;
+      container.appendChild(div);
+    }
+    
+    // Scroll to bottom
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+    }, 50);
+  }
+
+  window.handleChatKeyPress = function(e) {
+    if (e.key === 'Enter') {
+      sendChatMessage();
+    }
+  };
+
+  window.sendChatMessage = async function() {
+    if (!currentChatUserId || !currentSharedKey) return;
+    const input = document.getElementById('chat-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const myKey = userEmail.replace(/\./g, '_');
+    const chatId = getChatId(myKey, currentChatUserId);
+    
+    try {
+      const encryptedData = await encryptText(text, currentSharedKey);
+      
+      const newMsg = {
+        sender: myKey,
+        encrypted: encryptedData,
+        timestamp: new Date().toISOString()
+      };
+      
+      await db.ref('mirai_messages/' + chatId).push(newMsg);
+      input.value = '';
+    } catch(err) {
+      console.error(err);
+      if (err.message && err.message.includes("permission_denied")) {
+        alert('データベースへのアクセス権限がないため送信できません。');
+      } else {
+        alert('メッセージの送信に失敗しました。');
+      }
     }
   };
 

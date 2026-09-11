@@ -388,6 +388,54 @@
     </div>
   </div>
 
+  <!-- Chat FAB -->
+  <div class="chat-fab" id="chat-fab" onclick="openChatModal()" title="メッセージを開く">
+    💬
+    <div id="chat-unread-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--bg);"></div>
+  </div>
+
+  <!-- Chat Modal -->
+  <div id="chat-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
+    <div class="chat-modal-container">
+      
+      <!-- Sidebar -->
+      <div class="chat-sidebar">
+        <div style="padding: 1rem; border-bottom: 1px solid var(--panel-border); font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+          <span>メッセージ</span>
+          <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+        </div>
+        <div style="padding: 0.75rem;">
+          <input type="text" id="chat-user-search" class="form-control" placeholder="ユーザーを検索..." oninput="filterChatUsers()">
+        </div>
+        <ul class="chat-user-list" id="chat-user-list">
+          <li style="padding: 1rem; text-align: center; color: var(--text-muted);">読み込み中...</li>
+        </ul>
+      </div>
+
+      <!-- Main Chat Area -->
+      <div class="chat-main" id="chat-main-area" style="display: none;">
+        <div class="chat-header">
+          <div class="chat-user-avatar" id="chat-header-avatar">?</div>
+          <span id="chat-header-name">ユーザー名</span>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <!-- Messages will be injected here -->
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" placeholder="メッセージを入力..." onkeypress="handleChatKeyPress(event)">
+          <button onclick="sendChatMessage()">➤</button>
+        </div>
+      </div>
+      
+      <!-- Placeholder when no user is selected -->
+      <div id="chat-placeholder" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
+        <p>ユーザーを選択してメッセージを開始</p>
+      </div>
+
+    </div>
+  </div>
+
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
