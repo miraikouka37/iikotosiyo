@@ -1342,6 +1342,8 @@
       modal.style.display = 'flex';
       const badge = document.getElementById('chat-unread-badge');
       if (badge) badge.style.display = 'none';
+      const sidebar = document.getElementById('chat-sidebar');
+      if (sidebar) sidebar.style.display = 'flex';
       loadChatUsers();
     }
   };
@@ -1358,7 +1360,32 @@
       currentSharedKey = null;
       document.getElementById('chat-main-area').style.display = 'none';
       document.getElementById('chat-placeholder').style.display = 'flex';
+      const sidebar = document.getElementById('chat-sidebar');
+      if (sidebar) sidebar.style.display = 'flex';
     }
+  };
+
+  window.openChatInfoModal = function() {
+    const modal = document.getElementById('chat-info-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+
+  window.closeChatInfoModal = function() {
+    const modal = document.getElementById('chat-info-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.backToUserList = function() {
+    if (chatListenerRef) {
+      chatListenerRef.off();
+      chatListenerRef = null;
+    }
+    currentChatUserId = null;
+    currentSharedKey = null;
+    document.getElementById('chat-main-area').style.display = 'none';
+    document.getElementById('chat-placeholder').style.display = 'flex';
+    const sidebar = document.getElementById('chat-sidebar');
+    if (sidebar) sidebar.style.display = 'flex';
   };
 
   function loadChatUsers() {
@@ -1433,6 +1460,11 @@
     document.getElementById('chat-header-name').textContent = user.name;
     document.getElementById('chat-header-avatar').textContent = user.name.charAt(0);
     
+    if (window.innerWidth <= 600) {
+      const sidebar = document.getElementById('chat-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+    }
+
     filterChatUsers(); // Maintain search filter if active
 
     if (chatListenerRef) {
@@ -1454,6 +1486,12 @@
     container.innerHTML = '';
     const myKey = userEmail.replace(/\./g, '_');
     
+    // Top E2EE Security Banner
+    const e2eeBanner = document.createElement('div');
+    e2eeBanner.style.cssText = 'background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-align: center; color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.45;';
+    e2eeBanner.innerHTML = '🔒 このチャットは暗号化されており、管理者を含む第三者はメッセージを閲覧できません。';
+    container.appendChild(e2eeBanner);
+
     const messages = Object.keys(messagesObj).map(key => messagesObj[key]);
     messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     

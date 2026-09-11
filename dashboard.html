@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.6">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
 </head>
 
@@ -399,11 +399,24 @@
     <div class="chat-modal-container">
       
       <!-- Sidebar -->
-      <div class="chat-sidebar">
+      <div class="chat-sidebar" id="chat-sidebar">
         <div style="padding: 1rem; border-bottom: 1px solid var(--panel-border); font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
           <span>メッセージ</span>
-          <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button onclick="openChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1;" title="セキュリティ説明">ℹ️</button>
+            <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
+          </div>
         </div>
+
+        <!-- Security Banner -->
+        <div style="background: rgba(59, 130, 246, 0.1); border-bottom: 1px solid rgba(59, 130, 246, 0.2); padding: 0.65rem 0.85rem; font-size: 0.75rem; line-height: 1.45; color: var(--text-main); display: flex; align-items: flex-start; gap: 0.4rem;">
+          <span style="font-size: 1rem; flex-shrink: 0; line-height: 1;">🛡️</span>
+          <div>
+            <strong style="color: #60a5fa;">管理者も閲覧不可</strong><br>
+            <span style="color: var(--text-muted); font-size: 0.72rem;">端末間で暗号化されるため、管理者を含め第三者に内容は一切見られません。</span>
+          </div>
+        </div>
+
         <div style="padding: 0.75rem;">
           <input type="text" id="chat-user-search" class="form-control" placeholder="ユーザーを検索..." oninput="filterChatUsers()">
         </div>
@@ -414,9 +427,21 @@
 
       <!-- Main Chat Area -->
       <div class="chat-main" id="chat-main-area" style="display: none;">
-        <div class="chat-header">
-          <div class="chat-user-avatar" id="chat-header-avatar">?</div>
-          <span id="chat-header-name">ユーザー名</span>
+        <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button class="chat-back-btn" onclick="backToUserList()" style="display: none; background: transparent; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; padding-right: 0.25rem;">◀</button>
+            <div class="chat-user-avatar" id="chat-header-avatar">?</div>
+            <div>
+              <div id="chat-header-name" style="font-size: 1rem; font-weight: bold;">ユーザー名</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem;">
+                <span>🔒 管理者閲覧不可</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button onclick="openChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1;" title="セキュリティ説明">ℹ️</button>
+            <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
+          </div>
         </div>
         <div class="chat-messages" id="chat-messages">
           <!-- Messages will be injected here -->
@@ -428,11 +453,68 @@
       </div>
       
       <!-- Placeholder when no user is selected -->
-      <div id="chat-placeholder" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted);">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
-        <p>ユーザーを選択してメッセージを開始</p>
+      <div id="chat-placeholder" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; color: var(--text-main); overflow-y: auto;">
+        <div style="font-size: 3.5rem; margin-bottom: 0.75rem;">🔒</div>
+        <h3 style="color: var(--text-main); margin-bottom: 1rem; font-size: 1.35rem; font-weight: 800;">
+          ダイレクトメッセージ (DM)
+        </h3>
+        
+        <div style="max-width: 480px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 0.85rem;">
+            <span style="font-size: 1.3rem; flex-shrink: 0; line-height: 1;">🛡️</span>
+            <div>
+              <div style="font-weight: 700; font-size: 0.9375rem; color: #60a5fa; margin-bottom: 0.25rem;">管理者にも内容は一切見られません</div>
+              <div style="font-size: 0.8125rem; line-height: 1.55; color: var(--text-muted);">
+                このDM機能はメッセージを送信者の端末で暗号化し、受信者の端末でのみ解読（復号）します。データベースや管理者画面上でも暗号化された文字として保管されるため、<strong>管理者を含め第三者が内容を閲覧することは技術的に不可能</strong>です。
+              </div>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.85rem;">
+            <span style="font-size: 1.3rem; flex-shrink: 0; line-height: 1;">💬</span>
+            <div>
+              <div style="font-weight: 700; font-size: 0.9375rem; color: var(--text-main); margin-bottom: 0.25rem;">プライベートな1対1チャット</div>
+              <div style="font-size: 0.8125rem; line-height: 1.55; color: var(--text-muted);">
+                友達への相談や雑談など、プライバシーが完全に保護された安全な環境でメッセージをやり取りできます。
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <p style="font-size: 0.875rem; color: var(--text-muted);">
+          👈 左のリストからユーザーを選択してチャットを開始してください
+        </p>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Chat Info Modal -->
+  <div id="chat-info-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2100; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
+    <div class="glass-panel" style="width: 100%; max-width: 480px; padding: 2rem; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
+          <span>🔒</span> DMのセキュリティについて
+        </h3>
+        <button onclick="closeChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+      </div>
+      
+      <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+        <h4 style="color: #60a5fa; font-size: 0.95rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
+          🛡️ 管理者にも内容は一切見られません
+        </h4>
+        <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+          当アプリのDMは「<strong>エンドツーエンド暗号化（E2EE）</strong>」を採用しています。メッセージは送信者の端末で暗号化され、受信者の端末でのみ解読されます。<br><br>
+          データベースや管理者画面上にも暗号化されたデータしか存在しないため、<strong>管理者や第三者であってもメッセージの内容を閲覧・傍受することは技術的に不可能です</strong>。
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">
+        <div>💬 <strong>1対1の安全な通信</strong>：友達への相談や雑談を安心して行えます。</div>
+        <div>🔑 <strong>安全な鍵管理</strong>：暗号化の鍵はお使いのブラウザ内に安全に保管されています。</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="closeChatInfoModal()" style="width: 100%;">理解しました</button>
     </div>
   </div>
 
@@ -441,7 +523,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.2"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
-  <script defer src="assets/js/app.js?v=2.4"></script>
+  <script defer src="assets/js/app.js?v=2.5"></script>
 </body>
 
 </html>
