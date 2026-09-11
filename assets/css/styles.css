@@ -286,6 +286,29 @@ p {
 @media (max-width: 900px) {
   .col-main, .col-side { grid-column: span 12; }
   .grid { gap: 1rem; }
+
+  /* Dashboard mobile layout: Ranking displayed above Calendar */
+  .dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dashboard-grid > #dashboard-col-main,
+  .dashboard-grid > #dashboard-col-side {
+    display: contents !important;
+  }
+
+  .panel-balance { order: 1; }
+  .panel-actions { order: 2; }
+  .panel-ranking { order: 3; }
+  .panel-calendar { order: 4; }
+  .panel-grade-stats { order: 5; }
+  .panel-history { order: 6; }
+  .panel-feedback { order: 7; }
+  .panel-lost-found { order: 8; }
+  .panel-gallery { order: 9; }
+  .panel-recommendations { order: 10; }
 }
 
 @media (max-width: 480px) {

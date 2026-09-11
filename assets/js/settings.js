@@ -102,6 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // 一般ユーザーのメールアドレスドメイン制限 (@mirai-th.open.ed.jp および 秘密のドメイン @aaa)
+    const lowerEmail = newEmail.toLowerCase();
+    const isAllowedDomain = lowerEmail.endsWith('@mirai-th.open.ed.jp') || lowerEmail.endsWith('@aaa');
+    if (!isAllowedDomain) {
+      alert('メールアドレスは「@mirai-th.open.ed.jp」のドメインのみ使用可能です。');
+      return;
+    }
+
     const safePrev = previousEmail.replace(/\./g, '_');
     const safeNew = newEmail.replace(/\./g, '_');
 

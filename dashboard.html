@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.5">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
 </head>
 
@@ -34,18 +34,18 @@
 
     <div id="alert-container"></div>
 
-    <div class="grid">
+    <div class="grid dashboard-grid">
       <!-- Left Column -->
-      <div class="col-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="col-main" id="dashboard-col-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <!-- Balance Card -->
-        <div class="glass-panel points-card">
+        <div class="glass-panel points-card panel-balance">
           <p class="points-label">Current Balance</p>
           <div class="points-display" id="total-points">0</div>
           <p class="points-label mt-4" id="points-message">KEEP IT UP!</p>
         </div>
 
         <!-- Action Card -->
-        <div class="glass-panel">
+        <div class="glass-panel panel-actions">
           <h3 class="section-title">ポイント獲得</h3>
           <ul class="action-list">
             <li class="list-item">
@@ -101,7 +101,7 @@
 
 
         <!-- Calendar -->
-        <div class="glass-panel">
+        <div class="glass-panel panel-calendar" id="calendar-panel">
           <h3 class="section-title">チェックイン</h3>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <button class="btn btn-outline btn-sm btn-prev-month">◀</button>
@@ -115,9 +115,9 @@
       </div>
 
       <!-- Right Column -->
-      <div class="col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="col-side" id="dashboard-col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <!-- Ranking Card -->
-        <div class="glass-panel" style="display: flex; flex-direction: column;">
+        <div class="glass-panel panel-ranking" id="ranking-panel" style="display: flex; flex-direction: column;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h3 class="section-title" style="margin-bottom: 0;">ランキング</h3>
             <div style="display: flex; gap: 0.5rem;" id="ranking-tabs">
@@ -152,7 +152,7 @@
         </div>
 
         <!-- Grade Stats Card -->
-        <div class="glass-panel" id="grade-stats-panel">
+        <div class="glass-panel panel-grade-stats" id="grade-stats-panel">
           <h3 class="section-title">学年別対抗ステータス</h3>
           <div id="grade-stats-container">
             <div style="text-align: center; color: var(--text-muted);">読み込み中...</div>
@@ -160,7 +160,7 @@
         </div>
 
         <!-- History Card -->
-        <div class="glass-panel" style="flex: 1;">
+        <div class="glass-panel panel-history" id="history-panel" style="flex: 1;">
           <h3 class="section-title">最近の履歴</h3>
           <ul class="history-list" id="history-container">
             <li class="list-item" style="justify-content: center; color: var(--text-muted);">
@@ -170,7 +170,7 @@
         </div>
 
         <!-- Feedback Card -->
-        <div class="glass-panel">
+        <div class="glass-panel panel-feedback" id="feedback-panel">
           <h3 class="section-title">意見箱</h3>
           <p style="margin-bottom: 1rem; font-size: 0.8125rem;">管理者に要望を送信できます。</p>
           <div class="form-group">
@@ -180,7 +180,7 @@
         </div>
 
         <!-- Lost & Found Card -->
-        <div class="glass-panel">
+        <div class="glass-panel panel-lost-found" id="lost-found-panel">
           <h3 class="section-title">忘れ物掲示板</h3>
           <p style="margin-bottom: 1rem; font-size: 0.8125rem;">見つけた忘れ物をお知らせできます。</p>
           <div class="form-group">
@@ -199,7 +199,7 @@
       </div>
 
       <!-- Photos Gallery -->
-      <div class="col-main" style="grid-column: span 12;">
+      <div class="col-main panel-gallery" style="grid-column: span 12;">
         <div class="glass-panel">
           <h3 class="section-title">活動ギャラリー</h3>
           <div id="community-photos-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
@@ -209,7 +209,7 @@
       </div>
 
       <!-- Recommendations Gallery -->
-      <div class="col-main" style="grid-column: span 12;">
+      <div class="col-main panel-recommendations" style="grid-column: span 12;">
         <div class="glass-panel">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
             <h3 class="section-title" style="margin: 0;">みんなの「いい人」紹介</h3>

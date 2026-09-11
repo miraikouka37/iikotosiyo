@@ -62,13 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (signupForm) {
     signupForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('signup-name').value;
-      const email = document.getElementById('signup-email').value;
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
       const password = document.getElementById('signup-password').value;
       const gradeEl = document.getElementById('signup-grade');
       const grade = gradeEl ? gradeEl.value : '';
       const classEl = document.getElementById('signup-class');
       const classVal = classEl ? classEl.value : '';
+
+      // メールアドレスのドメイン制限 (@mirai-th.open.ed.jp および 秘密のドメイン @aaa)
+      const lowerEmail = email.toLowerCase();
+      const isAllowedDomain = lowerEmail.endsWith('@mirai-th.open.ed.jp') || lowerEmail.endsWith('@aaa');
+      if (!isAllowedDomain) {
+        alert('メールアドレスは「@mirai-th.open.ed.jp」のドメインのみ登録可能です。');
+        return;
+      }
 
       // 不適切な表現のバリデーション
       const forbiddenWords = [
