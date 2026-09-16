@@ -283,6 +283,18 @@ p {
 }
 
 /* Responsive */
+/* ================================================================
+   Mobile Collapsible "More" Section
+   ================================================================ */
+
+.mobile-more-toggle {
+  display: none; /* hidden on desktop */
+}
+
+.mobile-collapsible {
+  /* visible by default (desktop) */
+}
+
 @media (max-width: 900px) {
   .col-main, .col-side { grid-column: span 12; }
   .grid { gap: 1rem; }
@@ -302,13 +314,67 @@ p {
   .panel-balance { order: 1; }
   .panel-actions { order: 2; }
   .panel-ranking { order: 3; }
-  .panel-calendar { order: 4; }
-  .panel-grade-stats { order: 5; }
-  .panel-history { order: 6; }
-  .panel-feedback { order: 7; }
-  .panel-lost-found { order: 8; }
-  .panel-gallery { order: 9; }
-  .panel-recommendations { order: 10; }
+
+  /* "More" toggle button sits between always-visible and collapsible panels */
+  .mobile-more-toggle {
+    order: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .mobile-more-toggle:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent);
+  }
+
+  .mobile-more-toggle .toggle-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 0.75rem;
+  }
+
+  .mobile-more-toggle.expanded .toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  /* Collapsible panels — hidden by default on mobile */
+  .mobile-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .mobile-collapsible.mobile-visible {
+    max-height: 2000px; /* large enough to fit any panel */
+    opacity: 1;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .panel-calendar { order: 5; }
+  .panel-grade-stats { order: 6; }
+  .panel-history { order: 7; }
+  .panel-feedback { order: 8; }
+  .panel-lost-found { order: 9; }
+  .panel-gallery { order: 10; }
+  .panel-recommendations { order: 11; }
 }
 
 @media (max-width: 480px) {

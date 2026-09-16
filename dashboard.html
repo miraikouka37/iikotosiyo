@@ -101,7 +101,7 @@
 
 
         <!-- Calendar -->
-        <div class="glass-panel panel-calendar" id="calendar-panel">
+        <div class="glass-panel panel-calendar mobile-collapsible" id="calendar-panel">
           <h3 class="section-title">チェックイン</h3>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <button class="btn btn-outline btn-sm btn-prev-month">◀</button>
@@ -151,8 +151,13 @@
           </ul>
         </div>
 
+        <!-- Mobile "More" Toggle Button -->
+        <button class="mobile-more-toggle" id="mobile-more-btn" onclick="toggleMobilePanels()">
+          もっと見る <span class="toggle-arrow">▼</span>
+        </button>
+
         <!-- Grade Stats Card -->
-        <div class="glass-panel panel-grade-stats" id="grade-stats-panel">
+        <div class="glass-panel panel-grade-stats mobile-collapsible" id="grade-stats-panel">
           <h3 class="section-title">学年別対抗ステータス</h3>
           <div id="grade-stats-container">
             <div style="text-align: center; color: var(--text-muted);">読み込み中...</div>
@@ -160,7 +165,7 @@
         </div>
 
         <!-- History Card -->
-        <div class="glass-panel panel-history" id="history-panel" style="flex: 1;">
+        <div class="glass-panel panel-history mobile-collapsible" id="history-panel" style="flex: 1;">
           <h3 class="section-title">最近の履歴</h3>
           <ul class="history-list" id="history-container">
             <li class="list-item" style="justify-content: center; color: var(--text-muted);">
@@ -170,7 +175,7 @@
         </div>
 
         <!-- Feedback Card -->
-        <div class="glass-panel panel-feedback" id="feedback-panel">
+        <div class="glass-panel panel-feedback mobile-collapsible" id="feedback-panel">
           <h3 class="section-title">意見箱</h3>
           <p style="margin-bottom: 1rem; font-size: 0.8125rem;">管理者に要望を送信できます。</p>
           <div class="form-group">
@@ -180,7 +185,7 @@
         </div>
 
         <!-- Lost & Found Card -->
-        <div class="glass-panel panel-lost-found" id="lost-found-panel">
+        <div class="glass-panel panel-lost-found mobile-collapsible" id="lost-found-panel">
           <h3 class="section-title">忘れ物掲示板</h3>
           <p style="margin-bottom: 1rem; font-size: 0.8125rem;">見つけた忘れ物をお知らせできます。</p>
           <div class="form-group">
@@ -199,7 +204,7 @@
       </div>
 
       <!-- Photos Gallery -->
-      <div class="col-main panel-gallery" style="grid-column: span 12;">
+      <div class="col-main panel-gallery mobile-collapsible" style="grid-column: span 12;">
         <div class="glass-panel">
           <h3 class="section-title">活動ギャラリー</h3>
           <div id="community-photos-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
@@ -209,7 +214,7 @@
       </div>
 
       <!-- Recommendations Gallery -->
-      <div class="col-main panel-recommendations" style="grid-column: span 12;">
+      <div class="col-main panel-recommendations mobile-collapsible" style="grid-column: span 12;">
         <div class="glass-panel">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
             <h3 class="section-title" style="margin: 0;">みんなの「いい人」紹介</h3>
@@ -524,6 +529,23 @@
   <script defer src="assets/js/firebase-config.js?v=1.2"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
   <script defer src="assets/js/app.js?v=2.5"></script>
+  <script>
+    function toggleMobilePanels() {
+      var btn = document.getElementById('mobile-more-btn');
+      var panels = document.querySelectorAll('.mobile-collapsible');
+      var isExpanded = btn.classList.toggle('expanded');
+      panels.forEach(function(panel) {
+        if (isExpanded) {
+          panel.classList.add('mobile-visible');
+        } else {
+          panel.classList.remove('mobile-visible');
+        }
+      });
+      btn.innerHTML = isExpanded
+        ? '閉じる <span class="toggle-arrow">▼</span>'
+        : 'もっと見る <span class="toggle-arrow">▼</span>';
+    }
+  </script>
 </body>
 
 </html>
