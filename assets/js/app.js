@@ -310,30 +310,36 @@
     currentRankingTab = type;
     const tabPoints = document.getElementById('tab-ranking-points');
     const tabRank = document.getElementById('tab-ranking-rank');
-    if (type === 'points') {
-      if (tabPoints) {
-        tabPoints.style.fontWeight = '700';
-        tabPoints.style.color = 'var(--accent)';
-        tabPoints.style.borderColor = 'var(--accent)';
+    const tabGrade = document.getElementById('tab-ranking-grade');
+    const filters = document.getElementById('ranking-filters-container');
+
+    [tabPoints, tabRank, tabGrade].forEach(t => {
+      if (t) {
+        t.style.fontWeight = '400';
+        t.style.color = 'var(--text-muted)';
+        t.style.borderColor = 'transparent';
       }
-      if (tabRank) {
-        tabRank.style.fontWeight = '400';
-        tabRank.style.color = 'var(--text-muted)';
-        tabRank.style.borderColor = 'transparent';
-      }
-    } else {
-      if (tabRank) {
-        tabRank.style.fontWeight = '700';
-        tabRank.style.color = 'var(--accent)';
-        tabRank.style.borderColor = 'var(--accent)';
-      }
-      if (tabPoints) {
-        tabPoints.style.fontWeight = '400';
-        tabPoints.style.color = 'var(--text-muted)';
-        tabPoints.style.borderColor = 'transparent';
-      }
+    });
+
+    if (type === 'points' && tabPoints) {
+      tabPoints.style.fontWeight = '700';
+      tabPoints.style.color = 'var(--accent)';
+      tabPoints.style.borderColor = 'var(--accent)';
+      if (filters) filters.style.display = 'flex';
+      renderRanking();
+    } else if (type === 'rank' && tabRank) {
+      tabRank.style.fontWeight = '700';
+      tabRank.style.color = 'var(--accent)';
+      tabRank.style.borderColor = 'var(--accent)';
+      if (filters) filters.style.display = 'flex';
+      renderRanking();
+    } else if (type === 'grade' && tabGrade) {
+      tabGrade.style.fontWeight = '700';
+      tabGrade.style.color = 'var(--accent)';
+      tabGrade.style.borderColor = 'var(--accent)';
+      if (filters) filters.style.display = 'none';
+      renderGradeStats();
     }
-    renderRanking();
   };
 
   function renderRanking() {
@@ -438,7 +444,7 @@
 
   // 学年別対抗ステータスの描画
   function renderGradeStats() {
-    const container = document.getElementById('grade-stats-container');
+    const container = document.getElementById('ranking-container') || document.getElementById('grade-stats-container');
     if (!container || !allUsersData) return;
 
     const gradeColors = {

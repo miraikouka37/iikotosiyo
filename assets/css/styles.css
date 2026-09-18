@@ -282,17 +282,155 @@ p {
   font-weight: 700;
 }
 
-/* Responsive */
 /* ================================================================
-   Mobile Collapsible "More" Section
+   App Feature Shortcut Grid Launcher & Feature Modals
    ================================================================ */
 
-.mobile-more-toggle {
-  display: none; /* hidden on desktop */
+.app-grid-panel {
+  padding: 1.5rem;
 }
 
-.mobile-collapsible {
-  /* visible by default (desktop) */
+.app-grid-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+}
+
+.app-shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.app-shortcut-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.app-shortcut-card:hover,
+.app-shortcut-card:focus {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+.app-shortcut-card:active {
+  transform: translateY(-1px);
+}
+
+.app-card-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  line-height: 1;
+}
+
+.app-card-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.app-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Feature Modal Dialogs */
+.feature-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.feature-modal-box {
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+
+.feature-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 0.85rem;
+}
+
+.feature-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.75rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.feature-modal-close-btn:hover {
+  color: var(--text-main);
+}
+
+@media (max-width: 600px) {
+  .app-shortcut-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .app-shortcut-card {
+    padding: 1rem 0.75rem;
+  }
+
+  .app-card-icon-badge {
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
+  }
 }
 
 @media (max-width: 900px) {
@@ -400,62 +538,9 @@ p {
   }
 
   .panel-balance { order: 1; }
-  .panel-actions { order: 2; }
-  .panel-ranking { order: 3; }
-
-  /* "More" toggle button sits between always-visible and collapsible panels */
-  .mobile-more-toggle {
-    order: 4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 0.65rem 1rem;
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
-    color: var(--accent);
-    font-family: inherit;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-    user-select: none;
-  }
-
-  .mobile-more-toggle:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: var(--accent);
-  }
-
-  .mobile-more-toggle .toggle-arrow {
-    display: inline-block;
-    transition: transform 0.3s ease;
-    font-size: 0.75rem;
-  }
-
-  .mobile-more-toggle.expanded .toggle-arrow {
-    transform: rotate(180deg);
-  }
-
-  /* Collapsible panels — hidden by default on mobile */
-  .mobile-collapsible {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-
-  .mobile-collapsible.mobile-visible {
-    max-height: 2000px; /* large enough to fit any panel */
-    opacity: 1;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-
+  .app-shortcut-bar { order: 2; }
+  .panel-actions { order: 3; }
+  .panel-ranking { order: 4; }
   .panel-calendar { order: 5; }
   .panel-grade-stats { order: 6; }
   .panel-history { order: 7; }
