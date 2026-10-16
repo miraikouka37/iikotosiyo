@@ -258,6 +258,7 @@
     renderRecommendations();
     renderLostItems();
     renderGradeStats();
+    renderDailyTasks();
 
     // 初回ログイン時のオンボーディングと学年・組設定モーダル
     if (data.grade === undefined || data.grade === null || data.class === undefined || data.class === null) {
@@ -509,6 +510,116 @@
     });
   }
 
+  // 高校生活にふさわしい行動プール (50pt〜150pt)
+  const DAILY_TASKS_POOL = [
+    { title: "放課後や朝の自習に取り組んだ", desc: "授業外の自主的な学習時間", action: "自主学習の実施", amount: 150 },
+    { title: "委員会・係の仕事を完了した", desc: "担当の役割を責任を持って遂行", action: "委員会・係の活動", amount: 130 },
+    { title: "友達の勉強を手伝った・教えた", desc: "互いに教え合い学びを深める", action: "学習の教え合い", amount: 120 },
+    { title: "忘れ物・落とし物を届けた", desc: "職員室や持ち主へ速やかに届ける", action: "落とし物の届け出", amount: 100 },
+    { title: "図書室で読書・自習した", desc: "図書室の利用や本を借りる", action: "図書室の利用・読書", amount: 100 },
+    { title: "部活動で準備・片付けを率先", desc: "用具の手入れや会場準備に貢献", action: "部活動の準備・片付け", amount: 90 },
+    { title: "朝読書・朝学に集中して参加", desc: "一日の始まりの集中タイム", action: "朝学習への集中", amount: 80 },
+    { title: "配膳・給食/学食の片付け協力", desc: "マナーを守った食事と美化協力", action: "給食・食事の片付け協力", amount: 70 },
+    { title: "先生や仲間に感謝を伝えた", desc: "日常の「ありがとう」を言葉に", action: "感謝の言葉を伝える", amount: 70 },
+    { title: "健康管理（早起き・朝食）達成", desc: "元気に学校生活を送る基本習慣", action: "健康的な生活リズムの維持", amount: 60 },
+    { title: "元気よく挨拶・号令をした", desc: "先生や仲間への気持ちよい挨拶", action: "気持ちのよい挨拶・号令", amount: 50 },
+    { title: "教室の施錠・消灯を確認した", desc: "省エネと防犯への気配り", action: "施錠・消灯の安全確認", amount: 50 }
+  ];
+
+  // 日付文字列（YYYY-MM-DD）から毎日変わるランダムな3つのタスクを決定論的に抽出
+  function getDailyTasksForToday() {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    let seed = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+      seed = (seed * 31 + dateStr.charCodeAt(i)) & 0xffffffff;
+    }
+
+    function pseudoRandom() {
+      seed |= 0;
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    const pool = [...DAILY_TASKS_POOL];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(pseudoRandom() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, 3);
+  }
+
+  function renderDailyTasks() {
+    const listEl = document.getElementById('daily-tasks-list');
+    const { data } = getUserData();
+    const todayStr = new Date().toDateString();
+
+    if (listEl) {
+      const tasks = getDailyTasksForToday();
+      listEl.innerHTML = '';
+      tasks.forEach(task => {
+        const isDone = data.lastEarned && data.lastEarned[task.action] === todayStr;
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `
+          <div class="item-info">
+            <h4>${escapeHTML(task.title)}</h4>
+            <p>${escapeHTML(task.desc)}</p>
+          </div>
+          ${isDone ? `
+            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed; border: 1px solid var(--panel-border);">達成済み ✓</button>
+          ` : `
+            <button class="btn btn-primary btn-sm btn-earn" data-action="${escapeHTML(task.action)}" data-amount="${task.amount}">+${task.amount} pt</button>
+          `}
+        `;
+        listEl.appendChild(li);
+      });
+    }
+
+    // 常設タスクの状態反映（学校来ました・ごみ拾い）
+    const checkinBtn = document.getElementById('btn-checkin');
+    if (checkinBtn) {
+      if (data.lastCheckIn === todayStr) {
+        checkinBtn.disabled = true;
+        checkinBtn.innerText = '獲得済み ✓';
+        checkinBtn.classList.remove('btn-primary');
+        checkinBtn.classList.add('btn-secondary');
+        checkinBtn.style.opacity = '0.6';
+        checkinBtn.style.cursor = 'not-allowed';
+      } else {
+        checkinBtn.disabled = false;
+        checkinBtn.innerText = '+10 pt';
+        checkinBtn.classList.add('btn-primary');
+        checkinBtn.classList.remove('btn-secondary');
+        checkinBtn.style.opacity = '1';
+        checkinBtn.style.cursor = 'pointer';
+      }
+    }
+
+    const trashBtn = document.getElementById('btn-trash');
+    if (trashBtn) {
+      const countData = (data.earnedCount && data.earnedCount['ごみを拾った']) || { date: '', count: 0 };
+      const currentCount = countData.date === todayStr ? countData.count : 0;
+      if (currentCount >= 7) {
+        trashBtn.disabled = true;
+        trashBtn.innerText = '本日終了 (7/7)';
+        trashBtn.classList.remove('btn-primary');
+        trashBtn.classList.add('btn-secondary');
+        trashBtn.style.opacity = '0.6';
+        trashBtn.style.cursor = 'not-allowed';
+      } else {
+        trashBtn.disabled = false;
+        trashBtn.innerText = `+50 pt (${currentCount}/7)`;
+        trashBtn.classList.add('btn-primary');
+        trashBtn.classList.remove('btn-secondary');
+        trashBtn.style.opacity = '1';
+        trashBtn.style.cursor = 'pointer';
+      }
+    }
+  }
+
   function earnPoints(action, amount) {
     const { email, data } = getUserData();
     const todayStr = new Date().toDateString();
@@ -575,6 +686,10 @@
     }
     
     saveUserData(email, data);
+    renderDailyTasks();
+    if (!action.startsWith('[写真報告]')) {
+      alert(`「${action}」を完了し、+${amount} pt 獲得しました！🎉`);
+    }
   }
 
   window.logout = function() {

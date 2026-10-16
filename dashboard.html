@@ -47,36 +47,34 @@
         <!-- Action Card (ポイント獲得) -->
         <div class="glass-panel panel-actions" id="actions-panel">
           <h3 class="section-title">⚡ ポイント獲得</h3>
+          <!-- 常設タスク -->
           <ul class="action-list">
             <li class="list-item">
               <div class="item-info">
                 <h4>学校来ました</h4>
                 <p>1日1回ログインで獲得</p>
               </div>
-              <button class="btn btn-primary btn-sm btn-earn" data-action="デイリーチェックイン" data-amount="10">+10 pt</button>
+              <button class="btn btn-primary btn-sm btn-earn" id="btn-checkin" data-action="デイリーチェックイン" data-amount="10">+10 pt</button>
             </li>
             <li class="list-item">
               <div class="item-info">
                 <h4>ごみを拾った</h4>
                 <p>ごみ拾い時に申請（1日7回まで）</p>
               </div>
-              <button class="btn btn-primary btn-sm btn-earn" data-action="ごみを拾った" data-amount="50">+50 pt</button>
-            </li>
-            <li class="list-item">
-              <div class="item-info">
-                <h4>委員会・部活動参加</h4>
-                <p>活動完了時に申請</p>
-              </div>
-              <button class="btn btn-primary btn-sm btn-earn" data-action="委員会・部活動参加" data-amount="30">+30 pt</button>
-            </li>
-            <li class="list-item">
-              <div class="item-info">
-                <h4>サンクスポイントを送る</h4>
-                <p>友達に感謝を伝える</p>
-              </div>
-              <button class="btn btn-primary btn-sm btn-earn" data-action="サンクスポイント送信" data-amount="20">+20 pt</button>
+              <button class="btn btn-primary btn-sm btn-earn" id="btn-trash" data-action="ごみを拾った" data-amount="50">+50 pt</button>
             </li>
           </ul>
+
+          <!-- 日替わりデイリータスク (毎日ランダムで3つ) -->
+          <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--panel-border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">📅 本日のデイリーミッション (日替わり3選)</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">毎日0時更新</span>
+            </div>
+            <ul class="action-list" id="daily-tasks-list">
+              <!-- JSで動的に3件生成 -->
+            </ul>
+          </div>
 
           <!-- Photo Submission Section -->
           <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--panel-border);">
