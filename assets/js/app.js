@@ -587,10 +587,9 @@
         checkinBtn.classList.remove('btn-primary');
         checkinBtn.classList.add('btn-secondary');
         checkinBtn.style.opacity = '0.6';
-        checkinBtn.style.cursor = 'not-allowed';
       } else {
         checkinBtn.disabled = false;
-        checkinBtn.innerText = '+10 pt';
+        checkinBtn.innerText = '🎲 300〜1000 pt';
         checkinBtn.classList.add('btn-primary');
         checkinBtn.classList.remove('btn-secondary');
         checkinBtn.style.opacity = '1';
@@ -620,10 +619,35 @@
     }
   }
 
+  // 「学校来ました」のランダム抽選（300〜1000pt、高ポイントほど低確率）
+  function drawSchoolCheckInPoints() {
+    const r = Math.random() * 100;
+    let points, rarity;
+    if (r < 2) {
+      // 2%: 超激レア・特賞 (950〜1000pt)
+      points = 950 + Math.floor(Math.random() * 6) * 10;
+      rarity = '🎊【超大当たり！】';
+    } else if (r < 10) {
+      // 8%: 大当たり (750〜940pt)
+      points = 750 + Math.floor(Math.random() * 20) * 10;
+      rarity = '✨【大当たり！】';
+    } else if (r < 35) {
+      // 25%: 中当たり (500〜740pt)
+      points = 500 + Math.floor(Math.random() * 25) * 10;
+      rarity = '🌟【ナイス登校！】';
+    } else {
+      // 65%: 通常 (300〜490pt)
+      points = 300 + Math.floor(Math.random() * 20) * 10;
+      rarity = '🏫【登校ボーナス】';
+    }
+    return { points, rarity };
+  }
+
   function earnPoints(action, amount) {
     const { email, data } = getUserData();
     const todayStr = new Date().toDateString();
     data.lastEarned = data.lastEarned || {};
+    let checkInAlertMsg = null;
 
     if (action === 'デイリーチェックイン') {
       const todayObj = new Date();
@@ -639,6 +663,11 @@
       if (!data.checkInDates.includes(todayIso)) {
         data.checkInDates.push(todayIso);
       }
+
+      // 300〜1000ptのランダム抽選（1000付近は低確率）
+      const checkInResult = drawSchoolCheckInPoints();
+      amount = checkInResult.points;
+      checkInAlertMsg = `${checkInResult.rarity}\n本日の学校来ましたボーナス！ +${amount} pt 獲得しました！🎉`;
     } else if (action === 'ごみを拾った') {
       // ごみ拾いは1日7回まで
       // 古い制限データが残っている場合はクリア
@@ -688,7 +717,7 @@
     saveUserData(email, data);
     renderDailyTasks();
     if (!action.startsWith('[写真報告]')) {
-      alert(`「${action}」を完了し、+${amount} pt 獲得しました！🎉`);
+      alert(checkInAlertMsg || `「${action}」を完了し、+${amount} pt 獲得しました！🎉`);
     }
   }
 
