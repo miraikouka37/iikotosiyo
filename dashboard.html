@@ -298,12 +298,22 @@
 
         <!-- App Shortcut Menu Grid (その他の機能) -->
         <div class="glass-panel app-grid-panel" id="app-grid-panel">
-          <div class="app-grid-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            その他の機能
+          <div class="app-grid-header" onclick="toggleAppGridPanel()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; user-select: none;" title="クリックで折りたたみ（非表示/表示）">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>その他の機能</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <button type="button" id="btn-toggle-app-grid" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 9999px; pointer-events: none;">
+                <span id="app-grid-toggle-text">非表示にする ▲</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation(); hideAppGridPanelCompletely();" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 9999px; color: var(--text-muted);" title="このパネルを完全に非表示にする">
+                ✕
+              </button>
+            </div>
           </div>
 
-          <div class="app-shortcut-grid">
+          <div class="app-shortcut-grid" id="app-shortcut-grid" style="margin-top: 1.25rem;">
             <div class="app-shortcut-card" onclick="handleWaffleAction('calendar-modal')">
               <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
               <div class="app-card-title">カレンダー</div>
@@ -340,6 +350,13 @@
               <div class="app-card-sub">プライベート</div>
             </div>
           </div>
+        </div>
+
+        <!-- 完全に非表示にしたときの小さな再表示ボタン -->
+        <div id="app-grid-restore-container" style="display: none; text-align: right;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="restoreAppGridPanel()" style="font-size: 0.75rem; border-radius: 9999px; padding: 0.3rem 0.75rem; color: var(--text-muted);">
+            ＋ その他の機能を表示
+          </button>
         </div>
 
       </div>
@@ -919,6 +936,68 @@
         closeWaffleMenu();
       }
     });
+
+    function toggleAppGridPanel() {
+      var grid = document.getElementById('app-shortcut-grid');
+      var btnText = document.getElementById('app-grid-toggle-text');
+      var panel = document.getElementById('app-grid-panel');
+      if (!grid || !btnText) return;
+
+      var isHidden = grid.style.display === 'none';
+      if (isHidden) {
+        grid.style.display = 'grid';
+        btnText.innerText = '非表示にする ▲';
+        if (panel) panel.classList.remove('is-collapsed');
+        localStorage.setItem('mirai_app_grid_collapsed', 'false');
+      } else {
+        grid.style.display = 'none';
+        btnText.innerText = '表示する ▼';
+        if (panel) panel.classList.add('is-collapsed');
+        localStorage.setItem('mirai_app_grid_collapsed', 'true');
+      }
+    }
+
+    function hideAppGridPanelCompletely() {
+      var panel = document.getElementById('app-grid-panel');
+      var restoreBtn = document.getElementById('app-grid-restore-container');
+      if (panel) panel.style.display = 'none';
+      if (restoreBtn) restoreBtn.style.display = 'block';
+      localStorage.setItem('mirai_app_grid_completely_hidden', 'true');
+    }
+
+    function restoreAppGridPanel() {
+      var panel = document.getElementById('app-grid-panel');
+      var restoreBtn = document.getElementById('app-grid-restore-container');
+      var grid = document.getElementById('app-shortcut-grid');
+      var btnText = document.getElementById('app-grid-toggle-text');
+      if (panel) panel.style.display = 'block';
+      if (restoreBtn) restoreBtn.style.display = 'none';
+      if (grid) grid.style.display = 'grid';
+      if (btnText) btnText.innerText = '非表示にする ▲';
+      if (panel) panel.classList.remove('is-collapsed');
+      localStorage.setItem('mirai_app_grid_completely_hidden', 'false');
+      localStorage.setItem('mirai_app_grid_collapsed', 'false');
+    }
+
+    (function initAppGridState() {
+      try {
+        if (localStorage.getItem('mirai_app_grid_completely_hidden') === 'true') {
+          var panel = document.getElementById('app-grid-panel');
+          var restoreBtn = document.getElementById('app-grid-restore-container');
+          if (panel) panel.style.display = 'none';
+          if (restoreBtn) restoreBtn.style.display = 'block';
+        } else if (localStorage.getItem('mirai_app_grid_collapsed') === 'true') {
+          var grid = document.getElementById('app-shortcut-grid');
+          var btnText = document.getElementById('app-grid-toggle-text');
+          var panel = document.getElementById('app-grid-panel');
+          if (grid && btnText) {
+            grid.style.display = 'none';
+            btnText.innerText = '表示する ▼';
+            if (panel) panel.classList.add('is-collapsed');
+          }
+        }
+      } catch (e) {}
+    })();
   </script>
 </body>
 
