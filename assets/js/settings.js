@@ -62,9 +62,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(handleDatabaseError);
   }
 
+  // 画面表示設定（ワッフルメニュー）の初期化
+  const waffleToggle = document.getElementById('settings-show-waffle');
+  if (waffleToggle) {
+    const isWaffleVisible = localStorage.getItem('mirai_show_waffle') !== 'false';
+    waffleToggle.checked = isWaffleVisible;
+    waffleToggle.addEventListener('change', () => {
+      localStorage.setItem('mirai_show_waffle', waffleToggle.checked ? 'true' : 'false');
+    });
+  }
+
   const form = document.getElementById('settings-form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    if (waffleToggle) {
+      localStorage.setItem('mirai_show_waffle', waffleToggle.checked ? 'true' : 'false');
+    }
 
     const previousEmail = currentUser.email;
     const newName = document.getElementById('settings-name').value;

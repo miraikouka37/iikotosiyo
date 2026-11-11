@@ -89,6 +89,14 @@
                 <div class="waffle-item-sub">プライベート</div>
               </button>
             </div>
+            <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: center;">
+              <button type="button" onclick="hideWaffleMenuPermanently()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; padding: 0.2rem 0.25rem; border-radius: 4px; transition: color 0.15s ease;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-muted)'" title="設定画面からいつでも再表示できます">
+                🚫 ワッフルメニューを非表示
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="closeWaffleMenu()" style="padding: 0.25rem 0.65rem; font-size: 0.72rem;">
+                閉じる
+              </button>
+            </div>
           </div>
         </div>
         <span class="user-name" id="display-name">ユーザー</span>
@@ -923,6 +931,29 @@
         openFeatureModal(action);
       }
     }
+
+    function applyWaffleVisibility() {
+      var container = document.getElementById('waffle-menu-container');
+      if (!container) return;
+      var showWaffle = localStorage.getItem('mirai_show_waffle');
+      if (showWaffle === 'false') {
+        container.style.display = 'none';
+      } else {
+        container.style.display = 'inline-flex';
+      }
+    }
+
+    function hideWaffleMenuPermanently() {
+      closeWaffleMenu();
+      localStorage.setItem('mirai_show_waffle', 'false');
+      var container = document.getElementById('waffle-menu-container');
+      if (container) {
+        container.style.display = 'none';
+      }
+      alert('ヘッダーのワッフルメニューを非表示にしました。\n※設定ページ（右上の設定ボタン）の画面表示設定からいつでも再表示できます。');
+    }
+
+    applyWaffleVisibility();
 
     document.addEventListener('click', function(e) {
       var container = document.getElementById('waffle-menu-container');
