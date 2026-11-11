@@ -971,3 +971,230 @@ body.dark {
     display: inline-flex !important;
   }
 }
+
+/* ================================================================
+   Waffle Menu (その他メニュー)
+   ================================================================ */
+.waffle-menu-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.waffle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.waffle-btn:hover,
+.waffle-btn:focus-visible,
+.waffle-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.06);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.35);
+}
+
+.waffle-btn:active {
+  transform: scale(0.95);
+}
+
+.waffle-icon {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: currentColor;
+  transition: transform 0.25s ease;
+}
+
+.waffle-btn.active .waffle-icon {
+  transform: rotate(90deg);
+}
+
+.waffle-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 310px;
+  padding: 1rem;
+  border-radius: 18px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.96);
+  transform-origin: top right;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.2s;
+  pointer-events: none;
+}
+
+.waffle-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.waffle-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.65rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.waffle-dropdown-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.waffle-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.waffle-close-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.waffle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.waffle-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.25rem 0.55rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  user-select: none;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.waffle-item:hover,
+.waffle-item:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.waffle-item:active {
+  transform: translateY(0);
+}
+
+.waffle-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.waffle-item:hover .waffle-item-icon {
+  transform: scale(1.08);
+}
+
+.waffle-item-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-bottom: 0.1rem;
+}
+
+.waffle-item-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.1;
+}
+
+/* Light Theme overrides */
+body.light .waffle-btn {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body.light .waffle-btn:hover,
+body.light .waffle-btn.active {
+  background: #eff6ff;
+  border-color: var(--accent);
+}
+
+body.light .waffle-dropdown {
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+body.light .waffle-close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.light .waffle-item:hover,
+body.light .waffle-item:focus-visible {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .waffle-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    transform-origin: top right;
+  }
+}

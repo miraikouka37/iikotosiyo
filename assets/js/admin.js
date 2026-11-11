@@ -10,6 +10,17 @@
   let allReportsData = [];
   let allRecommendationsData = [];
   let allLostItemsData = [];
+  let allCampusPinsData = {};
+  let adminPinCategoryFilter = 'all';
+  let adminPinSearchTerm = '';
+
+  const CAMPUS_PIN_CATEGORIES = {
+    cleanup: { label: '美化・ごみ拾い', icon: '🌱', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' },
+    lost: { label: '忘れ物・落とし物', icon: '🔍', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' },
+    notice: { label: '注意・連絡事項', icon: '⚠️', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },
+    spot: { label: 'おすすめ・憩い', icon: '💡', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' },
+    facility: { label: '校舎・施設メモ', icon: '🏫', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.15)' }
+  };
 
   let hasShownDatabaseError = false;
   function handleDatabaseError(error) {
@@ -83,6 +94,28 @@
       });
       renderLostItems();
     }, handleDatabaseError);
+
+    db.ref('mirai_campus_pins').on('value', snapshot => {
+      allCampusPinsData = snapshot.val() || {};
+      renderAdminCampusPins();
+    }, handleDatabaseError);
+
+    // キャンパスマップ ピン管理のフィルター & 検索
+    const pinCatFilter = document.getElementById('admin-pin-filter-category');
+    if (pinCatFilter) {
+      pinCatFilter.addEventListener('change', (e) => {
+        adminPinCategoryFilter = e.target.value;
+        renderAdminCampusPins();
+      });
+    }
+
+    const pinSearchInput = document.getElementById('admin-pin-search');
+    if (pinSearchInput) {
+      pinSearchInput.addEventListener('input', (e) => {
+        adminPinSearchTerm = e.target.value.toLowerCase().trim();
+        renderAdminCampusPins();
+      });
+    }
 
     // Event Delegation for Table Actions
     const tbody = document.getElementById('admin-user-list');
@@ -966,5 +999,205 @@
       alert('今週は変動したユーザーはいませんでした。');
     }
   };
+
+  // ==========================================
+  // キャンパスマップ ピン管理機能
+  // ==========================================
+
+  function renderAdminCampusPins() {
+    const tbody = document.getElementById('admin-pins-table-body');
+    const badge = document.getElementById('admin-pins-count-badge');
+    if (!tbody) return;
+
+    const allPins = Object.values(allCampusPinsData || {});
+    const now = Date.now();
+
+    // フィルタリング & 検索
+    const filtered = allPins.filter(pin => {
+      if (!pin) return false;
+      if (adminPinCategoryFilter !== 'all' && pin.category !== adminPinCategoryFilter) {
+        return false;
+      }
+      if (adminPinSearchTerm) {
+        const text = `${pin.title || ''} ${pin.memo || ''} ${pin.authorName || ''} ${pin.authorEmail || ''}`.toLowerCase();
+        if (!text.includes(adminPinSearchTerm)) return false;
+      }
+      return true;
+    });
+
+    // 件数バッジ
+    if (badge) {
+      badge.innerText = `${allPins.length}件 (表示中: ${filtered.length}件)`;
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+            ${allPins.length === 0 ? '現在登録されているピンはありません。' : '条件に一致するピンが見つかりませんでした。'}
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    // 新しい順にソート
+    filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    let html = '';
+    filtered.forEach(pin => {
+      const cat = CAMPUS_PIN_CATEGORIES[pin.category] || { label: 'その他', icon: '📍', color: '#94a3b8', bg: 'rgba(255,255,255,0.05)' };
+      const dateStr = pin.createdAt ? formatDate(pin.createdAt) : '--/-- --:--';
+
+      // 有効期限の計算
+      const expiryDays = pin.expiryDays || (pin.category === 'lost' ? 30 : 7);
+      const expiresAt = pin.expiresAt || ((pin.createdAt || now) + expiryDays * 24 * 60 * 60 * 1000);
+      const remainingMs = expiresAt - now;
+      const isExpired = remainingMs <= 0;
+      const remainingDays = Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+
+      let expiryHtml = '';
+      if (isExpired) {
+        expiryHtml = `<span style="color: #ef4444; font-weight: 700; background: rgba(239, 68, 68, 0.15); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">⚠️ 期限切れ</span>`;
+      } else {
+        expiryHtml = `<span style="color: #60a5fa; font-weight: 600;">あと${remainingDays}日</span><br><span style="font-size: 0.7rem; color: var(--text-muted);">${formatDate(expiresAt).split(' ')[0]}まで</span>`;
+      }
+
+      const escapedTitle = escapeHtml(pin.title);
+      const escapedMemo = escapeHtml(pin.memo || 'メモなし');
+      const escapedAuthor = escapeHtml(pin.authorName || '匿名');
+      const escapedEmail = escapeHtml(pin.authorEmail || '');
+
+      html += `
+        <tr style="border-bottom: 1px solid var(--panel-border); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+          <td style="padding: 0.75rem; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background: ${cat.bg}; color: ${cat.color}; border: 1px solid ${cat.color}40; white-space: nowrap;">
+              <span>${cat.icon}</span>
+              <span>${cat.label}</span>
+            </span>
+          </td>
+          <td style="padding: 0.75rem; vertical-align: top;">
+            <strong style="color: var(--text-main); font-size: 0.875rem;">${escapedTitle}</strong>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">
+              位置: (${pin.x ? pin.x.toFixed(1) : 0}%, ${pin.y ? pin.y.toFixed(1) : 0}%)
+            </div>
+          </td>
+          <td style="padding: 0.75rem; vertical-align: top; color: var(--text-main); max-width: 250px; word-break: break-word;">
+            ${escapedMemo}
+          </td>
+          <td style="padding: 0.75rem; vertical-align: top;">
+            <strong style="color: var(--text-main);">${escapedAuthor}</strong>
+            ${escapedEmail ? `<div style="font-size: 0.7rem; color: var(--text-muted);">${escapedEmail}</div>` : ''}
+            <div style="font-size: 0.7rem; color: var(--text-muted);">${dateStr}</div>
+          </td>
+          <td style="padding: 0.75rem; vertical-align: top;">
+            ${expiryHtml}
+          </td>
+          <td style="padding: 0.75rem; vertical-align: top; text-align: center;">
+            <button class="btn btn-outline btn-sm" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); padding: 0.3rem 0.65rem; font-size: 0.75rem;" onclick="deleteAdminPin('${pin.id}', '${escapedTitle.replace(/'/g, "\\'")}')">
+              🗑️ 削除
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  // 管理者による単一ピン削除
+  window.deleteAdminPin = function(pinId, pinTitle) {
+    const title = pinTitle || 'このピン';
+    if (!confirm(`マップピン「${title}」を削除しますか？\n\n削除するとマップ上およびユーザー画面から完全に消去されます。`)) {
+      return;
+    }
+
+    db.ref('mirai_campus_pins/' + pinId).remove()
+      .then(() => {
+        alert(`ピン「${title}」を削除しました。`);
+      })
+      .catch(err => {
+        console.error('Pin delete error:', err);
+        alert('ピンの削除中にエラーが発生しました: ' + err.message);
+      });
+  };
+
+  // 期限切れピンの一括削除
+  window.cleanupExpiredAdminPins = function() {
+    const allPins = Object.values(allCampusPinsData || {});
+    const now = Date.now();
+    const expiredPins = allPins.filter(pin => {
+      if (!pin) return false;
+      const expiryDays = pin.expiryDays || (pin.category === 'lost' ? 30 : 7);
+      const expiresAt = pin.expiresAt || ((pin.createdAt || now) + expiryDays * 24 * 60 * 60 * 1000);
+      return now > expiresAt;
+    });
+
+    if (expiredPins.length === 0) {
+      alert('現在、期限切れのピンはありません。');
+      return;
+    }
+
+    if (!confirm(`期限切れのピンが ${expiredPins.length} 件あります。\nすべて一括削除しますか？`)) {
+      return;
+    }
+
+    const updates = {};
+    expiredPins.forEach(p => {
+      updates['mirai_campus_pins/' + p.id] = null;
+    });
+
+    db.ref().update(updates)
+      .then(() => {
+        alert(`期限切れピン ${expiredPins.length} 件を一括削除しました。`);
+      })
+      .catch(err => {
+        console.error('Expired pins cleanup error:', err);
+        alert('一括削除中にエラーが発生しました: ' + err.message);
+      });
+  };
+
+  // 全ピンの一括削除（管理者リセット）
+  window.clearAllAdminPins = function() {
+    const allPins = Object.values(allCampusPinsData || {});
+    if (allPins.length === 0) {
+      alert('現在登録されているピンはありません。');
+      return;
+    }
+
+    const input = prompt(`【警告】登録されているすべてのピン（${allPins.length}件）を完全に消去します。\n\n本当に実行する場合は、確認のため「削除」と入力してください:`);
+    if (input !== '削除') {
+      alert('キャンセルしました。');
+      return;
+    }
+
+    db.ref('mirai_campus_pins').remove()
+      .then(() => {
+        alert('すべてのマップピンを削除しました。');
+      })
+      .catch(err => {
+        console.error('Clear all pins error:', err);
+        alert('全削除中にエラーが発生しました: ' + err.message);
+      });
+  };
+
+  function formatDate(timestamp) {
+    const d = new Date(timestamp);
+    const m = d.getMonth() + 1;
+    const date = d.getDate();
+    const h = ('0' + d.getHours()).slice(-2);
+    const min = ('0' + d.getMinutes()).slice(-2);
+    return `${m}/${date} ${h}:${min}`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
 })();
