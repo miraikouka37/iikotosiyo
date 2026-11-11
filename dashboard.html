@@ -6,10 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.6">
-  <link rel="stylesheet" href="assets/css/campus-map.css?v=1.0">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3.1">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 
 <body style="padding-top: 0;">
@@ -28,77 +26,6 @@
         </button>
       </h2>
       <div class="nav-user">
-        <!-- Waffle Menu (その他メニュー) -->
-        <div class="waffle-menu-container" id="waffle-menu-container">
-          <button class="waffle-btn" id="waffle-btn" onclick="toggleWaffleMenu(event)" aria-label="その他の機能" title="その他の機能">
-            <svg class="waffle-icon" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="5" cy="5" r="2.2"></circle>
-              <circle cx="12" cy="5" r="2.2"></circle>
-              <circle cx="19" cy="5" r="2.2"></circle>
-              <circle cx="5" cy="12" r="2.2"></circle>
-              <circle cx="12" cy="12" r="2.2"></circle>
-              <circle cx="19" cy="12" r="2.2"></circle>
-              <circle cx="5" cy="19" r="2.2"></circle>
-              <circle cx="12" cy="19" r="2.2"></circle>
-              <circle cx="19" cy="19" r="2.2"></circle>
-            </svg>
-          </button>
-          
-          <div class="waffle-dropdown" id="waffle-dropdown" aria-hidden="true">
-            <div class="waffle-dropdown-header">
-              <span class="waffle-dropdown-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                その他の機能
-              </span>
-              <button type="button" class="waffle-close-btn" onclick="closeWaffleMenu()" aria-label="閉じる">&times;</button>
-            </div>
-            <div class="waffle-grid">
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('calendar-modal')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
-                <div class="waffle-item-name">カレンダー</div>
-                <div class="waffle-item-sub">チェックイン</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('history-panel-modal')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">📜</div>
-                <div class="waffle-item-name">最近の履歴</div>
-                <div class="waffle-item-sub">獲得履歴</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('feedback-modal')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">💡</div>
-                <div class="waffle-item-name">意見箱</div>
-                <div class="waffle-item-sub">要望送信</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('gallery-modal')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #6366f1, #4338ca);">🖼️</div>
-                <div class="waffle-item-name">ギャラリー</div>
-                <div class="waffle-item-sub">活動写真</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('recommendations-modal')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">👏</div>
-                <div class="waffle-item-name">いい人紹介</div>
-                <div class="waffle-item-sub">善行推薦</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('campus-map')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🗺️</div>
-                <div class="waffle-item-name">学内マップ</div>
-                <div class="waffle-item-sub">ピン・共有</div>
-              </button>
-              <button type="button" class="waffle-item" onclick="handleWaffleAction('chat')">
-                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">💬</div>
-                <div class="waffle-item-name">DM</div>
-                <div class="waffle-item-sub">プライベート</div>
-              </button>
-            </div>
-            <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: center;">
-              <button type="button" onclick="hideWaffleMenuPermanently()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; padding: 0.2rem 0.25rem; border-radius: 4px; transition: color 0.15s ease;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-muted)'" title="設定画面からいつでも再表示できます">
-                🚫 ワッフルメニューを非表示
-              </button>
-              <button type="button" class="btn btn-outline btn-sm" onclick="closeWaffleMenu()" style="padding: 0.25rem 0.65rem; font-size: 0.72rem;">
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
         <span class="user-name" id="display-name">ユーザー</span>
         <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
         <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
@@ -107,51 +34,53 @@
 
     <div id="alert-container"></div>
 
-    <div class="grid dashboard-grid">
+    <div class="grid">
       <!-- Left Column -->
-      <div class="col-main" id="dashboard-col-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="col-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <!-- Balance Card -->
-        <div class="glass-panel points-card panel-balance">
+        <div class="glass-panel points-card">
           <p class="points-label">Current Balance</p>
           <div class="points-display" id="total-points">0</div>
           <p class="points-label mt-4" id="points-message">KEEP IT UP!</p>
         </div>
 
-        <!-- Action Card (ポイント獲得) -->
-        <div class="glass-panel panel-actions" id="actions-panel">
+        <!-- Action Card -->
+        <div class="glass-panel">
           <h3 class="section-title">⚡ ポイント獲得</h3>
-          <!-- 常設タスク -->
           <ul class="action-list">
             <li class="list-item">
               <div class="item-info">
                 <h4>学校来ました</h4>
-                <p>1日1回ログインボーナス（300〜1000ptランダム！）</p>
+                <p>1日1回ログインで獲得</p>
               </div>
-              <button class="btn btn-primary btn-sm btn-earn" id="btn-checkin" data-action="デイリーチェックイン" data-amount="300">🎲 300〜1000 pt</button>
+              <button class="btn btn-primary btn-sm btn-earn" data-action="デイリーチェックイン" data-amount="10">+10 pt</button>
             </li>
             <li class="list-item">
               <div class="item-info">
                 <h4>ごみを拾った</h4>
                 <p>ごみ拾い時に申請（1日7回まで）</p>
               </div>
-              <button class="btn btn-primary btn-sm btn-earn" id="btn-trash" data-action="ごみを拾った" data-amount="50">+50 pt</button>
+              <button class="btn btn-primary btn-sm btn-earn" data-action="ごみを拾った" data-amount="50">+50 pt</button>
+            </li>
+            <li class="list-item">
+              <div class="item-info">
+                <h4>委員会・部活動参加</h4>
+                <p>活動完了時に申請</p>
+              </div>
+              <button class="btn btn-primary btn-sm btn-earn" data-action="委員会・部活動参加" data-amount="30">+30 pt</button>
+            </li>
+            <li class="list-item">
+              <div class="item-info">
+                <h4>サンクスポイントを送る</h4>
+                <p>友達に感謝を伝える</p>
+              </div>
+              <button class="btn btn-primary btn-sm btn-earn" data-action="サンクスポイント送信" data-amount="20">+20 pt</button>
             </li>
           </ul>
 
-          <!-- 日替わりデイリータスク (毎日ランダムで3つ) -->
-          <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--panel-border);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">📅 本日のデイリーミッション (日替わり3選)</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">毎日0時更新</span>
-            </div>
-            <ul class="action-list" id="daily-tasks-list">
-              <!-- JSで動的に3件生成 -->
-            </ul>
-          </div>
-
           <!-- Photo Submission Section -->
           <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--panel-border);">
-            <h4 style="margin-bottom: 0.5rem;">📷 写真報告</h4>
+            <h4 class="section-title" style="margin-bottom: 0.5rem;">📷 写真報告</h4>
             <p style="margin-bottom: 1.5rem;">ゴミ拾いやボランティア等の写真を添付して申請できます。</p>
             
             <div class="form-group">
@@ -170,115 +99,33 @@
           </div>
         </div>
 
-        <!-- Campus Map Card (キャンパスマップ & ピン) -->
-        <div class="glass-panel panel-campus-map" id="campus-map-panel">
-          <div class="campus-map-header">
-            <div>
-              <div class="campus-map-title-wrap">
-                <h3 class="section-title" style="margin-bottom: 0.25rem;">🗺️ キャンパスマップ</h3>
-                <span class="campus-map-badge" id="campus-map-pin-count">0件のピン</span>
-              </div>
-              <p style="font-size: 0.8125rem; margin: 0;">学内マップにピンを刺して、美化活動やスポット、連絡事項を共有できます。</p>
-            </div>
-            <div class="campus-map-toolbar">
-              <input type="file" id="campus-map-file-input" accept=".pdf,image/*" style="display: none;">
-              <button type="button" class="campus-map-btn" id="btn-upload-map" title="マップPDFまたは画像を選択して読み込み・更新">
-                <span>📁</span> マップ読込
-              </button>
-              <button type="button" class="campus-map-btn btn-pin-mode" id="btn-toggle-pin-mode">
-                <span>📍</span> ピンを刺す
-              </button>
-            </div>
-          </div>
 
-          <!-- フィルターチップ -->
-          <div class="campus-map-filters" id="campus-map-filters">
-            <button type="button" class="map-filter-chip active" data-filter="all">すべて</button>
-            <button type="button" class="map-filter-chip" data-filter="cleanup">🌱 美化・ごみ</button>
-            <button type="button" class="map-filter-chip" data-filter="lost">🔍 忘れ物</button>
-            <button type="button" class="map-filter-chip" data-filter="notice">⚠️ 注意・連絡</button>
-            <button type="button" class="map-filter-chip" data-filter="spot">💡 おすすめ・憩い</button>
-            <button type="button" class="map-filter-chip" data-filter="facility">🏫 施設メモ</button>
+        <!-- Calendar -->
+        <div class="glass-panel">
+          <h3 class="section-title">📅 チェックイン</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <button class="btn btn-outline btn-sm btn-prev-month">◀</button>
+            <span id="calendar-month-year" style="font-weight: 700; font-size: 1.1rem;"></span>
+            <button class="btn btn-outline btn-sm btn-next-month">▶</button>
           </div>
-
-          <!-- ガイドバナー (ピン設置モード中のみ表示) -->
-          <div class="campus-map-guide-banner" id="campus-map-guide-banner">
-            <div style="display: flex; align-items: center; gap: 0.4rem;">
-              <span style="font-size: 1.1rem;">📍</span>
-              <span><strong>ピン設置モード中：</strong> マップ上のピンを立てたい場所をクリックしてください</span>
-            </div>
-            <button type="button" class="campus-map-btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="window.CampusMap.togglePinMode()">中止</button>
+          <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; font-size: 0.8125rem;">
+            <!-- Dates via JS -->
           </div>
-
-          <!-- マップ表示ビューポート -->
-          <div class="campus-map-viewport" id="campus-map-viewport" title="ドラッグで移動、ホイールで拡大縮小できます">
-            <div class="campus-map-stage" id="campus-map-stage">
-              <canvas id="campus-map-canvas" class="campus-map-canvas"></canvas>
-              <div id="campus-map-overlay" class="campus-map-overlay"></div>
-            </div>
-
-            <!-- ローディング画面 -->
-            <div class="campus-map-loading" id="campus-map-loading">
-              <div class="campus-map-spinner"></div>
-              <span>キャンパスマップを読み込み中...</span>
-            </div>
-
-            <!-- フローティング操作ボタン -->
-            <div class="campus-map-float-controls">
-              <button type="button" class="map-control-btn" id="btn-map-zoom-in" title="拡大 (＋)">＋</button>
-              <button type="button" class="map-control-btn" id="btn-map-zoom-out" title="縮小 (－)">−</button>
-              <button type="button" class="map-control-btn" id="btn-map-reset" title="全体表示にリセット (⟲)" style="font-size: 14px;">⟲</button>
-            </div>
-          </div>
-
-          <!-- ピン一覧アコーディオン -->
-          <div class="campus-map-list-header" id="campus-map-list-header">
-            <h4>
-              <span>📌</span>
-              <span>登録されたピン一覧</span>
-              <span id="campus-map-list-toggle-icon" style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.25rem;">▼</span>
-            </h4>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">クリックで開閉</span>
-          </div>
-          <div id="campus-map-list-wrapper" style="display: block;">
-            <ul class="campus-map-list-items" id="campus-map-list-items">
-              <!-- JSで動的生成 -->
-            </ul>
-          </div>
-        </div>
-
-        <!-- Lost & Found Card (忘れ物掲示板) -->
-        <div class="glass-panel panel-lost-found" id="lost-found-panel">
-          <h3 class="section-title">🔍 忘れ物掲示板</h3>
-          <p style="margin-bottom: 1rem; font-size: 0.8125rem;">見つけた忘れ物をお知らせできます。</p>
-          <div class="form-group">
-            <input type="text" id="lost-item-name" class="form-control" placeholder="忘れ物名 (例: 赤い水筒)" style="margin-bottom: 0.5rem;" required>
-            <input type="text" id="lost-item-location" class="form-control" placeholder="見つけた場所 (例: 3F理科室前)" required>
-          </div>
-          <button class="btn btn-outline btn-sm btn-send-lost-item" style="width: 100%; margin-bottom: 1.5rem;">お知らせを投稿</button>
-          
-          <h4 style="font-size: 0.875rem; margin-bottom: 0.75rem; border-top: 1px solid var(--panel-border); padding-top: 1rem;">現在のお知らせ</h4>
-          <ul class="history-list" id="lost-items-container" style="max-height: 250px; overflow-y: auto;">
-            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
-              現在、忘れ物はありません
-            </li>
-          </ul>
         </div>
       </div>
 
       <!-- Right Column -->
-      <div class="col-side" id="dashboard-col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <!-- Ranking Card (ランキング) -->
-        <div class="glass-panel panel-ranking" id="ranking-panel" style="display: flex; flex-direction: column;">
+      <div class="col-side" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Ranking Card -->
+        <div class="glass-panel" style="display: flex; flex-direction: column;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h3 class="section-title" style="margin-bottom: 0;">🏆 ランキング</h3>
             <div style="display: flex; gap: 0.5rem;" id="ranking-tabs">
               <span id="tab-ranking-points" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.2rem;" onclick="switchRankingTab('points')">ポイント</span>
               <span id="tab-ranking-rank" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; color: var(--text-muted); padding-bottom: 0.2rem; border-bottom: 2px solid transparent;" onclick="switchRankingTab('rank')">ランク</span>
-              <span id="tab-ranking-grade" class="rank-tab" style="cursor: pointer; font-size: 0.85rem; color: var(--text-muted); padding-bottom: 0.2rem; border-bottom: 2px solid transparent;" onclick="switchRankingTab('grade')">学年対抗</span>
             </div>
           </div>
-          <div id="ranking-filters-container" style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+          <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
             <select id="filter-ranking-grade" class="form-control" style="font-size: 0.8125rem; padding: 0.4rem 0.75rem; flex: 1;" onchange="renderRanking()">
               <option value="all">全学年</option>
               <option value="1">1年生</option>
@@ -297,161 +144,90 @@
               <option value="8">8組</option>
             </select>
           </div>
-          <ul class="action-list" id="ranking-container" style="overflow-y: auto; max-height: 250px;">
+          <ul class="action-list" id="ranking-container" style="overflow-y: auto; max-height: 250px; margin-bottom: 1.5rem;">
             <li class="list-item" style="justify-content: center; color: var(--text-muted);">
               データがありません
             </li>
           </ul>
         </div>
 
-        <!-- App Shortcut Menu Grid (その他の機能) -->
-        <div class="glass-panel app-grid-panel" id="app-grid-panel">
-          <div class="app-grid-header" onclick="toggleAppGridPanel()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; user-select: none;" title="クリックで折りたたみ（非表示/表示）">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              <span>その他の機能</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.4rem;">
-              <button type="button" id="btn-toggle-app-grid" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 9999px; pointer-events: none;">
-                <span id="app-grid-toggle-text">非表示にする ▲</span>
-              </button>
-              <button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation(); hideAppGridPanelCompletely();" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 9999px; color: var(--text-muted);" title="このパネルを完全に非表示にする">
-                ✕
-              </button>
-            </div>
-          </div>
-
-          <div class="app-shortcut-grid" id="app-shortcut-grid" style="margin-top: 1.25rem;">
-            <div class="app-shortcut-card" onclick="handleWaffleAction('calendar-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
-              <div class="app-card-title">カレンダー</div>
-              <div class="app-card-sub">チェックイン</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('history-panel-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #ec4899, #be185d);">📜</div>
-              <div class="app-card-title">最近の履歴</div>
-              <div class="app-card-sub">獲得履歴</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('feedback-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">💡</div>
-              <div class="app-card-title">意見箱</div>
-              <div class="app-card-sub">要望送信</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('gallery-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #6366f1, #4338ca);">🖼️</div>
-              <div class="app-card-title">ギャラリー</div>
-              <div class="app-card-sub">活動写真</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('recommendations-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">👏</div>
-              <div class="app-card-title">いい人紹介</div>
-              <div class="app-card-sub">善行推薦</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('campus-map')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #10b981, #059669);">🗺️</div>
-              <div class="app-card-title">学内マップ</div>
-              <div class="app-card-sub">ピン・共有</div>
-            </div>
-            <div class="app-shortcut-card" onclick="handleWaffleAction('chat')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">💬</div>
-              <div class="app-card-title">DM</div>
-              <div class="app-card-sub">プライベート</div>
-            </div>
+        <!-- Grade Stats Card -->
+        <div class="glass-panel" id="grade-stats-panel">
+          <h3 class="section-title">📊 学年別対抗ステータス</h3>
+          <div id="grade-stats-container">
+            <div style="text-align: center; color: var(--text-muted);">読み込み中...</div>
           </div>
         </div>
 
-        <!-- 完全に非表示にしたときの小さな再表示ボタン -->
-        <div id="app-grid-restore-container" style="display: none; text-align: right;">
-          <button type="button" class="btn btn-outline btn-sm" onclick="restoreAppGridPanel()" style="font-size: 0.75rem; border-radius: 9999px; padding: 0.3rem 0.75rem; color: var(--text-muted);">
-            ＋ その他の機能を表示
-          </button>
+        <!-- History Card -->
+        <div class="glass-panel" style="flex: 1;">
+          <h3 class="section-title">📜 最近の履歴</h3>
+          <ul class="history-list" id="history-container">
+            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
+              履歴がありません
+            </li>
+          </ul>
         </div>
 
-      </div>
-    </div>
+        <!-- Feedback Card -->
+        <div class="glass-panel">
+          <h3 class="section-title">💬 意見箱</h3>
+          <p style="margin-bottom: 1rem; font-size: 0.8125rem;">管理者に要望を送信できます。</p>
+          <div class="form-group">
+            <textarea id="feedback-message" class="form-control" rows="3" placeholder="ご意見を入力..." style="resize: none;"></textarea>
+          </div>
+          <button class="btn btn-outline btn-sm btn-send-feedback" style="width: 100%;">送信する</button>
+        </div>
 
-  <!-- Feature Modals -->
-  <!-- Calendar Modal -->
-  <div id="calendar-modal" class="feature-modal-overlay" style="display: none;" onclick="closeModalOnBackdrop(event, 'calendar-modal')">
-    <div class="glass-panel feature-modal-box">
-      <div class="feature-modal-header">
-        <h3 class="section-title" style="margin: 0;">📅 チェックイン / カレンダー</h3>
-        <button onclick="closeFeatureModal('calendar-modal')" class="feature-modal-close-btn">&times;</button>
+        <!-- Lost & Found Card -->
+        <div class="glass-panel">
+          <h3 class="section-title">🔍 忘れ物掲示板</h3>
+          <p style="margin-bottom: 1rem; font-size: 0.8125rem;">見つけた忘れ物をお知らせできます。</p>
+          <div class="form-group">
+            <input type="text" id="lost-item-name" class="form-control" placeholder="忘れ物名 (例: 赤い水筒)" style="margin-bottom: 0.5rem;" required>
+            <input type="text" id="lost-item-location" class="form-control" placeholder="見つけた場所 (例: 3F理科室前)" required>
+          </div>
+          <button class="btn btn-outline btn-sm btn-send-lost-item" style="width: 100%; margin-bottom: 1.5rem;">お知らせを投稿</button>
+          
+          <h4 style="font-size: 0.875rem; margin-bottom: 0.75rem; border-top: 1px solid var(--panel-border); padding-top: 1rem;">現在のお知らせ</h4>
+          <ul class="history-list" id="lost-items-container" style="max-height: 250px; overflow-y: auto;">
+            <li class="list-item" style="justify-content: center; color: var(--text-muted);">
+              現在、忘れ物はありません
+            </li>
+          </ul>
+        </div>
       </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <button class="btn btn-outline btn-sm btn-prev-month">◀</button>
-        <span id="calendar-month-year" style="font-weight: 700; font-size: 1.1rem;"></span>
-        <button class="btn btn-outline btn-sm btn-next-month">▶</button>
-      </div>
-      <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; font-size: 0.8125rem;">
-        <!-- Dates via JS -->
-      </div>
-    </div>
-  </div>
 
-  <!-- History Panel Modal -->
-  <div id="history-panel-modal" class="feature-modal-overlay" style="display: none;" onclick="closeModalOnBackdrop(event, 'history-panel-modal')">
-    <div class="glass-panel feature-modal-box">
-      <div class="feature-modal-header">
-        <h3 class="section-title" style="margin: 0;">📜 最近の履歴</h3>
-        <button onclick="closeFeatureModal('history-panel-modal')" class="feature-modal-close-btn">&times;</button>
+      <!-- Photos Gallery -->
+      <div class="col-main" style="grid-column: span 12;">
+        <div class="glass-panel">
+          <h3 class="section-title">📷 活動ギャラリー</h3>
+          <div id="community-photos-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+            <div style="text-align: center; color: var(--text-muted); width: 100%;">読み込み中...</div>
+          </div>
+        </div>
       </div>
-      <ul class="history-list" id="history-container" style="max-height: 350px; overflow-y: auto;">
-        <li class="list-item" style="justify-content: center; color: var(--text-muted);">
-          履歴がありません
-        </li>
-      </ul>
-    </div>
-  </div>
 
-  <!-- Feedback Modal -->
-  <div id="feedback-modal" class="feature-modal-overlay" style="display: none;" onclick="closeModalOnBackdrop(event, 'feedback-modal')">
-    <div class="glass-panel feature-modal-box">
-      <div class="feature-modal-header">
-        <h3 class="section-title" style="margin: 0;">💡 意見箱</h3>
-        <button onclick="closeFeatureModal('feedback-modal')" class="feature-modal-close-btn">&times;</button>
+      <!-- Recommendations Gallery -->
+      <div class="col-main" style="grid-column: span 12;">
+        <div class="glass-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <h3 class="section-title" style="margin: 0;">✨ みんなの「いい人」紹介</h3>
+            <button class="btn btn-primary btn-sm btn-recommend-trigger" style="width: auto;">いい人を推薦する</button>
+          </div>
+          <div id="recommendations-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+            <div style="text-align: center; color: var(--text-muted); width: 100%;">読み込み中...</div>
+          </div>
+        </div>
       </div>
-      <p style="margin-bottom: 1rem; font-size: 0.8125rem;">管理者に要望を送信できます。</p>
-      <div class="form-group">
-        <textarea id="feedback-message" class="form-control" rows="3" placeholder="ご意見を入力..." style="resize: none;"></textarea>
-      </div>
-      <button class="btn btn-outline btn-sm btn-send-feedback" style="width: 100%;">送信する</button>
-    </div>
-  </div>
 
-  <!-- Gallery Modal -->
-  <div id="gallery-modal" class="feature-modal-overlay" style="display: none;" onclick="closeModalOnBackdrop(event, 'gallery-modal')">
-    <div class="glass-panel feature-modal-box" style="max-width: 720px;">
-      <div class="feature-modal-header">
-        <h3 class="section-title" style="margin: 0;">🖼️ 活動ギャラリー</h3>
-        <button onclick="closeFeatureModal('gallery-modal')" class="feature-modal-close-btn">&times;</button>
-      </div>
-      <div id="community-photos-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
-        <div style="text-align: center; color: var(--text-muted); width: 100%;">読み込み中...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recommendations Modal -->
-  <div id="recommendations-modal" class="feature-modal-overlay" style="display: none;" onclick="closeModalOnBackdrop(event, 'recommendations-modal')">
-    <div class="glass-panel feature-modal-box" style="max-width: 720px;">
-      <div class="feature-modal-header">
-        <h3 class="section-title" style="margin: 0;">👏 みんなの「いい人」紹介</h3>
-        <button onclick="closeFeatureModal('recommendations-modal')" class="feature-modal-close-btn">&times;</button>
-      </div>
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-        <button class="btn btn-primary btn-sm btn-recommend-trigger" style="width: auto;">いい人を推薦する</button>
-      </div>
-      <div id="recommendations-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
-        <div style="text-align: center; color: var(--text-muted); width: 100%;">読み込み中...</div>
-      </div>
     </div>
   </div>
 
   <!-- Recommendation Modal -->
   <div id="recommend-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px);">
     <div class="glass-panel" style="width: 100%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column;">
-      <h3 class="section-title">いい人推薦</h3>
+      <h3 class="section-title">🤝 いい人推薦</h3>
       <p style="margin-bottom: 1.5rem; font-size: 0.875rem;">身の回りの「いい人」を推薦してください。管理者が承認すると、推薦された人に50pt、あなたに10ptが贈られます！</p>
       
       <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.5rem;">
@@ -612,424 +388,12 @@
     </div>
   </div>
 
-  <!-- Chat FAB -->
-  <div class="chat-fab" id="chat-fab" onclick="openChatModal()" title="メッセージを開く">
-    💬
-    <div id="chat-unread-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--bg);"></div>
-  </div>
-
-  <!-- Chat Modal -->
-  <div id="chat-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
-    <div class="chat-modal-container">
-      
-      <!-- Sidebar -->
-      <div class="chat-sidebar" id="chat-sidebar">
-        <div style="padding: 1rem; border-bottom: 1px solid var(--panel-border); font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-          <span>メッセージ</span>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <button onclick="openChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1;" title="セキュリティ説明">ℹ️</button>
-            <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
-          </div>
-        </div>
-
-        <!-- Security Banner -->
-        <div style="background: rgba(59, 130, 246, 0.1); border-bottom: 1px solid rgba(59, 130, 246, 0.2); padding: 0.65rem 0.85rem; font-size: 0.75rem; line-height: 1.45; color: var(--text-main); display: flex; align-items: flex-start; gap: 0.4rem;">
-          <span style="font-size: 1rem; flex-shrink: 0; line-height: 1;">🛡️</span>
-          <div>
-            <strong style="color: #60a5fa;">管理者も閲覧不可</strong><br>
-            <span style="color: var(--text-muted); font-size: 0.72rem;">端末間で暗号化されるため、管理者を含め第三者に内容は一切見られません。</span>
-          </div>
-        </div>
-
-        <div style="padding: 0.75rem;">
-          <input type="text" id="chat-user-search" class="form-control" placeholder="ユーザーを検索..." oninput="filterChatUsers()">
-        </div>
-        <ul class="chat-user-list" id="chat-user-list">
-          <li style="padding: 1rem; text-align: center; color: var(--text-muted);">読み込み中...</li>
-        </ul>
-      </div>
-
-      <!-- Main Chat Area -->
-      <div class="chat-main" id="chat-main-area" style="display: none;">
-        <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <button class="chat-back-btn" onclick="backToUserList()" style="display: none; background: transparent; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; padding-right: 0.25rem;">◀</button>
-            <div class="chat-user-avatar" id="chat-header-avatar">?</div>
-            <div>
-              <div id="chat-header-name" style="font-size: 1rem; font-weight: bold;">ユーザー名</div>
-              <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem;">
-                <span>🔒 管理者閲覧不可</span>
-              </div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <button onclick="openChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1;" title="セキュリティ説明">ℹ️</button>
-            <button onclick="closeChatModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
-          </div>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-          <!-- Messages will be injected here -->
-        </div>
-        <div class="chat-input-area">
-          <input type="text" id="chat-input" placeholder="メッセージを入力..." onkeypress="handleChatKeyPress(event)">
-          <button onclick="sendChatMessage()">➤</button>
-        </div>
-      </div>
-      
-      <!-- Placeholder when no user is selected -->
-      <div id="chat-placeholder" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; color: var(--text-main); overflow-y: auto;">
-        <div style="font-size: 3.5rem; margin-bottom: 0.75rem;">🔒</div>
-        <h3 style="color: var(--text-main); margin-bottom: 1rem; font-size: 1.35rem; font-weight: 800;">
-          ダイレクトメッセージ (DM)
-        </h3>
-        
-        <div style="max-width: 480px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
-          <div style="display: flex; gap: 0.75rem; margin-bottom: 0.85rem;">
-            <span style="font-size: 1.3rem; flex-shrink: 0; line-height: 1;">🛡️</span>
-            <div>
-              <div style="font-weight: 700; font-size: 0.9375rem; color: #60a5fa; margin-bottom: 0.25rem;">管理者にも内容は一切見られません</div>
-              <div style="font-size: 0.8125rem; line-height: 1.55; color: var(--text-muted);">
-                このDM機能はメッセージを送信者の端末で暗号化し、受信者の端末でのみ解読（復号）します。データベースや管理者画面上でも暗号化された文字として保管されるため、<strong>管理者を含め第三者が内容を閲覧することは技術的に不可能</strong>です。
-              </div>
-            </div>
-          </div>
-          
-          <div style="display: flex; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.85rem;">
-            <span style="font-size: 1.3rem; flex-shrink: 0; line-height: 1;">💬</span>
-            <div>
-              <div style="font-weight: 700; font-size: 0.9375rem; color: var(--text-main); margin-bottom: 0.25rem;">プライベートDM</div>
-              <div style="font-size: 0.8125rem; line-height: 1.55; color: var(--text-muted);">
-                友達への相談や雑談など、プライバシーが完全に保護された安全な環境でメッセージをやり取りできます。
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <p style="font-size: 0.875rem; color: var(--text-muted);">
-          👈 左のリストからユーザーを選択してDMを開始してください
-        </p>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Chat Info Modal -->
-  <div id="chat-info-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2100; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px);">
-    <div class="glass-panel" style="width: 100%; max-width: 480px; padding: 2rem; position: relative;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
-          <span>🔒</span> DMのセキュリティについて
-        </h3>
-        <button onclick="closeChatInfoModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
-      </div>
-      
-      <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
-        <h4 style="color: #60a5fa; font-size: 0.95rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
-          🛡️ 管理者にも内容は一切見られません
-        </h4>
-        <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-main); margin: 0;">
-          当アプリのDMは「<strong>エンドツーエンド暗号化（E2EE）</strong>」を採用しています。メッセージは送信者の端末で暗号化され、受信者の端末でのみ解読されます。<br><br>
-          データベースや管理者画面上にも暗号化されたデータしか存在しないため、<strong>管理者や第三者であってもメッセージの内容を閲覧・傍受することは技術的に不可能です</strong>。
-        </p>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">
-        <div>💬 <strong>安全な直接メッセージ（DM）</strong>：友達への相談や雑談を安心して行えます。</div>
-        <div>🔑 <strong>安全な鍵管理</strong>：暗号化の鍵はお使いのブラウザ内に安全に保管されています。</div>
-      </div>
-
-      <button class="btn btn-primary" onclick="closeChatInfoModal()" style="width: 100%;">理解しました</button>
-    </div>
-  </div>
-
-  <!-- Campus Map Pin Add Modal -->
-  <div id="campus-map-add-modal" class="campus-map-modal">
-    <div class="campus-map-modal-content">
-      <div class="campus-map-modal-header">
-        <h3><span>📍</span> ピンを設置する</h3>
-        <button type="button" id="btn-close-add-modal" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
-      </div>
-
-      <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
-        選択した位置にピンを立てます。カテゴリを選び、場所の名前や状況を入力してください。
-      </div>
-
-      <div class="form-group">
-        <label>ピンのカテゴリ</label>
-        <div class="category-picker-grid">
-          <button type="button" class="category-option-btn selected" data-cat="cleanup">
-            <span style="font-size: 1.1rem;">🌱</span>
-            <span>美化・ごみ拾い</span>
-          </button>
-          <button type="button" class="category-option-btn" data-cat="lost">
-            <span style="font-size: 1.1rem;">🔍</span>
-            <span>忘れ物・落とし物</span>
-          </button>
-          <button type="button" class="category-option-btn" data-cat="notice">
-            <span style="font-size: 1.1rem;">⚠️</span>
-            <span>注意・連絡事項</span>
-          </button>
-          <button type="button" class="category-option-btn" data-cat="spot">
-            <span style="font-size: 1.1rem;">💡</span>
-            <span>おすすめ・憩い</span>
-          </button>
-          <button type="button" class="category-option-btn" data-cat="facility">
-            <span style="font-size: 1.1rem;">🏫</span>
-            <span>施設・校舎メモ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="pin-input-title">ピンのタイトル / 場所名 <span style="color: #ef4444;">*</span></label>
-        <input type="text" id="pin-input-title" class="form-control" placeholder="例: 体育館裏のゴミ箱、3F自習コーナー" required>
-      </div>
-
-      <div class="form-group">
-        <label for="pin-input-memo">詳細・メモ・状況（任意）</label>
-        <textarea id="pin-input-memo" class="form-control" rows="3" placeholder="状況の詳細や共有したいメッセージを入力..." style="resize: vertical;"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="pin-input-expiry">掲載期間（自動消去）</label>
-        <select id="pin-input-expiry" class="form-control">
-          <option value="7">1週間で自動消去（通常・美化など）</option>
-          <option value="30">30日間（忘れ物・重要なお知らせ）</option>
-          <option value="14">2週間</option>
-          <option value="60">60日間（長期）</option>
-        </select>
-        <p style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.25rem;">
-          ※カテゴリ選択で自動推奨されます。忘れ物は解決時にいつでも手動で消去できます。
-        </p>
-      </div>
-
-      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-        <span>投稿者: <strong id="pin-author-display" style="color: var(--text-main);">ユーザー</strong></span>
-        <span>誰でも閲覧できます</span>
-      </div>
-
-      <div style="display: flex; gap: 0.75rem;">
-        <button type="button" class="btn btn-outline" id="btn-cancel-pin" style="flex: 1;">キャンセル</button>
-        <button type="button" class="btn btn-primary" id="btn-submit-pin" style="flex: 2;">📍 ピンを刺す</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Campus Map Pin Detail Modal -->
-  <div id="campus-map-detail-modal" class="campus-map-modal">
-    <div class="campus-map-modal-content">
-      <div class="campus-map-modal-header">
-        <div id="pin-detail-tag" class="pin-detail-tag">🌱 美化・ごみ拾い</div>
-        <button type="button" id="btn-close-detail-modal" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
-      </div>
-
-      <div class="pin-detail-card">
-        <h3 id="pin-detail-title" class="pin-detail-title">タイトル</h3>
-        <div id="pin-detail-body" class="pin-detail-body">メモ内容</div>
-        
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; background: rgba(255, 255, 255, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid var(--panel-border);">
-          <span style="color: var(--text-muted);">⏳ 掲載期間:</span>
-          <span id="pin-detail-expiry" style="font-weight: 700; color: #60a5fa;">--</span>
-        </div>
-
-        <div class="pin-detail-meta">
-          <span>投稿者: <strong id="pin-detail-author" style="color: var(--text-main);">--</strong></span>
-          <span id="pin-detail-date">--/-- --:--</span>
-        </div>
-      </div>
-
-      <!-- 落とし物専用の解決ボタンエリア -->
-      <div id="pin-resolve-banner" style="display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); text-align: center;">
-        <div style="font-size: 0.8125rem; color: #34d399; font-weight: 700; margin-bottom: 0.4rem;">
-          🎉 落とし主が見つかったり、届け出が完了しましたか？
-        </div>
-        <button type="button" id="btn-pin-resolve" class="btn btn-sm" style="background: #10b981; color: white; width: 100%; font-weight: 700; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-          ✅ 解決済みにする（マップから消去）
-        </button>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
-        <button type="button" id="btn-pin-delete" class="btn btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); display: none;">
-          🗑️ 削除
-        </button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('campus-map-detail-modal').classList.remove('show');">
-          閉じる
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.2"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
-  <script defer src="assets/js/app.js?v=2.5"></script>
-  <script defer src="assets/js/campus-map.js?v=1.0"></script>
-  <script>
-    function openFeatureModal(modalId) {
-      var modal = document.getElementById(modalId);
-      if (modal) {
-        modal.style.display = 'flex';
-      }
-    }
-
-    function closeFeatureModal(modalId) {
-      var modal = document.getElementById(modalId);
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    function closeModalOnBackdrop(e, modalId) {
-      if (e.target.id === modalId) {
-        closeFeatureModal(modalId);
-      }
-    }
-
-    function toggleWaffleMenu(e) {
-      if (e) {
-        e.stopPropagation();
-      }
-      var dropdown = document.getElementById('waffle-dropdown');
-      var btn = document.getElementById('waffle-btn');
-      if (!dropdown) return;
-      var isOpen = dropdown.classList.contains('open');
-      if (isOpen) {
-        closeWaffleMenu();
-      } else {
-        dropdown.classList.add('open');
-        dropdown.setAttribute('aria-hidden', 'false');
-        if (btn) btn.classList.add('active');
-      }
-    }
-
-    function closeWaffleMenu() {
-      var dropdown = document.getElementById('waffle-dropdown');
-      var btn = document.getElementById('waffle-btn');
-      if (dropdown) {
-        dropdown.classList.remove('open');
-        dropdown.setAttribute('aria-hidden', 'true');
-      }
-      if (btn) {
-        btn.classList.remove('active');
-      }
-    }
-
-    function handleWaffleAction(action) {
-      closeWaffleMenu();
-      if (action === 'chat') {
-        if (typeof openChatModal === 'function') {
-          openChatModal();
-        }
-      } else if (action === 'campus-map') {
-        var mapPanel = document.getElementById('campus-map-panel');
-        if (mapPanel) {
-          mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      } else {
-        openFeatureModal(action);
-      }
-    }
-
-    function applyWaffleVisibility() {
-      var container = document.getElementById('waffle-menu-container');
-      if (!container) return;
-      var showWaffle = localStorage.getItem('mirai_show_waffle');
-      if (showWaffle === 'false') {
-        container.style.display = 'none';
-      } else {
-        container.style.display = 'inline-flex';
-      }
-    }
-
-    function hideWaffleMenuPermanently() {
-      closeWaffleMenu();
-      localStorage.setItem('mirai_show_waffle', 'false');
-      var container = document.getElementById('waffle-menu-container');
-      if (container) {
-        container.style.display = 'none';
-      }
-      alert('ヘッダーのワッフルメニューを非表示にしました。\n※設定ページ（右上の設定ボタン）の画面表示設定からいつでも再表示できます。');
-    }
-
-    applyWaffleVisibility();
-
-    document.addEventListener('click', function(e) {
-      var container = document.getElementById('waffle-menu-container');
-      if (container && !container.contains(e.target)) {
-        closeWaffleMenu();
-      }
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeWaffleMenu();
-      }
-    });
-
-    function toggleAppGridPanel() {
-      var grid = document.getElementById('app-shortcut-grid');
-      var btnText = document.getElementById('app-grid-toggle-text');
-      var panel = document.getElementById('app-grid-panel');
-      if (!grid || !btnText) return;
-
-      var isHidden = grid.style.display === 'none';
-      if (isHidden) {
-        grid.style.display = 'grid';
-        btnText.innerText = '非表示にする ▲';
-        if (panel) panel.classList.remove('is-collapsed');
-        localStorage.setItem('mirai_app_grid_collapsed', 'false');
-      } else {
-        grid.style.display = 'none';
-        btnText.innerText = '表示する ▼';
-        if (panel) panel.classList.add('is-collapsed');
-        localStorage.setItem('mirai_app_grid_collapsed', 'true');
-      }
-    }
-
-    function hideAppGridPanelCompletely() {
-      var panel = document.getElementById('app-grid-panel');
-      var restoreBtn = document.getElementById('app-grid-restore-container');
-      if (panel) panel.style.display = 'none';
-      if (restoreBtn) restoreBtn.style.display = 'block';
-      localStorage.setItem('mirai_app_grid_completely_hidden', 'true');
-    }
-
-    function restoreAppGridPanel() {
-      var panel = document.getElementById('app-grid-panel');
-      var restoreBtn = document.getElementById('app-grid-restore-container');
-      var grid = document.getElementById('app-shortcut-grid');
-      var btnText = document.getElementById('app-grid-toggle-text');
-      if (panel) panel.style.display = 'block';
-      if (restoreBtn) restoreBtn.style.display = 'none';
-      if (grid) grid.style.display = 'grid';
-      if (btnText) btnText.innerText = '非表示にする ▲';
-      if (panel) panel.classList.remove('is-collapsed');
-      localStorage.setItem('mirai_app_grid_completely_hidden', 'false');
-      localStorage.setItem('mirai_app_grid_collapsed', 'false');
-    }
-
-    (function initAppGridState() {
-      try {
-        if (localStorage.getItem('mirai_app_grid_completely_hidden') === 'true') {
-          var panel = document.getElementById('app-grid-panel');
-          var restoreBtn = document.getElementById('app-grid-restore-container');
-          if (panel) panel.style.display = 'none';
-          if (restoreBtn) restoreBtn.style.display = 'block';
-        } else if (localStorage.getItem('mirai_app_grid_collapsed') === 'true') {
-          var grid = document.getElementById('app-shortcut-grid');
-          var btnText = document.getElementById('app-grid-toggle-text');
-          var panel = document.getElementById('app-grid-panel');
-          if (grid && btnText) {
-            grid.style.display = 'none';
-            btnText.innerText = '表示する ▼';
-            if (panel) panel.classList.add('is-collapsed');
-          }
-        }
-      } catch (e) {}
-    })();
-  </script>
+  <script defer src="assets/js/app.js?v=2.4"></script>
 </body>
 
 </html>

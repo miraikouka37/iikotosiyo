@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUTURE POINTS | ログイン</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.2">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3.1">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
 </head>
 <body>
@@ -47,9 +47,9 @@
         <input type="text" id="signup-name" class="form-control" placeholder="山田 太郎" required>
       </div>
       <div class="form-group">
-        <label for="signup-email">メールアドレス <span style="font-size: 0.75rem; color: var(--accent); font-weight: normal;">(@mirai-th.open.ed.jp のみ)</span></label>
-        <input type="text" id="signup-email" class="form-control" placeholder="user@mirai-th.open.ed.jp" required>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">※学校用のメールアドレス（@mirai-th.open.ed.jp）を入力してください</p>
+        <label for="signup-email">メールアドレス</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="user@mirai-th.open.ed.jp" required>
+        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.35rem;">※ @mirai-th.open.ed.jp のメールアドレスのみ登録可能です</small>
       </div>
       <div class="form-group">
         <label for="signup-password">パスワード</label>
@@ -93,6 +93,6 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.1"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
-  <script defer src="assets/js/auth.js?v=1.6"></script>
+  <script defer src="assets/js/auth.js?v=1.5"></script>
 </body>
 </html>
