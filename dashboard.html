@@ -7,7 +7,9 @@
   <title>FUTURE POINTS | ダッシュボード</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="stylesheet" href="assets/css/styles.css?v=1.6">
+  <link rel="stylesheet" href="assets/css/campus-map.css?v=1.0">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 
 <body style="padding-top: 0;">
@@ -29,6 +31,69 @@
         <span class="user-name" id="display-name">ユーザー</span>
         <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
         <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
+        <!-- Waffle Menu (その他メニュー) -->
+        <div class="waffle-menu-container" id="waffle-menu-container">
+          <button class="waffle-btn" id="waffle-btn" onclick="toggleWaffleMenu(event)" aria-label="その他の機能" title="その他の機能">
+            <svg class="waffle-icon" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="5" cy="5" r="2.2"></circle>
+              <circle cx="12" cy="5" r="2.2"></circle>
+              <circle cx="19" cy="5" r="2.2"></circle>
+              <circle cx="5" cy="12" r="2.2"></circle>
+              <circle cx="12" cy="12" r="2.2"></circle>
+              <circle cx="19" cy="12" r="2.2"></circle>
+              <circle cx="5" cy="19" r="2.2"></circle>
+              <circle cx="12" cy="19" r="2.2"></circle>
+              <circle cx="19" cy="19" r="2.2"></circle>
+            </svg>
+          </button>
+          
+          <div class="waffle-dropdown" id="waffle-dropdown" aria-hidden="true">
+            <div class="waffle-dropdown-header">
+              <span class="waffle-dropdown-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                その他の機能
+              </span>
+              <button type="button" class="waffle-close-btn" onclick="closeWaffleMenu()" aria-label="閉じる">&times;</button>
+            </div>
+            <div class="waffle-grid">
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('calendar-modal')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
+                <div class="waffle-item-name">カレンダー</div>
+                <div class="waffle-item-sub">チェックイン</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('history-panel-modal')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">📜</div>
+                <div class="waffle-item-name">最近の履歴</div>
+                <div class="waffle-item-sub">獲得履歴</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('feedback-modal')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">💡</div>
+                <div class="waffle-item-name">意見箱</div>
+                <div class="waffle-item-sub">要望送信</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('gallery-modal')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #6366f1, #4338ca);">🖼️</div>
+                <div class="waffle-item-name">ギャラリー</div>
+                <div class="waffle-item-sub">活動写真</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('recommendations-modal')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">👏</div>
+                <div class="waffle-item-name">いい人紹介</div>
+                <div class="waffle-item-sub">善行推薦</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('campus-map')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🗺️</div>
+                <div class="waffle-item-name">学内マップ</div>
+                <div class="waffle-item-sub">ピン・共有</div>
+              </button>
+              <button type="button" class="waffle-item" onclick="handleWaffleAction('chat')">
+                <div class="waffle-item-icon" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">💬</div>
+                <div class="waffle-item-name">DM</div>
+                <div class="waffle-item-sub">プライベート</div>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -97,6 +162,83 @@
           </div>
         </div>
 
+        <!-- Campus Map Card (キャンパスマップ & ピン) -->
+        <div class="glass-panel panel-campus-map" id="campus-map-panel">
+          <div class="campus-map-header">
+            <div>
+              <div class="campus-map-title-wrap">
+                <h3 class="section-title" style="margin-bottom: 0.25rem;">🗺️ キャンパスマップ</h3>
+                <span class="campus-map-badge" id="campus-map-pin-count">0件のピン</span>
+              </div>
+              <p style="font-size: 0.8125rem; margin: 0;">学内マップにピンを刺して、美化活動やスポット、連絡事項を共有できます。</p>
+            </div>
+            <div class="campus-map-toolbar">
+              <input type="file" id="campus-map-file-input" accept=".pdf,image/*" style="display: none;">
+              <button type="button" class="campus-map-btn" id="btn-upload-map" title="マップPDFまたは画像を選択して読み込み・更新">
+                <span>📁</span> マップ読込
+              </button>
+              <button type="button" class="campus-map-btn btn-pin-mode" id="btn-toggle-pin-mode">
+                <span>📍</span> ピンを刺す
+              </button>
+            </div>
+          </div>
+
+          <!-- フィルターチップ -->
+          <div class="campus-map-filters" id="campus-map-filters">
+            <button type="button" class="map-filter-chip active" data-filter="all">すべて</button>
+            <button type="button" class="map-filter-chip" data-filter="cleanup">🌱 美化・ごみ</button>
+            <button type="button" class="map-filter-chip" data-filter="lost">🔍 忘れ物</button>
+            <button type="button" class="map-filter-chip" data-filter="notice">⚠️ 注意・連絡</button>
+            <button type="button" class="map-filter-chip" data-filter="spot">💡 おすすめ・憩い</button>
+            <button type="button" class="map-filter-chip" data-filter="facility">🏫 施設メモ</button>
+          </div>
+
+          <!-- ガイドバナー (ピン設置モード中のみ表示) -->
+          <div class="campus-map-guide-banner" id="campus-map-guide-banner">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="font-size: 1.1rem;">📍</span>
+              <span><strong>ピン設置モード中：</strong> マップ上のピンを立てたい場所をクリックしてください</span>
+            </div>
+            <button type="button" class="campus-map-btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="window.CampusMap.togglePinMode()">中止</button>
+          </div>
+
+          <!-- マップ表示ビューポート -->
+          <div class="campus-map-viewport" id="campus-map-viewport" title="ドラッグで移動、ホイールで拡大縮小できます">
+            <div class="campus-map-stage" id="campus-map-stage">
+              <canvas id="campus-map-canvas" class="campus-map-canvas"></canvas>
+              <div id="campus-map-overlay" class="campus-map-overlay"></div>
+            </div>
+
+            <!-- ローディング画面 -->
+            <div class="campus-map-loading" id="campus-map-loading">
+              <div class="campus-map-spinner"></div>
+              <span>キャンパスマップを読み込み中...</span>
+            </div>
+
+            <!-- フローティング操作ボタン -->
+            <div class="campus-map-float-controls">
+              <button type="button" class="map-control-btn" id="btn-map-zoom-in" title="拡大 (＋)">＋</button>
+              <button type="button" class="map-control-btn" id="btn-map-zoom-out" title="縮小 (－)">−</button>
+              <button type="button" class="map-control-btn" id="btn-map-reset" title="全体表示にリセット (⟲)" style="font-size: 14px;">⟲</button>
+            </div>
+          </div>
+
+          <!-- ピン一覧アコーディオン -->
+          <div class="campus-map-list-header" id="campus-map-list-header">
+            <h4>
+              <span>📌</span>
+              <span>登録されたピン一覧</span>
+              <span id="campus-map-list-toggle-icon" style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.25rem;">▼</span>
+            </h4>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">クリックで開閉</span>
+          </div>
+          <div id="campus-map-list-wrapper" style="display: block;">
+            <ul class="campus-map-list-items" id="campus-map-list-items">
+              <!-- JSで動的生成 -->
+            </ul>
+          </div>
+        </div>
+
         <!-- Lost & Found Card (忘れ物掲示板) -->
         <div class="glass-panel panel-lost-found" id="lost-found-panel">
           <h3 class="section-title">🔍 忘れ物掲示板</h3>
@@ -154,46 +296,6 @@
           </ul>
         </div>
 
-        <!-- App Shortcut Menu Grid -->
-        <div class="glass-panel app-grid-panel">
-          <div class="app-grid-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            その他の機能
-          </div>
-
-          <div class="app-shortcut-grid">
-            <div class="app-shortcut-card" onclick="openFeatureModal('calendar-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
-              <div class="app-card-title">カレンダー</div>
-              <div class="app-card-sub">チェックイン履歴</div>
-            </div>
-            <div class="app-shortcut-card" onclick="openFeatureModal('history-panel-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #ec4899, #be185d);">📜</div>
-              <div class="app-card-title">最近の履歴</div>
-              <div class="app-card-sub">獲得履歴</div>
-            </div>
-            <div class="app-shortcut-card" onclick="openFeatureModal('feedback-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">💡</div>
-              <div class="app-card-title">意見箱</div>
-              <div class="app-card-sub">要望送信</div>
-            </div>
-            <div class="app-shortcut-card" onclick="openFeatureModal('gallery-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #6366f1, #4338ca);">🖼️</div>
-              <div class="app-card-title">活動ギャラリー</div>
-              <div class="app-card-sub">報告写真一覧</div>
-            </div>
-            <div class="app-shortcut-card" onclick="openFeatureModal('recommendations-modal')">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">👏</div>
-              <div class="app-card-title">いい人紹介</div>
-              <div class="app-card-sub">善行推薦・投稿</div>
-            </div>
-            <div class="app-shortcut-card" onclick="openChatModal()">
-              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">💬</div>
-              <div class="app-card-title">DM</div>
-              <div class="app-card-sub">暗号化プライベートDM</div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -569,12 +671,130 @@
     </div>
   </div>
 
+  <!-- Campus Map Pin Add Modal -->
+  <div id="campus-map-add-modal" class="campus-map-modal">
+    <div class="campus-map-modal-content">
+      <div class="campus-map-modal-header">
+        <h3><span>📍</span> ピンを設置する</h3>
+        <button type="button" id="btn-close-add-modal" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
+      </div>
+
+      <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
+        選択した位置にピンを立てます。カテゴリを選び、場所の名前や状況を入力してください。
+      </div>
+
+      <div class="form-group">
+        <label>ピンのカテゴリ</label>
+        <div class="category-picker-grid">
+          <button type="button" class="category-option-btn selected" data-cat="cleanup">
+            <span style="font-size: 1.1rem;">🌱</span>
+            <span>美化・ごみ拾い</span>
+          </button>
+          <button type="button" class="category-option-btn" data-cat="lost">
+            <span style="font-size: 1.1rem;">🔍</span>
+            <span>忘れ物・落とし物</span>
+          </button>
+          <button type="button" class="category-option-btn" data-cat="notice">
+            <span style="font-size: 1.1rem;">⚠️</span>
+            <span>注意・連絡事項</span>
+          </button>
+          <button type="button" class="category-option-btn" data-cat="spot">
+            <span style="font-size: 1.1rem;">💡</span>
+            <span>おすすめ・憩い</span>
+          </button>
+          <button type="button" class="category-option-btn" data-cat="facility">
+            <span style="font-size: 1.1rem;">🏫</span>
+            <span>施設・校舎メモ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pin-input-title">ピンのタイトル / 場所名 <span style="color: #ef4444;">*</span></label>
+        <input type="text" id="pin-input-title" class="form-control" placeholder="例: 体育館裏のゴミ箱、3F自習コーナー" required>
+      </div>
+
+      <div class="form-group">
+        <label for="pin-input-memo">詳細・メモ・状況（任意）</label>
+        <textarea id="pin-input-memo" class="form-control" rows="3" placeholder="状況の詳細や共有したいメッセージを入力..." style="resize: vertical;"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="pin-input-expiry">掲載期間（自動消去）</label>
+        <select id="pin-input-expiry" class="form-control">
+          <option value="7">1週間で自動消去（通常・美化など）</option>
+          <option value="30">30日間（忘れ物・重要なお知らせ）</option>
+          <option value="14">2週間</option>
+          <option value="60">60日間（長期）</option>
+        </select>
+        <p style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.25rem;">
+          ※カテゴリ選択で自動推奨されます。忘れ物は解決時にいつでも手動で消去できます。
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        <span>投稿者: <strong id="pin-author-display" style="color: var(--text-main);">ユーザー</strong></span>
+        <span>誰でも閲覧できます</span>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" class="btn btn-outline" id="btn-cancel-pin" style="flex: 1;">キャンセル</button>
+        <button type="button" class="btn btn-primary" id="btn-submit-pin" style="flex: 2;">📍 ピンを刺す</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Campus Map Pin Detail Modal -->
+  <div id="campus-map-detail-modal" class="campus-map-modal">
+    <div class="campus-map-modal-content">
+      <div class="campus-map-modal-header">
+        <div id="pin-detail-tag" class="pin-detail-tag">🌱 美化・ごみ拾い</div>
+        <button type="button" id="btn-close-detail-modal" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
+      </div>
+
+      <div class="pin-detail-card">
+        <h3 id="pin-detail-title" class="pin-detail-title">タイトル</h3>
+        <div id="pin-detail-body" class="pin-detail-body">メモ内容</div>
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; background: rgba(255, 255, 255, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid var(--panel-border);">
+          <span style="color: var(--text-muted);">⏳ 掲載期間:</span>
+          <span id="pin-detail-expiry" style="font-weight: 700; color: #60a5fa;">--</span>
+        </div>
+
+        <div class="pin-detail-meta">
+          <span>投稿者: <strong id="pin-detail-author" style="color: var(--text-main);">--</strong></span>
+          <span id="pin-detail-date">--/-- --:--</span>
+        </div>
+      </div>
+
+      <!-- 落とし物専用の解決ボタンエリア -->
+      <div id="pin-resolve-banner" style="display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); text-align: center;">
+        <div style="font-size: 0.8125rem; color: #34d399; font-weight: 700; margin-bottom: 0.4rem;">
+          🎉 落とし主が見つかったり、届け出が完了しましたか？
+        </div>
+        <button type="button" id="btn-pin-resolve" class="btn btn-sm" style="background: #10b981; color: white; width: 100%; font-weight: 700; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+          ✅ 解決済みにする（マップから消去）
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+        <button type="button" id="btn-pin-delete" class="btn btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); display: none;">
+          🗑️ 削除
+        </button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('campus-map-detail-modal').classList.remove('show');">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.2"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
   <script defer src="assets/js/app.js?v=2.5"></script>
+  <script defer src="assets/js/campus-map.js?v=1.0"></script>
   <script>
     function openFeatureModal(modalId) {
       var modal = document.getElementById(modalId);
@@ -595,6 +815,64 @@
         closeFeatureModal(modalId);
       }
     }
+
+    function toggleWaffleMenu(e) {
+      if (e) {
+        e.stopPropagation();
+      }
+      var dropdown = document.getElementById('waffle-dropdown');
+      var btn = document.getElementById('waffle-btn');
+      if (!dropdown) return;
+      var isOpen = dropdown.classList.contains('open');
+      if (isOpen) {
+        closeWaffleMenu();
+      } else {
+        dropdown.classList.add('open');
+        dropdown.setAttribute('aria-hidden', 'false');
+        if (btn) btn.classList.add('active');
+      }
+    }
+
+    function closeWaffleMenu() {
+      var dropdown = document.getElementById('waffle-dropdown');
+      var btn = document.getElementById('waffle-btn');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.setAttribute('aria-hidden', 'true');
+      }
+      if (btn) {
+        btn.classList.remove('active');
+      }
+    }
+
+    function handleWaffleAction(action) {
+      closeWaffleMenu();
+      if (action === 'chat') {
+        if (typeof openChatModal === 'function') {
+          openChatModal();
+        }
+      } else if (action === 'campus-map') {
+        var mapPanel = document.getElementById('campus-map-panel');
+        if (mapPanel) {
+          mapPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else {
+        openFeatureModal(action);
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      var container = document.getElementById('waffle-menu-container');
+      if (container && !container.contains(e.target)) {
+        closeWaffleMenu();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeWaffleMenu();
+      }
+    });
   </script>
 </body>
 
