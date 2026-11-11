@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUTURE POINTS | 設定</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=3.1">
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.3">
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
 </head>
 <body style="padding-top: 0;">
@@ -23,7 +23,7 @@
     </header>
 
     <div class="glass-panel" style="max-width: 600px; margin: 2rem auto;">
-      <h3 class="section-title">👤 プロフィール編集</h3>
+      <h3 class="section-title">プロフィール編集</h3>
       
       <form id="settings-form">
         <div class="form-group">
@@ -32,9 +32,9 @@
         </div>
         
         <div class="form-group">
-          <label for="settings-email" id="label-settings-email">メールアドレス</label>
-          <input type="email" id="settings-email" class="form-control" placeholder="user@mirai-th.open.ed.jp" required>
-          <small id="settings-email-hint" style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.35rem;">※ @mirai-th.open.ed.jp のみ使用可能です</small>
+          <label for="settings-email" id="label-settings-email">メールアドレス <span id="label-settings-email-tag" style="font-size: 0.75rem; color: var(--accent); font-weight: normal;">(@mirai-th.open.ed.jp のみ)</span></label>
+          <input type="text" id="settings-email" class="form-control" placeholder="user@mirai-th.open.ed.jp" required>
+          <p id="settings-email-hint" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">※学校用のメールアドレス（@mirai-th.open.ed.jp）を入力してください</p>
         </div>
         
         <div class="form-group">
@@ -66,6 +66,21 @@
             <option value="8">8組</option>
           </select>
         </div>
+
+        <!-- 画面表示設定 -->
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--panel-border);">
+          <label style="font-weight: 700; font-size: 0.85rem; color: var(--accent); margin-bottom: 0.75rem; display: block;">⚙️ 画面表示設定</label>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--panel-border); border-radius: 10px;">
+            <div style="flex: 1; padding-right: 1rem;">
+              <div style="font-weight: 600; font-size: 0.875rem; color: var(--text-main);">ヘッダーのワッフルメニュー</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">ヘッダー上の「その他の機能」アイコン（9つの点）を表示します</div>
+            </div>
+            <label class="toggle-switch" style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; margin: 0;">
+              <input type="checkbox" id="settings-show-waffle" style="opacity: 0; width: 0; height: 0;">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
         
         <button type="submit" class="btn btn-primary mt-4">変更を保存</button>
       </form>
@@ -77,6 +92,6 @@
   <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script defer src="assets/js/firebase-config.js?v=1.1"></script>
   <script defer src="assets/js/theme.js?v=1.0"></script>
-  <script defer src="assets/js/settings.js?v=1.2"></script>
+  <script defer src="assets/js/settings.js?v=1.3"></script>
 </body>
 </html>
