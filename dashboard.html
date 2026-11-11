@@ -28,9 +28,6 @@
         </button>
       </h2>
       <div class="nav-user">
-        <span class="user-name" id="display-name">ユーザー</span>
-        <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
-        <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
         <!-- Waffle Menu (その他メニュー) -->
         <div class="waffle-menu-container" id="waffle-menu-container">
           <button class="waffle-btn" id="waffle-btn" onclick="toggleWaffleMenu(event)" aria-label="その他の機能" title="その他の機能">
@@ -94,6 +91,9 @@
             </div>
           </div>
         </div>
+        <span class="user-name" id="display-name">ユーザー</span>
+        <button class="btn btn-outline btn-sm" onclick="window.location.href='settings.html'">設定</button>
+        <button class="btn btn-outline btn-sm" onclick="logout()">ログアウト</button>
       </div>
     </header>
 
@@ -294,6 +294,52 @@
               データがありません
             </li>
           </ul>
+        </div>
+
+        <!-- App Shortcut Menu Grid (その他の機能) -->
+        <div class="glass-panel app-grid-panel" id="app-grid-panel">
+          <div class="app-grid-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            その他の機能
+          </div>
+
+          <div class="app-shortcut-grid">
+            <div class="app-shortcut-card" onclick="handleWaffleAction('calendar-modal')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">📅</div>
+              <div class="app-card-title">カレンダー</div>
+              <div class="app-card-sub">チェックイン</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('history-panel-modal')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #ec4899, #be185d);">📜</div>
+              <div class="app-card-title">最近の履歴</div>
+              <div class="app-card-sub">獲得履歴</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('feedback-modal')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">💡</div>
+              <div class="app-card-title">意見箱</div>
+              <div class="app-card-sub">要望送信</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('gallery-modal')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #6366f1, #4338ca);">🖼️</div>
+              <div class="app-card-title">ギャラリー</div>
+              <div class="app-card-sub">活動写真</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('recommendations-modal')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">👏</div>
+              <div class="app-card-title">いい人紹介</div>
+              <div class="app-card-sub">善行推薦</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('campus-map')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #10b981, #059669);">🗺️</div>
+              <div class="app-card-title">学内マップ</div>
+              <div class="app-card-sub">ピン・共有</div>
+            </div>
+            <div class="app-shortcut-card" onclick="handleWaffleAction('chat')">
+              <div class="app-card-icon-badge" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">💬</div>
+              <div class="app-card-title">DM</div>
+              <div class="app-card-sub">プライベート</div>
+            </div>
+          </div>
         </div>
 
       </div>

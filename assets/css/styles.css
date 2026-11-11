@@ -538,16 +538,17 @@ p {
   }
 
   .panel-balance { order: 1; }
-  .app-shortcut-bar { order: 2; }
-  .panel-actions { order: 3; }
+  .panel-actions { order: 2; }
+  .panel-campus-map { order: 3; }
   .panel-ranking { order: 4; }
-  .panel-calendar { order: 5; }
-  .panel-grade-stats { order: 6; }
-  .panel-history { order: 7; }
-  .panel-feedback { order: 8; }
-  .panel-lost-found { order: 9; }
-  .panel-gallery { order: 10; }
-  .panel-recommendations { order: 11; }
+  .app-grid-panel { order: 5; }
+  .panel-lost-found { order: 6; }
+  .panel-calendar { order: 7; }
+  .panel-grade-stats { order: 8; }
+  .panel-history { order: 9; }
+  .panel-feedback { order: 10; }
+  .panel-gallery { order: 11; }
+  .panel-recommendations { order: 12; }
 }
 
 @media (max-width: 480px) {
@@ -677,6 +678,19 @@ body.light .btn-outline:hover {
 
 body.light .list-item:hover {
   background: #f8fafc;
+}
+
+body.light .app-shortcut-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+body.light .app-shortcut-card:hover,
+body.light .app-shortcut-card:focus {
+  background: #f0f7ff;
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.18);
 }
 
 /* Dark Mode (Default) */
